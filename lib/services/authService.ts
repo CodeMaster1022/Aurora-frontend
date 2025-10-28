@@ -1,6 +1,6 @@
 import { LoginCredentials, RegisterCredentials, SpeakerRegisterCredentials, AuthResponse, ApiError } from '../types/auth';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://natalia3-backend.vercel.app/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 class AuthService {
   private async makeRequest<T>(
@@ -29,6 +29,8 @@ class AuthService {
     try {
       const response = await fetch(url, config);
       const data = await response.json();
+      console.log('makeRequest - endpoint:', endpoint);
+      console.log('makeRequest - data:', data);
 
       if (!response.ok) {
         console.error('API Error:', data);

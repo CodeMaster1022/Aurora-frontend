@@ -48,9 +48,10 @@ export function Header() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [showUserMenu])
 
-  const handleLogout = () => {
-    dispatch(logoutUser())
+  const handleLogout = async () => {
     setShowUserMenu(false)
+    setIsMenuOpen(false)
+    await dispatch(logoutUser())
     router.push('/')
   }
 
@@ -76,12 +77,22 @@ export function Header() {
             <div className="flex items-center space-x-12 xl:space-x-16">
               {isAuthenticated ? (
                 <>
-                  <Link href="/dashboard" className="text-white hover:text-orange-400 transition-colors text-lg font-medium">
-                    Dashboard
-                  </Link>
-                  <Link href="/my-lessons" className="text-white hover:text-orange-400 transition-colors text-lg font-medium">
-                    My Lessons
-                  </Link>
+                  {user?.role === 'speaker' ? (
+                    <>
+                      <Link href="/speakers/dashboard" className="text-white hover:text-orange-400 transition-colors text-lg font-medium">
+                        Speaker Dashboard
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <Link href="/learners/dashboard" className="text-white hover:text-orange-400 transition-colors text-lg font-medium">
+                        Dashboard
+                      </Link>
+                      <Link href="/speakers" className="text-white hover:text-orange-400 transition-colors text-lg font-medium">
+                        Speakers
+                      </Link>
+                    </>
+                  )}
                 </>
               ) : (
                 <>
@@ -110,7 +121,18 @@ export function Header() {
                 
                 {showUserMenu && (
                   <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border overflow-hidden z-50">
-                    <div className="border-t border-gray-100"></div>
+                    {user?.role === 'speaker' && (
+                      <button
+                        onClick={() => {
+                          router.push('/dashboard/speaker')
+                          setShowUserMenu(false)
+                        }}
+                        className="w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2"
+                      >
+                        <Settings className="w-4 h-4" />
+                        Dashboard
+                      </button>
+                    )}
                     <button
                       onClick={() => {
                         router.push('/profile')
@@ -197,11 +219,21 @@ export function Header() {
               <nav className="space-y-2">
                 {isAuthenticated ? (
                   <>
-                    <Link href="/dashboard" className="block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-colors text-lg font-medium">
-                      Dashboard
-                    </Link>
-                    <Link href="/my-lessons" className="block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-colors text-lg font-medium">
-                      My Lessons
+                    {user?.role === 'speaker' ? (
+                      <>
+                        <Link href="/speakers/dashboard" className="block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-colors text-lg font-medium">
+                          Speaker Dashboard
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <Link href="/dashboard" className="block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-colors text-lg font-medium">
+                          Dashboard
+                        </Link>
+                      </>
+                    )}
+                    <Link href="/discover" className="block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-colors text-lg font-medium">
+                      Discover
                     </Link>
                   </>
                 ) : (

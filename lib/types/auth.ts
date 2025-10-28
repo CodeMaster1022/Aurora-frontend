@@ -3,12 +3,22 @@ export interface User {
   firstname: string;
   lastname: string;
   email: string;
-  role: 'user' | 'admin' | 'moderator';
+  role: 'learner' | 'admin' | 'moderator' | 'speaker';
   status: 'review' | 'failed' | 'success';
   lastLogin?: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  interests?: string[];
+  meetingPreference?: string;
+  avatar?: string;
+  bio?: string;
+  availability?: Array<{
+    day: string;
+    startTime: string;
+    endTime: string;
+    isAvailable: boolean;
+  }>;
 }
 
 export interface AuthState {
@@ -31,7 +41,7 @@ export interface RegisterCredentials {
   email: string;
   password: string;
   confirmPassword: string;
-  role?: 'user' | 'admin' | 'moderator' | 'speaker';
+  role?: 'learner' | 'admin' | 'moderator' | 'speaker';
 }
 
 export interface SpeakerRegisterCredentials {

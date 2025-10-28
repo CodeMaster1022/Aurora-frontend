@@ -6,23 +6,99 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 import Link from "next/link"
+import { useAppDispatch, useAppSelector } from "@/lib/hooks/redux"
+import { loginUser } from "@/lib/store/authSlice"
 
 export default function SignInPage() {
   const router = useRouter()
+  const dispatch = useAppDispatch()
+  const { error: authError, isLoading: authLoading } = useAppSelector((state) => state.auth)
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
+  
+  // Combine local loading with Redux loading state
+  const isLoadingState = isLoading || authLoading
+  
+  // Combine local error with Redux error
+  const displayError = error || authError
+  
+  const [validationErrors, setValidationErrors] = useState({
+    email: "",
+    password: ""
+  })
+
+  // Validation functions
+  const validateEmail = (email: string) => {
+    if (!email.trim()) {
+      return "Email is required"
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      return "Please enter a valid email address"
+    }
+    return ""
+  }
+
+  const validatePassword = (password: string) => {
+    if (!password) {
+      return "Password is required"
+    }
+    return ""
+  }
+
+  const handleBlur = (field: string, value: string) => {
+    let error = ""
+    switch (field) {
+      case "email":
+        error = validateEmail(value)
+        break
+      case "password":
+        error = validatePassword(value)
+        break
+    }
+    setValidationErrors(prev => ({ ...prev, [field]: error }))
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+    setError("")
+    setValidationErrors({ email: "", password: "" })
     
-    // TODO: Implement signin logic
-    setTimeout(() => {
+    // Validate all fields
+    const emailError = validateEmail(email)
+    const passwordError = validatePassword(password)
+    
+    setValidationErrors({
+      email: emailError,
+      password: passwordError
+    })
+    
+    if (emailError || passwordError) {
       setIsLoading(false)
-      router.push("/dashboard")
-    }, 1000)
+      return
+    }
+    
+    try {
+      // Call the login action
+      const result = await dispatch(loginUser({ email, password }))
+      
+      if (loginUser.fulfilled.match(result)) {
+        // Login successful - navigate to dashboard
+        router.push("/speakers/dashboard")
+      } else if (loginUser.rejected.match(result)) {
+        // Login failed - show error
+        setError(result.payload as string || "Login failed")
+      }
+    } catch (err) {
+      console.error("Login error:", err)
+      setError("An unexpected error occurred")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleGoogleSignIn = () => {
@@ -113,6 +189,13 @@ export default function SignInPage() {
             <div className="flex-1 border-t border-gray-300"></div>
           </div>
 
+          {/* Error Message */}
+          {displayError && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-600">{displayError}</p>
+            </div>
+          )}
+
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
@@ -122,9 +205,17 @@ export default function SignInPage() {
                 placeholder="Email Address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                onBlur={(e) => handleBlur("email", e.target.value)}
                 required
-                className="border-0 border-b-2 border-gray-300 rounded-none focus-visible:ring-0 focus-visible:border-purple-500 px-0 py-3 text-base"
+                className={`border-0 border-b-2 rounded-none focus-visible:ring-0 px-0 py-3 text-base text-gray-900 ${
+                  validationErrors.email 
+                    ? "border-red-500 focus-visible:border-red-500" 
+                    : "border-gray-300 focus-visible:border-purple-500"
+                }`}
               />
+              {validationErrors.email && (
+                <p className="text-xs text-red-500 mt-1">{validationErrors.email}</p>
+              )}
             </div>
 
             {/* Password */}
@@ -134,8 +225,13 @@ export default function SignInPage() {
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                onBlur={(e) => handleBlur("password", e.target.value)}
                 required
-                className="border-0 border-b-2 border-gray-300 rounded-none focus-visible:ring-0 focus-visible:border-purple-500 px-0 py-3 pr-10 text-base"
+                className={`border-0 border-b-2 rounded-none focus-visible:ring-0 px-0 py-3 pr-10 text-base text-gray-900 ${
+                  validationErrors.password 
+                    ? "border-red-500 focus-visible:border-red-500" 
+                    : "border-gray-300 focus-visible:border-purple-500"
+                }`}
               />
               <button
                 type="button"
@@ -148,18 +244,21 @@ export default function SignInPage() {
                   <Eye className="h-5 w-5" />
                 )}
               </button>
+              {validationErrors.password && (
+                <p className="text-xs text-red-500 mt-1">{validationErrors.password}</p>
+              )}
             </div>
 
             {/* Submit Button */}
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoadingState}
               className="w-full py-6 text-lg font-semibold rounded-lg disabled:opacity-50"
               style={{
                 background: 'linear-gradient(to right, #9333ea, #d946ef)',
               }}
             >
-              {isLoading ? (
+              {isLoadingState ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Signing in...

@@ -19,11 +19,89 @@ export default function SignUpPage() {
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [validationErrors, setValidationErrors] = useState({
+    fullName: "",
+    email: "",
+    password: ""
+  })
+
+  // Validation functions
+  const validateFullName = (name: string) => {
+    if (!name.trim()) {
+      return "Full name is required"
+    }
+    if (name.trim().length < 2) {
+      return "Full name must be at least 2 characters"
+    }
+    if (!/^[a-zA-Z\s'-]+$/.test(name.trim())) {
+      return "Full name can only contain letters, spaces, hyphens, and apostrophes"
+    }
+    return ""
+  }
+
+  const validateEmail = (email: string) => {
+    if (!email.trim()) {
+      return "Email is required"
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      return "Please enter a valid email address"
+    }
+    return ""
+  }
+
+  const validatePassword = (password: string) => {
+    if (!password) {
+      return "Password is required"
+    }
+    if (password.length < 8) {
+      return "Password must be at least 8 characters"
+    }
+    if (!/[A-Za-z]/.test(password)) {
+      return "Password must contain at least one letter"
+    }
+    if (!/[0-9]/.test(password)) {
+      return "Password must contain at least one number"
+    }
+    return ""
+  }
+
+  const handleBlur = (field: string, value: string) => {
+    let error = ""
+    switch (field) {
+      case "fullName":
+        error = validateFullName(value)
+        break
+      case "email":
+        error = validateEmail(value)
+        break
+      case "password":
+        error = validatePassword(value)
+        break
+    }
+    setValidationErrors(prev => ({ ...prev, [field]: error }))
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError("")
+    
+    // Validate all fields
+    const fullNameError = validateFullName(fullName)
+    const emailError = validateEmail(email)
+    const passwordError = validatePassword(password)
+    
+    setValidationErrors({
+      fullName: fullNameError,
+      email: emailError,
+      password: passwordError
+    })
+    
+    if (fullNameError || emailError || passwordError) {
+      setIsLoading(false)
+      return
+    }
     
     try {
       const response = await authService.register({
@@ -153,9 +231,17 @@ export default function SignUpPage() {
                 placeholder="Full Name"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
+                onBlur={(e) => handleBlur("fullName", e.target.value)}
                 required
-                className="border-0 border-b-2 border-gray-300 rounded-none focus-visible:ring-0 focus-visible:border-purple-500 px-0 py-3 text-base"
+                className={`border-0 border-b-2 rounded-none focus-visible:ring-0 px-0 py-3 text-base text-gray-900 ${
+                  validationErrors.fullName 
+                    ? "border-red-500 focus-visible:border-red-500" 
+                    : "border-gray-300 focus-visible:border-purple-500"
+                }`}
               />
+              {validationErrors.fullName && (
+                <p className="text-xs text-red-500 mt-1">{validationErrors.fullName}</p>
+              )}
             </div>
 
             {/* Email */}
@@ -165,9 +251,17 @@ export default function SignUpPage() {
                 placeholder="Email Address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                onBlur={(e) => handleBlur("email", e.target.value)}
                 required
-                className="border-0 border-b-2 border-gray-300 rounded-none focus-visible:ring-0 focus-visible:border-purple-500 px-0 py-3 text-base"
+                className={`border-0 border-b-2 rounded-none focus-visible:ring-0 px-0 py-3 text-base text-gray-900 ${
+                  validationErrors.email 
+                    ? "border-red-500 focus-visible:border-red-500" 
+                    : "border-gray-300 focus-visible:border-purple-500"
+                }`}
               />
+              {validationErrors.email && (
+                <p className="text-xs text-red-500 mt-1">{validationErrors.email}</p>
+              )}
             </div>
 
             {/* Password */}
@@ -177,8 +271,13 @@ export default function SignUpPage() {
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                onBlur={(e) => handleBlur("password", e.target.value)}
                 required
-                className="border-0 border-b-2 border-gray-300 rounded-none focus-visible:ring-0 focus-visible:border-purple-500 px-0 py-3 pr-10 text-base"
+                className={`border-0 border-b-2 rounded-none focus-visible:ring-0 px-0 py-3 pr-10 text-base text-gray-900 ${
+                  validationErrors.password 
+                    ? "border-red-500 focus-visible:border-red-500" 
+                    : "border-gray-300 focus-visible:border-purple-500"
+                }`}
               />
               <button
                 type="button"
@@ -191,6 +290,9 @@ export default function SignUpPage() {
                   <Eye className="h-5 w-5" />
                 )}
               </button>
+              {validationErrors.password && (
+                <p className="text-xs text-red-500 mt-1">{validationErrors.password}</p>
+              )}
             </div>
 
             {/* Submit Button */}

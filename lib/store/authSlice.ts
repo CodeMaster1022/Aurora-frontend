@@ -18,7 +18,10 @@ export const loginUser = createAsyncThunk(
     try {
       console.log('Login attempt with:', credentials);
       const response = await authService.login(credentials);
+      console.log('Login response:', response);
+      console.log('Login response.data:', response.data);
       authService.setToken(response.data.token);
+      console.log('Login response.data.user:', response.data.user);
       return response.data;
     } catch (error) {
       console.error('Login error:', error);
@@ -51,6 +54,8 @@ export const getCurrentUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await authService.getCurrentUser();
+      console.log('getCurrentUser response:', response);
+      console.log('getCurrentUser response.data:', response.data);
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -112,11 +117,19 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
+        console.log('=== loginUser.fulfilled ===');
+        console.log('Full action:', action);
+        console.log('action.payload:', action.payload);
+        console.log('action.payload.user:', action.payload.user);
+        console.log('action.payload.token:', action.payload.token);
         state.isLoading = false;
         state.user = action.payload.user;
         state.token = action.payload.token;
         state.isAuthenticated = true;
         state.error = null;
+        console.log('State after update - user:', state.user);
+        console.log('State after update - isAuthenticated:', state.isAuthenticated);
+        console.log('===========================');
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;

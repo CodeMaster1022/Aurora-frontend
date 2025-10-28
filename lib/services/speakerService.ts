@@ -1,0 +1,170 @@
+import { authService } from './authService';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
+export interface Learner {
+  _id: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  avatar?: string;
+}
+
+export interface Session {
+  _id: string;
+  title: string;
+  learner: Learner | string;
+  date: string;
+  time: string;
+  duration: number;
+  status: 'scheduled' | 'completed' | 'cancelled';
+  topic?: string;
+  meetingLink?: string;
+}
+
+export interface ReviewUser {
+  _id: string;
+  firstname: string;
+  lastname: string;
+}
+
+export interface Review {
+  _id: string;
+  session: string;
+  from: ReviewUser | string;
+  to: ReviewUser | string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+}
+
+export interface SpeakerAvailability {
+  day: string;
+  startTime: string;
+  endTime: string;
+  isAvailable: boolean;
+}
+
+export interface SpeakerProfile {
+  _id: string;
+  bio?: string;
+  availability: SpeakerAvailability[];
+  totalSessions: number;
+  completedSessions: number;
+  rating: number;
+  reviewsCount: number;
+}
+
+class SpeakerService {
+  private async makeRequest<T>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<T> {
+    const url = `${API_BASE_URL}${endpoint}`;
+    const token = authService.getToken();
+
+    const config: RequestInit = {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+        ...options.headers,
+      },
+      ...options,
+    };
+
+    try {
+      const response = await fetch(url, config);
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error('API Error:', data);
+        throw new Error(data.message || 'An error occurred');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Network Error:', error);
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Network error occurred');
+    }
+  }
+
+  // Get speaker dashboard data
+  async getDashboard(): Promise<{
+    success: boolean;
+    data: {
+      upcomingSessions: Session[];
+      reviews: Review[];
+      profile: SpeakerProfile;
+    };
+  }> {
+    return this.makeRequest<{
+      success: boolean;
+      data: {
+        upcomingSessions: Session[];
+        reviews: Review[];
+        profile: SpeakerProfile;
+      };
+    }>('/speaker/dashboard');
+  }
+
+  // Update speaker profile
+  async updateProfile(profileData: Partial<SpeakerProfile>): Promise<SpeakerProfile> {
+    const response = await this.makeRequest<{
+      success: boolean;
+      data: { profile: SpeakerProfile };
+    }>('/speaker/profile', {
+      method: 'PUT',
+      body: JSON.stringify(profileData),
+    });
+    return response.data.profile;
+  }
+
+  // Update availability
+  async updateAvailability(
+    availability: SpeakerAvailability[]
+  ): Promise<{ success: boolean }> {
+    return this.makeRequest<{ success: boolean }>('/speaker/availability', {
+      method: 'PUT',
+      body: JSON.stringify({ availability }),
+    });
+  }
+
+  // Upload avatar
+  async uploadAvatar(file: File): Promise<string> {
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    const url = `${API_BASE_URL}/speaker/avatar`;
+    const token = authService.getToken();
+
+    const config: RequestInit = {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    };
+
+    try {
+      const response = await fetch(url, config);
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error('API Error:', data);
+        throw new Error(data.message || 'An error occurred');
+      }
+
+      return data.data.avatarUrl;
+    } catch (error) {
+      console.error('Network Error:', error);
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Network error occurred');
+    }
+  }
+}
+
+export const speakerService = new SpeakerService();
+

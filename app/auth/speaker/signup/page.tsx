@@ -32,6 +32,71 @@ export default function SignUpPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [error, setError] = useState("")
+  const [validationErrors, setValidationErrors] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: ""
+  })
+
+  // Validation functions
+  const validateFirstName = (name: string) => {
+    if (!name.trim()) return "First name is required"
+    if (name.trim().length < 2) return "First name must be at least 2 characters"
+    if (!/^[a-zA-Z\s'-]+$/.test(name.trim())) return "First name can only contain letters"
+    return ""
+  }
+
+  const validateLastName = (name: string) => {
+    if (!name.trim()) return "Last name is required"
+    if (name.trim().length < 2) return "Last name must be at least 2 characters"
+    if (!/^[a-zA-Z\s'-]+$/.test(name.trim())) return "Last name can only contain letters"
+    return ""
+  }
+
+  const validateEmail = (email: string) => {
+    if (!email.trim()) return "Email is required"
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) return "Please enter a valid email address"
+    return ""
+  }
+
+  const validatePassword = (password: string) => {
+    if (!password) return "Password is required"
+    if (password.length < 8) return "Password must be at least 8 characters"
+    if (!/[A-Za-z]/.test(password)) return "Password must contain at least one letter"
+    if (!/[0-9]/.test(password)) return "Password must contain at least one number"
+    return ""
+  }
+
+  const validateConfirmPassword = (password: string, confirmPassword: string) => {
+    if (!confirmPassword) return "Please confirm your password"
+    if (password !== confirmPassword) return "Passwords do not match"
+    return ""
+  }
+
+  const handleBlur = (field: string, value: string) => {
+    let error = ""
+    switch (field) {
+      case "firstName":
+        error = validateFirstName(value)
+        break
+      case "lastName":
+        error = validateLastName(value)
+        break
+      case "email":
+        error = validateEmail(value)
+        break
+      case "password":
+        error = validatePassword(value)
+        break
+      case "confirmPassword":
+        error = validateConfirmPassword(formData.password, value)
+        break
+    }
+    setValidationErrors(prev => ({ ...prev, [field]: error }))
+  }
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -214,9 +279,17 @@ export default function SignUpPage() {
                         placeholder="First name"
                         value={formData.firstName}
                         onChange={(e) => handleInputChange("firstName", e.target.value)}
+                        onBlur={(e) => handleBlur("firstName", e.target.value)}
                         required
-                        className="border border-gray-300 rounded-lg px-4 py-3"
+                        className={`border rounded-lg px-4 py-3 text-gray-900 ${
+                          validationErrors.firstName 
+                            ? "border-red-500 focus-visible:border-red-500" 
+                            : "border-gray-300 focus-visible:border-purple-500"
+                        }`}
                       />
+                      {validationErrors.firstName && (
+                        <p className="text-xs text-red-500 mt-1">{validationErrors.firstName}</p>
+                      )}
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Last name</label>
@@ -225,9 +298,17 @@ export default function SignUpPage() {
                         placeholder="Last name"
                         value={formData.lastName}
                         onChange={(e) => handleInputChange("lastName", e.target.value)}
+                        onBlur={(e) => handleBlur("lastName", e.target.value)}
                         required
-                        className="border border-gray-300 rounded-lg px-4 py-3"
+                        className={`border rounded-lg px-4 py-3 text-gray-900 ${
+                          validationErrors.lastName 
+                            ? "border-red-500 focus-visible:border-red-500" 
+                            : "border-gray-300 focus-visible:border-purple-500"
+                        }`}
                       />
+                      {validationErrors.lastName && (
+                        <p className="text-xs text-red-500 mt-1">{validationErrors.lastName}</p>
+                      )}
                     </div>
                   </div>
                   
@@ -238,9 +319,17 @@ export default function SignUpPage() {
                       placeholder="Email address"
                       value={formData.email}
                       onChange={(e) => handleInputChange("email", e.target.value)}
+                      onBlur={(e) => handleBlur("email", e.target.value)}
                       required
-                      className="border border-gray-300 rounded-lg px-4 py-3"
+                      className={`border rounded-lg px-4 py-3 text-gray-900 ${
+                        validationErrors.email 
+                          ? "border-red-500 focus-visible:border-red-500" 
+                          : "border-gray-300 focus-visible:border-purple-500"
+                      }`}
                     />
+                    {validationErrors.email && (
+                      <p className="text-xs text-red-500 mt-1">{validationErrors.email}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -361,8 +450,13 @@ export default function SignUpPage() {
                       placeholder="Password"
                       value={formData.password}
                       onChange={(e) => handleInputChange("password", e.target.value)}
+                      onBlur={(e) => handleBlur("password", e.target.value)}
                       required
-                      className="border border-gray-300 rounded-lg px-4 py-3 pr-10"
+                      className={`border rounded-lg px-4 py-3 pr-10 text-gray-900 ${
+                        validationErrors.password 
+                          ? "border-red-500 focus-visible:border-red-500" 
+                          : "border-gray-300 focus-visible:border-purple-500"
+                      }`}
                     />
                     <button
                       type="button"
@@ -375,7 +469,11 @@ export default function SignUpPage() {
                         <Eye className="h-5 w-5" />
                       )}
                     </button>
-                    <p className="text-xs text-gray-500 mt-2">Must be at least 8 characters with letters and numbers</p>
+                    {validationErrors.password ? (
+                      <p className="text-xs text-red-500 mt-2">{validationErrors.password}</p>
+                    ) : (
+                      <p className="text-xs text-gray-500 mt-2">Must be at least 8 characters with letters and numbers</p>
+                    )}
                   </div>
                   
                   <div className="relative">
@@ -385,8 +483,13 @@ export default function SignUpPage() {
                       placeholder="Confirm password"
                       value={formData.confirmPassword}
                       onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+                      onBlur={(e) => handleBlur("confirmPassword", e.target.value)}
                       required
-                      className="border border-gray-300 rounded-lg px-4 py-3 pr-10"
+                      className={`border rounded-lg px-4 py-3 pr-10 text-gray-900 ${
+                        validationErrors.confirmPassword 
+                          ? "border-red-500 focus-visible:border-red-500" 
+                          : "border-gray-300 focus-visible:border-purple-500"
+                      }`}
                     />
                     <button
                       type="button"
@@ -399,6 +502,9 @@ export default function SignUpPage() {
                         <Eye className="h-5 w-5" />
                       )}
                     </button>
+                    {validationErrors.confirmPassword && (
+                      <p className="text-xs text-red-500 mt-2">{validationErrors.confirmPassword}</p>
+                    )}
                   </div>
                 </div>
               </div>
