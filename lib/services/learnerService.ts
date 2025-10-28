@@ -144,6 +144,26 @@ class LearnerService {
     );
   }
 
+  // Create Stripe donation checkout
+  async createDonation(amount?: number): Promise<{
+    success: boolean;
+    data: {
+      sessionId: string;
+      url: string;
+    };
+  }> {
+    return this.makeRequest<{
+      success: boolean;
+      data: {
+        sessionId: string;
+        url: string;
+      };
+    }>('/learner/create-donation', {
+      method: 'POST',
+      body: JSON.stringify({ amount }),
+    });
+  }
+
   // Get all speakers with search and filters
   async getSpeakers(search?: string, topic?: string): Promise<{
     success: boolean;

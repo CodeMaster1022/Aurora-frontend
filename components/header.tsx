@@ -1,11 +1,12 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Menu, X, User, LogOut, Settings } from "lucide-react"
+import { Menu, X, User, LogOut, Settings, Sun, Moon } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAppSelector, useAppDispatch } from "@/lib/hooks/redux"
 import { logoutUser } from "@/lib/store/authSlice"
+import { useTheme } from "next-themes"
 import Link from "next/link"
 import Image from "next/image"
 
@@ -13,9 +14,16 @@ export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const router = useRouter()
   const dispatch = useAppDispatch()
   const { user, isAuthenticated } = useAppSelector((state) => state.auth)
+  const { theme, setTheme } = useTheme()
+
+  // Handle hydration
+  useEffect(() => {
+    setMounted(true)
+  }, [])
   // Add scroll effect for header
   useEffect(() => {
     const handleScroll = () => {
@@ -57,7 +65,9 @@ export function Header() {
 
   return (
     <header className={`w-full fixed top-0 z-50 transition-all duration-300 ${
-      isScrolled ? 'bg-white/10 backdrop-blur-lg shadow-lg' : ''
+      isScrolled 
+        ? 'bg-white/10 dark:bg-black/10 backdrop-blur-lg shadow-lg' 
+        : 'bg-white dark:bg-transparent'
     }`}>
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
@@ -79,16 +89,16 @@ export function Header() {
                 <>
                   {user?.role === 'speaker' ? (
                     <>
-                      <Link href="/speakers/dashboard" className="text-white hover:text-orange-400 transition-colors text-lg font-medium">
+                      <Link href="/speakers/dashboard" className="text-gray-900 dark:text-white hover:text-orange-400 transition-colors text-lg font-medium">
                         Speaker Dashboard
                       </Link>
                     </>
                   ) : (
                     <>
-                      <Link href="/learners/dashboard" className="text-white hover:text-orange-400 transition-colors text-lg font-medium">
+                      <Link href="/learners/dashboard" className="text-gray-900 dark:text-white hover:text-orange-400 transition-colors text-lg font-medium">
                         Dashboard
                       </Link>
-                      <Link href="/speakers" className="text-white hover:text-orange-400 transition-colors text-lg font-medium">
+                      <Link href="/speakers" className="text-gray-900 dark:text-white hover:text-orange-400 transition-colors text-lg font-medium">
                         Speakers
                       </Link>
                     </>
@@ -96,10 +106,10 @@ export function Header() {
                 </>
               ) : (
                 <>
-                  <Link href="/" className="text-white hover:text-orange-400 transition-colors text-lg font-medium">
+                  <Link href="/" className="text-gray-900 dark:text-white hover:text-orange-400 transition-colors text-lg font-medium">
                     Home
                   </Link>
-                  <Link href="#" className="text-white hover:text-orange-400 transition-colors text-lg font-medium">
+                  <Link href="#" className="text-gray-900 dark:text-white hover:text-orange-400 transition-colors text-lg font-medium">
                     Nosotros
                   </Link>
                 </>
@@ -107,8 +117,23 @@ export function Header() {
             </div>
           </div>
 
-          {/* Desktop Auth Buttons */}
+          {/* Theme Toggle & Auth Buttons */}
           <div className="hidden md:flex items-center gap-3">
+            {/* Theme Toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="text-black dark:text-white hover:bg-gray-100 dark:hover:bg-white/10 border border-gray-300 dark:border-white/20"
+              aria-label="Toggle theme"
+            >
+              {mounted && theme === 'dark' ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
+            </Button>
+
             {isAuthenticated ? (
               <div className="relative user-menu-container">
                 <button 
@@ -154,14 +179,14 @@ export function Header() {
                 )}
               </div>
             ) : (
-              <>
-                <button className="px-6 py-2.5 rounded-lg text-white border-2 border-white/30 hover:border-white hover:bg-white hover:text-[#49BBBD] font-semibold transition-all duration-300" onClick={() => router.push('/auth/signin')}>
-                Inicia sesión
-                </button>
-                <button className="px-6 py-2.5 rounded-lg bg-[#524FD5] text-white hover:bg-orange-400 hover:text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5" onClick={() => router.push('/auth/speaker/signup')}>
-                  Spreaker
-                </button>
-              </>
+                  <>
+                    <button className="px-6 py-2.5 rounded-lg text-black dark:text-white border-2 border-gray-300 dark:border-white/30 hover:border-gray-400 dark:hover:border-white hover:bg-gray-100 dark:hover:bg-white hover:text-[#49BBBD] font-semibold transition-all duration-300" onClick={() => router.push('/auth/signin')}>
+                      Inicia sesión
+                    </button>
+                    <button className="px-6 py-2.5 rounded-lg bg-[#524FD5] text-white hover:bg-orange-400 hover:text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5" onClick={() => router.push('/auth/speaker/signup')}>
+                      Spreaker
+                    </button>
+                  </>
             )}
           </div>
 

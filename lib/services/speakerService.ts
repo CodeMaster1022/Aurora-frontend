@@ -98,6 +98,7 @@ class SpeakerService {
     success: boolean;
     data: {
       upcomingSessions: Session[];
+      pastSessions: Session[];
       reviews: Review[];
       profile: SpeakerProfile;
     };
@@ -106,6 +107,7 @@ class SpeakerService {
       success: boolean;
       data: {
         upcomingSessions: Session[];
+        pastSessions: Session[];
         reviews: Review[];
         profile: SpeakerProfile;
       };
@@ -165,6 +167,40 @@ class SpeakerService {
       }
       throw new Error('Network error occurred');
     }
+  }
+
+  // Rate and review a learner after completing a session
+  async rateLearner(
+    sessionId: string,
+    rating: number,
+    comment: string
+  ): Promise<{ success: boolean; data: { review: Review } }> {
+    return this.makeRequest<{ success: boolean; data: { review: Review } }>(
+      `/speaker/sessions/${sessionId}/review`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ rating, comment }),
+      }
+    );
+  }
+
+  // Get a random YouTube gift song (no repeats)
+  async getGiftSong(): Promise<{
+    success: boolean;
+    data: {
+      url: string;
+      videoId: string;
+      title: string;
+    };
+  }> {
+    return this.makeRequest<{
+      success: boolean;
+      data: {
+        url: string;
+        videoId: string;
+        title: string;
+      };
+    }>('/speaker/gift-song');
   }
 }
 

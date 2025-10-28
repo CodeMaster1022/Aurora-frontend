@@ -25,6 +25,7 @@ import {
 import { learnerService, Session, Speaker } from "@/lib/services/learnerService"
 import { useAppSelector, useAppDispatch } from "@/lib/hooks/redux"
 import { getCurrentUser } from "@/lib/store/authSlice"
+import { LearnerRatingModal } from "@/components/LearnerRatingModal"
 import Image from "next/image"
 
 export default function LearnerDashboardPage() {
@@ -44,11 +45,8 @@ export default function LearnerDashboardPage() {
   const [isUploading, setIsUploading] = useState(false)
 
   // Rating dialog states
-  const [ratingDialogOpen, setRatingDialogOpen] = useState(false)
-  const [selectedSession, setSelectedSession] = useState<Session | null>(null)
-  const [rating, setRating] = useState(5)
-  const [reviewComment, setReviewComment] = useState("")
-  const [isSubmittingReview, setIsSubmittingReview] = useState(false)
+  const [ratingModalOpen, setRatingModalOpen] = useState(false)
+  const [selectedSessionForRating, setSelectedSessionForRating] = useState<Session | null>(null)
 
   useEffect(() => {
     console.log('=== Learner Dashboard First Render ===')
@@ -163,41 +161,14 @@ export default function LearnerDashboardPage() {
     }
   }
 
-  const handleOpenRatingDialog = (session: Session) => {
-    setSelectedSession(session)
-    setRatingDialogOpen(true)
-    setRating(5)
-    setReviewComment("")
+  const handleRateSession = (session: Session) => {
+    setSelectedSessionForRating(session)
+    setRatingModalOpen(true)
   }
 
-  const handleSubmitReview = async () => {
-    if (!selectedSession) return
-    
-    try {
-      setIsSubmittingReview(true)
-      await learnerService.rateSession(
-        selectedSession._id,
-        rating,
-        reviewComment
-      )
-      
-      // Update the session in pastSessions to mark it as reviewed
-      setPastSessions(prevSessions =>
-        prevSessions.map(session =>
-          session._id === selectedSession._id
-            ? { ...session, hasReview: true }
-            : session
-        )
-      )
-      
-      setRatingDialogOpen(false)
-      setSelectedSession(null)
-    } catch (err) {
-      console.error("Error submitting review:", err)
-      setError("Failed to submit review")
-    } finally {
-      setIsSubmittingReview(false)
-    }
+  const handleRatingSuccess = () => {
+    // Refresh dashboard data
+    fetchDashboardData()
   }
 
   const formatDate = (dateString: string) => {
@@ -488,7 +459,7 @@ export default function LearnerDashboardPage() {
                           {/* Rate Button */}
                           <div className="flex justify-end">
                             <Button
-                              onClick={() => handleOpenRatingDialog(session)}
+                              onClick={() => handleRateSession(session)}
                               variant="outline"
                               size="sm"
                               className="text-purple-400 border-purple-400/50 hover:bg-purple-400/10"
@@ -590,6 +561,21 @@ export default function LearnerDashboardPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Learner Rating Modal */}
+      {selectedSessionForRating && (
+        <LearnerRatingModal
+          open={ratingModalOpen}
+          onOpenChange={setRatingModalOpen}
+          sessionId={selectedSessionForRating._id}
+          speakerName={
+            typeof selectedSessionForRating.speaker === 'object'
+              ? `${selectedSessionForRating.speaker.firstname} ${selectedSessionForRating.speaker.lastname}`
+              : selectedSessionForRating.speaker
+          }
+          onSuccess={handleRatingSuccess}
+        />
+      )}
     </div>
   )
 }

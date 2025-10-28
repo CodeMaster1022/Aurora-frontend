@@ -26,6 +26,7 @@ import {
 import { speakerService, Session, Review, SpeakerAvailability } from "@/lib/services/speakerService"
 import { useAppSelector, useAppDispatch } from "@/lib/hooks/redux"
 import { getCurrentUser } from "@/lib/store/authSlice"
+import { SpeakerRatingModal } from "@/components/SpeakerRatingModal"
 import Image from "next/image"
 
 interface ReviewWithType extends Review {
@@ -36,6 +37,7 @@ export default function SpeakerDashboardPage() {
   const dispatch = useAppDispatch()
   const { user, isAuthenticated, isLoading: authLoading } = useAppSelector((state) => state.auth)
   const [upcomingSessions, setUpcomingSessions] = useState<Session[]>([])
+  const [pastSessions, setPastSessions] = useState<Session[]>([])
   const [reviews, setReviews] = useState<ReviewWithType[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState("")
@@ -46,6 +48,10 @@ export default function SpeakerDashboardPage() {
   const [availability, setAvailability] = useState<SpeakerAvailability[]>([])
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
+
+  // Rating modal states
+  const [ratingModalOpen, setRatingModalOpen] = useState(false)
+  const [selectedSessionForRating, setSelectedSessionForRating] = useState<Session | null>(null)
 
   // Days of the week
   const daysOfWeek = [
@@ -116,10 +122,11 @@ export default function SpeakerDashboardPage() {
       const response = await speakerService.getDashboard()
       
       if (response.success && response.data) {
-        const { upcomingSessions, reviews, profile } = response.data
+        const { upcomingSessions, pastSessions, reviews, profile } = response.data
         
         // Update sessions
         setUpcomingSessions(upcomingSessions || [])
+        setPastSessions((pastSessions as Session[]) || [])
         
         // Process reviews to add type field based on current user
         const processedReviews: ReviewWithType[] = (reviews || []).map((review: Review) => ({
@@ -200,6 +207,21 @@ export default function SpeakerDashboardPage() {
       month: 'long',
       day: 'numeric'
     })
+  }
+
+  // Check if a session has been reviewed by this speaker
+  const hasBeenReviewed = (sessionId: string) => {
+    return givenReviews.some(review => review.session === sessionId)
+  }
+
+  const handleRateSession = (session: Session) => {
+    setSelectedSessionForRating(session)
+    setRatingModalOpen(true)
+  }
+
+  const handleRatingSuccess = () => {
+    // Refresh dashboard data
+    fetchDashboardData()
   }
 
   const receivedReviews = reviews.filter(r => r.type === "received")
@@ -449,6 +471,71 @@ export default function SpeakerDashboardPage() {
               </CardContent>
             </Card>
 
+            {/* Past Sessions */}
+            <Card className="bg-white/10 backdrop-blur-lg border-white/20">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Calendar className="w-5 h-5" />
+                  Past Sessions
+                </CardTitle>
+                <CardDescription className="text-gray-300">
+                  {pastSessions.length} completed sessions
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {pastSessions.length > 0 ? (
+                  <div className="space-y-4">
+                    {pastSessions.map((session) => (
+                      <div
+                        key={session._id}
+                        className="p-4 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h4 className="text-lg font-semibold text-white mb-1">{session.title}</h4>
+                            <p className="text-sm text-gray-300 mb-2">
+                              with <span className="font-medium">
+                                {typeof session.learner === 'object' 
+                                  ? `${session.learner.firstname} ${session.learner.lastname}`
+                                  : session.learner}
+                              </span>
+                            </p>
+                            <div className="flex items-center gap-4 text-sm text-gray-400">
+                              <div className="flex items-center gap-1">
+                                <Calendar className="w-4 h-4" />
+                                {formatDate(session.date)}
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Clock className="w-4 h-4" />
+                                {session.time}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end gap-2">
+                            <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
+                              {session.status}
+                            </Badge>
+                            {session.status === 'completed' && !hasBeenReviewed(session._id) && (
+                              <Button
+                                size="sm"
+                                onClick={() => handleRateSession(session)}
+                                className="bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600"
+                              >
+                                <Star className="w-3 h-3 mr-1" />
+                                Rate
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-gray-400 py-8">No past sessions</p>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Reviews */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Reviews Received */}
@@ -540,6 +627,21 @@ export default function SpeakerDashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Rating Modal */}
+      {selectedSessionForRating && (
+        <SpeakerRatingModal
+          open={ratingModalOpen}
+          onOpenChange={setRatingModalOpen}
+          sessionId={selectedSessionForRating._id}
+          learnerName={
+            typeof selectedSessionForRating.learner === 'object'
+              ? `${selectedSessionForRating.learner.firstname} ${selectedSessionForRating.learner.lastname}`
+              : selectedSessionForRating.learner
+          }
+          onSuccess={handleRatingSuccess}
+        />
+      )}
     </div>
   )
 }

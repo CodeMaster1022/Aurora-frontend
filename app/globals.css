@@ -4,13 +4,13 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Updated color scheme to match GEORGE turquoise theme */
-  --background: #0F172A; 
-  --foreground: oklch(1 0 0); /* Pure white for text */
-  --card: oklch(1 0 0); /* White card backgrounds */
-  --card-foreground: oklch(0.25 0 0); /* Dark text on cards */
-  --popover: oklch(0.98 0 0);
-  --popover-foreground: oklch(0.25 0 0);
+  /* Light mode - Updated color scheme to match GEORGE turquoise theme */
+  --background: #FFFFFF; 
+  --foreground: oklch(0.145 0 0); /* Dark text */
+  --card: #FEFEFE; /* Light card backgrounds */
+  --card-foreground: oklch(0.145 0 0); /* Dark text on cards */
+  --popover: #FFFFFF;
+  --popover-foreground: oklch(0.145 0 0);
   --primary: oklch(0.75 0.15 195); /* Turquoise primary */
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.6 0.2 250); /* Blue accent */
@@ -22,8 +22,8 @@
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(1 0 0);
   --border: oklch(0.9 0 0);
-  --input: oklch(0.145 0 0);
-  --input-foreground: oklch(1 0 0);
+  --input: oklch(0.98 0 0);
+  --input-foreground: oklch(0.145 0 0);
   --ring: oklch(0.6 0.2 250 / 0.5);
   --chart-1: oklch(0.6 0.2 250);
   --chart-2: oklch(0.75 0.15 195);
@@ -31,10 +31,10 @@
   --chart-4: oklch(0.7 0.25 35);
   --chart-5: oklch(0.6 0.25 280);
   --radius: 0.625rem;
-  --sidebar: oklch(0.95 0 0);
-  --sidebar-foreground: oklch(0.25 0 0);
-  --sidebar-primary: oklch(1 0 0);
-  --sidebar-primary-foreground: oklch(0.25 0 0);
+  --sidebar: oklch(0.98 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.145 0 0);
+  --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(0.6 0.2 250);
   --sidebar-accent-foreground: oklch(1 0 0);
   --sidebar-border: oklch(0.9 0 0);
