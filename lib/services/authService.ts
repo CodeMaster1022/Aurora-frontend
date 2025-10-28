@@ -1,4 +1,4 @@
-import { LoginCredentials, RegisterCredentials, AuthResponse, ApiError } from '../types/auth';
+import { LoginCredentials, RegisterCredentials, SpeakerRegisterCredentials, AuthResponse, ApiError } from '../types/auth';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://natalia3-backend.vercel.app/api';
 
@@ -55,11 +55,73 @@ class AuthService {
   async register(credentials: RegisterCredentials): Promise<AuthResponse> {
     // Remove confirmPassword before sending to backend
     const { confirmPassword, ...registerData } = credentials;
-    console.log('Sending registration data:', registerData);
-    return this.makeRequest<AuthResponse>('/auth/register', {
+    console.log('Sending user registration data:', registerData);
+    return this.makeRequest<AuthResponse>('/auth/signup', {
       method: 'POST',
       body: JSON.stringify(registerData),
     });
+  }
+
+  async registerSpeaker(credentials: SpeakerRegisterCredentials): Promise<AuthResponse> {
+    // Remove confirmPassword before sending to backend
+    const { confirmPassword, avatar, ...registerData } = credentials;
+    
+    // If there's an avatar, use FormData
+    if (avatar) {
+      const formData = new FormData();
+      
+      // Add text fields
+      Object.keys(registerData).forEach(key => {
+        const value = registerData[key as keyof typeof registerData];
+        if (value !== undefined) {
+          if (Array.isArray(value)) {
+            formData.append(key, JSON.stringify(value));
+          } else {
+            formData.append(key, value as string);
+          }
+        }
+      });
+      
+      // Add avatar file
+      formData.append('avatar', avatar);
+      
+      console.log('Sending speaker registration data with avatar:', formData);
+      
+      // For FormData, we need to send without JSON headers
+      const url = `${API_BASE_URL}/auth/speaker/signup`;
+      const token = this.getToken();
+      
+      const config: RequestInit = {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      };
+
+      try {
+        const response = await fetch(url, config);
+        const data = await response.json();
+
+        if (!response.ok) {
+          console.error('API Error:', data);
+          throw new Error(data.message || 'An error occurred');
+        }
+
+        return data;
+      } catch (error) {
+        console.error('Network Error:', error);
+        if (error instanceof Error) {
+          throw error;
+        }
+        throw new Error('Network error occurred');
+      }
+    } else {
+      // No avatar, send as JSON
+      console.log('Sending speaker registration data:', registerData);
+      return this.makeRequest<AuthResponse>('/auth/speaker/signup', {
+        method: 'POST',
+        body: JSON.stringify(registerData),
+      });
+    }
   }
 
   async getCurrentUser(): Promise<AuthResponse> {

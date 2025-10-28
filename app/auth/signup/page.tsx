@@ -6,24 +6,47 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 import Link from "next/link"
+import { authService } from "@/lib/services/authService"
+import { useAppDispatch } from "@/lib/hooks/redux"
+import { setUser } from "@/lib/store/authSlice"
 
 export default function SignUpPage() {
   const router = useRouter()
+  const dispatch = useAppDispatch()
   const [showPassword, setShowPassword] = useState(false)
   const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+    setError("")
     
-    // TODO: Implement signup logic
-    setTimeout(() => {
+    try {
+      const response = await authService.register({
+        fullName: fullName,
+        email: email,
+        password: password,
+        confirmPassword: password,
+      })
+      
+      if (response.success && response.data) {
+        // Store token and update Redux state
+        authService.setToken(response.data.token)
+        dispatch(setUser(response.data.user))
+        
+        // Redirect to dashboard
+        router.push("/dashboard")
+      }
+    } catch (err) {
+      console.error("Registration error:", err)
+      setError(err instanceof Error ? err.message : "Failed to create account. Please try again.")
+    } finally {
       setIsLoading(false)
-      router.push("/dashboard")
-    }, 1000)
+    }
   }
 
   const handleGoogleSignUp = () => {
@@ -113,6 +136,13 @@ export default function SignUpPage() {
             <span className="text-gray-500 text-sm">- OR -</span>
             <div className="flex-1 border-t border-gray-300"></div>
           </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-600">{error}</p>
+            </div>
+          )}
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">

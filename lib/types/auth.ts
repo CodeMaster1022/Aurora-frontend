@@ -25,12 +25,24 @@ export interface LoginCredentials {
 }
 
 export interface RegisterCredentials {
-  firstname: string;
-  lastname: string;
+  firstname?: string;
+  fullName?: string;
+  lastname?: string;
   email: string;
   password: string;
   confirmPassword: string;
-  role?: 'user' | 'admin' | 'moderator';
+  role?: 'user' | 'admin' | 'moderator' | 'speaker';
+}
+
+export interface SpeakerRegisterCredentials {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  interests?: string[];
+  meetingPreference?: string;
+  avatar?: File;
 }
 
 export interface AuthResponse {

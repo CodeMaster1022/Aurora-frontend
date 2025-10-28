@@ -6,9 +6,13 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react"
 import Link from "next/link"
+import { authService } from "@/lib/services/authService"
+import { useAppDispatch } from "@/lib/hooks/redux"
+import { setUser } from "@/lib/store/authSlice"
 
 export default function SignUpPage() {
   const router = useRouter()
+  const dispatch = useAppDispatch()
   const [currentStep, setCurrentStep] = useState(1)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -27,6 +31,7 @@ export default function SignUpPage() {
   
   const [isLoading, setIsLoading] = useState(false)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+  const [error, setError] = useState("")
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -72,12 +77,41 @@ export default function SignUpPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+    setError("")
     
-    // TODO: Implement signup logic
-    setTimeout(() => {
+    try {
+      // Validate passwords match
+      if (formData.password !== formData.confirmPassword) {
+        setError("Passwords do not match")
+        setIsLoading(false)
+        return
+      }
+      
+      const response = await authService.registerSpeaker({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+        interests: formData.interests,
+        meetingPreference: formData.meetingPreference,
+        avatar: formData.avatar || undefined,
+      })
+      
+      if (response.success && response.data) {
+        // Store token and update Redux state
+        authService.setToken(response.data.token)
+        dispatch(setUser(response.data.user))
+        
+        // Redirect to dashboard
+        router.push("/dashboard")
+      }
+    } catch (err) {
+      console.error("Registration error:", err)
+      setError(err instanceof Error ? err.message : "Failed to create account. Please try again.")
+    } finally {
       setIsLoading(false)
-      router.push("/dashboard")
-    }, 1000)
+    }
   }
 
   const handleGoogleSignUp = () => {
@@ -156,6 +190,13 @@ export default function SignUpPage() {
               <span>Back</span>
             </button>
           </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-600">{error}</p>
+            </div>
+          )}
 
           {/* Step Content */}
           <div className="bg-white rounded-lg shadow-sm p-8 mb-6">
