@@ -4,8 +4,12 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Star, Loader2, ArrowLeft, Calendar, Users, MessageSquare } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Star, Loader2, ArrowLeft, Calendar, Users, MessageSquare, CheckCircle2 } from "lucide-react"
 import { learnerService } from "@/lib/services/learnerService"
+import { useAppSelector } from "@/lib/hooks/redux"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -14,7 +18,21 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
   const [speaker, setSpeaker] = useState<any>(null)
   const [reviews, setReviews] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false)
+  const [isBooking, setIsBooking] = useState(false)
+  const [bookingError, setBookingError] = useState("")
+  const [bookingSuccess, setBookingSuccess] = useState(false)
   const router = useRouter()
+  const { user, isAuthenticated } = useAppSelector((state) => state.auth)
+  
+  // Booking form state
+  const [formData, setFormData] = useState({
+    title: "",
+    date: "",
+    time: "",
+    topic1: "",
+    topic2: ""
+  })
 
   useEffect(() => {
     fetchSpeakerProfile()
@@ -35,6 +53,55 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
     }
   }
 
+  const handleBooking = async () => {
+    if (!formData.title || !formData.date || !formData.time) {
+      setBookingError("Please fill in all required fields")
+      return
+    }
+
+    const topics = [formData.topic1, formData.topic2].filter(t => t.trim() !== "")
+    
+    if (topics.length > 2) {
+      setBookingError("Maximum 2 topics allowed")
+      return
+    }
+
+    try {
+      setIsBooking(true)
+      setBookingError("")
+      
+      await learnerService.bookSession({
+        speakerId: params.id,
+        title: formData.title,
+        date: formData.date,
+        time: formData.time,
+        topics: topics
+      })
+
+      setBookingSuccess(true)
+      
+      // Reset form
+      setFormData({
+        title: "",
+        date: "",
+        time: "",
+        topic1: "",
+        topic2: ""
+      })
+
+      // Close dialog after 2 seconds and redirect to dashboard
+      setTimeout(() => {
+        setIsBookingDialogOpen(false)
+        router.push("/learners/dashboard")
+      }, 2000)
+    } catch (error: any) {
+      console.error("Error booking session:", error)
+      setBookingError(error.message || "Failed to book session")
+    } finally {
+      setIsBooking(false)
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#1A1A33]">
@@ -45,7 +112,7 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
 
   if (!speaker) {
     return (
-      <div className="min-h-screen bg-[#1A1A33] pt-24 pb-12 px-4 sm:px-6">
+      <div className="min-h-screen bg我在-[#1A1A33] pt-24 pb-12 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto">
           <Card className="bg-white/10 backdrop-blur-lg border-white/20">
             <CardContent className="p-12 text-center">
@@ -123,6 +190,104 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
                     <span className="text-sm">{speaker.completedSessions || 0} Completed</span>
                   </div>
                 </div>
+
+                {/* Book Session Button */}
+                {isAuthenticated && user && user.role === 'learner' && (
+                  <Dialog open={isBookingDialogOpen} onOpenChange={setIsBookingDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button className="mt-4 bg-purple-600 hover:bg-purple-700 text-white">
+                        <Calendar className="w-4 h-4 mr-2" />
+                        Book a Session
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="bg-[#1A1A33] border-white/20 text-white">
+                      <DialogHeader>
+                        <DialogTitle className="text-white text-2xl">Book a Session</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        {bookingSuccess ? (
+                          <div className="text-center py-8">
+                            <CheckCircle2 className="w-16 h-16 mx-auto text-green-400 mb-4" />
+                            <h3 className="text-xl font-semibold text-white mb-2">Session Booked!</h3>
+                            <p className="text-gray-300">
+                              Your session has been confirmed. Check your email for details.
+                            </p>
+                          </div>
+                        ) : (
+                          <>
+                            <div>
+                              <Label htmlFor="title" className="text-white">Session Title *</Label>
+                              <Input
+                                id="title"
+                                value={formData.title}
+                                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                placeholder="E.g., Practice Conversation"
+                                className="bg-white/10 border-white/20 text-white mt-2"
+                              />
+                            </div>
+
+                            <div>
+                              <Label htmlFor="date" className="text-white">Date *</Label>
+                              <Input
+                                id="date"
+                                type="date"
+                                value={formData.date}
+                                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                                className="bg-white/10 border-white/20 text-white mt-2"
+                              />
+                            </div>
+
+                            <div>
+                              <Label htmlFor="time" className="text-white">Time *</Label>
+                              <Input
+                                id="time"
+                                type="time"
+                                value={formData.time}
+                                onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                                className="bg-white/10 border-white/20 text-white mt-2"
+                              />
+                            </div>
+
+                            <div>
+                              <Label className="text-white">Topics (max 2, optional)</Label>
+                              <Input
+                                placeholder="Topic 1"
+                                value={formData.topic1}
+                                onChange={(e) => setFormData({ ...formData, topic1: e.target.value })}
+                                className="bg-white/10 border-white/20 text-white mt-2 mb-2"
+                              />
+                              <Input
+                                placeholder="Topic 2"
+                                value={formData.topic2}
+                                onChange={(e) => setFormData({ ...formData, topic2: e.target.value })}
+                                className="bg-white/10 border-white/20 text-white"
+                              />
+                            </div>
+
+                            {bookingError && (
+                              <div className="text-red-400 text-sm">{bookingError}</div>
+                            )}
+
+                            <Button
+                              onClick={handleBooking}
+                              disabled={isBooking}
+                              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                            >
+                              {isBooking ? (
+                                <>
+                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                  Booking...
+                                </>
+                              ) : (
+                                "Confirm Booking"
+                              )}
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                )}
               </div>
             </div>
 
@@ -241,4 +406,3 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
     </div>
   )
 }
-

@@ -406,6 +406,25 @@ export default function SpeakerDashboardPage() {
                                   : session.learner}
                               </span>
                             </p>
+                            {(session as any).topics && (session as any).topics.length > 0 && (
+                              <p className="text-xs text-gray-400 mb-2">Topics: {(session as any).topics.join(', ')}</p>
+                            )}
+                            {(session as any).icebreaker && (
+                              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 mb-2 mt-2">
+                                <p className="text-xs font-semibold text-yellow-400 mb-1">💡 Icebreaker</p>
+                                <p className="text-xs text-yellow-200">{(session as any).icebreaker}</p>
+                              </div>
+                            )}
+                            {(session as any).meetingLink && (
+                              <a 
+                                href={(session as any).meetingLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm text-purple-400 hover:text-purple-300 mb-2 inline-block"
+                              >
+                                Join Meeting →
+                              </a>
+                            )}
                             <div className="flex items-center gap-4 text-sm text-gray-400">
                               <div className="flex items-center gap-1">
                                 <Calendar className="w-4 h-4" />

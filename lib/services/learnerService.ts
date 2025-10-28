@@ -22,6 +22,8 @@ export interface Session {
   duration: number;
   status: 'scheduled' | 'completed' | 'cancelled';
   topic?: string;
+  topics?: string[];
+  icebreaker?: string;
   meetingLink?: string;
   notes?: string;
 }
@@ -212,6 +214,23 @@ class LearnerService {
       }
       throw new Error('Network error occurred');
     }
+  }
+
+  // Book a session with a speaker
+  async bookSession(bookingData: {
+    speakerId: string;
+    title: string;
+    date: string;
+    time: string;
+    topics?: string[];
+  }): Promise<{ success: boolean; data: { session: Session } }> {
+    return this.makeRequest<{ success: boolean; data: { session: Session } }>(
+      '/learner/book-session',
+      {
+        method: 'POST',
+        body: JSON.stringify(bookingData),
+      }
+    );
   }
 }
 

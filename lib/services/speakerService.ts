@@ -19,6 +19,8 @@ export interface Session {
   duration: number;
   status: 'scheduled' | 'completed' | 'cancelled';
   topic?: string;
+  topics?: string[];
+  icebreaker?: string;
   meetingLink?: string;
 }
 

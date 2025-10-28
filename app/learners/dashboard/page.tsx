@@ -396,8 +396,14 @@ export default function LearnerDashboardPage() {
                                   : session.speaker}
                               </span>
                             </p>
-                            {session.topic && (
-                              <p className="text-xs text-gray-400 mb-2">Topic: {session.topic}</p>
+                            {session.topics && session.topics.length > 0 && (
+                              <p className="text-xs text-gray-400 mb-2">Topics: {session.topics.join(', ')}</p>
+                            )}
+                            {session.icebreaker && (
+                              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 mb-2 mt-2">
+                                <p className="text-xs font-semibold text-yellow-400 mb-1">💡 Icebreaker</p>
+                                <p className="text-xs text-yellow-200">{session.icebreaker}</p>
+                              </div>
                             )}
                             <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-sm text-gray-400">
                               <div className="flex items-center gap-1">
