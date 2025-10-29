@@ -202,6 +202,47 @@ class SpeakerService {
       };
     }>('/speaker/gift-song');
   }
+
+  // Google Calendar OAuth methods
+  async getCalendarAuthUrl(): Promise<{
+    success: boolean;
+    data: { authUrl: string };
+  }> {
+    return this.makeRequest<{
+      success: boolean;
+      data: { authUrl: string };
+    }>('/speaker/calendar/auth-url');
+  }
+
+  async getCalendarStatus(): Promise<{
+    success: boolean;
+    data: {
+      connected: boolean;
+      expiresAt: string | null;
+    };
+  }> {
+    return this.makeRequest<{
+      success: boolean;
+      data: {
+        connected: boolean;
+        expiresAt: string | null;
+      };
+    }>('/speaker/calendar/status');
+  }
+
+  async disconnectCalendar(): Promise<{
+    success: boolean;
+    message: string;
+    data: { user: any };
+  }> {
+    return this.makeRequest<{
+      success: boolean;
+      message: string;
+      data: { user: any };
+    }>('/speaker/calendar/disconnect', {
+      method: 'POST',
+    });
+  }
 }
 
 export const speakerService = new SpeakerService();

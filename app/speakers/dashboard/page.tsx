@@ -21,7 +21,10 @@ import {
   Settings,
   Loader2,
   Camera,
-  User
+  User,
+  Link as LinkIcon,
+  Unlink,
+  CheckCircle2
 } from "lucide-react"
 import { speakerService, Session, Review, SpeakerAvailability } from "@/lib/services/speakerService"
 import { useAppSelector, useAppDispatch } from "@/lib/hooks/redux"
@@ -53,6 +56,11 @@ export default function SpeakerDashboardPage() {
   const [ratingModalOpen, setRatingModalOpen] = useState(false)
   const [selectedSessionForRating, setSelectedSessionForRating] = useState<Session | null>(null)
 
+  // Google Calendar states
+  const [isCalendarConnected, setIsCalendarConnected] = useState(false)
+  const [isConnectingCalendar, setIsConnectingCalendar] = useState(false)
+  const [calendarExpiresAt, setCalendarExpiresAt] = useState<string | null>(null)
+
   // Days of the week
   const daysOfWeek = [
     { key: "monday", label: "Monday" },
@@ -77,7 +85,37 @@ export default function SpeakerDashboardPage() {
       console.log('Authenticated but no user - fetching current user...')
       dispatch(getCurrentUser())
     }
+
+    // Check for OAuth callback params
+    const params = new URLSearchParams(window.location.search)
+    const calendarStatus = params.get('calendar')
+    if (calendarStatus === 'connected') {
+      // Calendar connected successfully
+      console.log('Calendar connected successfully')
+      setError('') // Clear any errors
+      // Refresh calendar status
+      checkCalendarStatus()
+      // Clean up URL
+      window.history.replaceState({}, '', window.location.pathname)
+    } else if (calendarStatus === 'error') {
+      setError('Failed to connect Google Calendar. Please try again.')
+      // Clean up URL
+      window.history.replaceState({}, '', window.location.pathname)
+    }
   }, [isAuthenticated, user, dispatch, authLoading])
+
+  // Check calendar connection status
+  const checkCalendarStatus = async () => {
+    try {
+      const response = await speakerService.getCalendarStatus()
+      if (response.success) {
+        setIsCalendarConnected(response.data.connected)
+        setCalendarExpiresAt(response.data.expiresAt)
+      }
+    } catch (error) {
+      console.error('Error checking calendar status:', error)
+    }
+  }
 
   useEffect(() => {
     console.log('Dashboard fetch effect - user:', !!user, 'isAuthenticated:', isAuthenticated, 'authLoading:', authLoading)
@@ -92,6 +130,8 @@ export default function SpeakerDashboardPage() {
     if (user) {
       console.log('User exists, fetching dashboard data...')
       fetchDashboardData()
+      // Check calendar connection status
+      checkCalendarStatus()
     } 
     // If not authenticated at all, show error
     else if (!isAuthenticated) {
@@ -224,6 +264,50 @@ export default function SpeakerDashboardPage() {
     fetchDashboardData()
   }
 
+  const handleConnectCalendar = async () => {
+    try {
+      setIsConnectingCalendar(true)
+      setError('')
+      
+      // Get the OAuth URL from the backend
+      const response = await speakerService.getCalendarAuthUrl()
+      
+      if (response.success && response.data.authUrl && user?._id) {
+        // Add user ID as state parameter for the callback
+        const authUrl = new URL(response.data.authUrl)
+        authUrl.searchParams.set('state', user._id)
+        
+        // Redirect to Google OAuth
+        window.location.href = authUrl.toString()
+      } else {
+        setError('Failed to initiate Google Calendar connection')
+        setIsConnectingCalendar(false)
+      }
+    } catch (err) {
+      console.error('Error connecting calendar:', err)
+      setError('Failed to connect Google Calendar')
+      setIsConnectingCalendar(false)
+    }
+  }
+
+  const handleDisconnectCalendar = async () => {
+    try {
+      setIsConnectingCalendar(true)
+      setError('')
+      
+      await speakerService.disconnectCalendar()
+      
+      // Update local state
+      setIsCalendarConnected(false)
+      setCalendarExpiresAt(null)
+    } catch (err) {
+      console.error('Error disconnecting calendar:', err)
+      setError('Failed to disconnect Google Calendar')
+    } finally {
+      setIsConnectingCalendar(false)
+    }
+  }
+
   const receivedReviews = reviews.filter(r => r.type === "received")
   const givenReviews = reviews.filter(r => r.type === "given")
 
@@ -347,8 +431,87 @@ export default function SpeakerDashboardPage() {
               </CardContent>
             </Card>
 
+            {/* Google Calendar Connection Card */}
+            <Card className="bg-white/10 backdrop-blur-lg border-white/20">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="text-purple-400 w-5 h-5" />
+                    <CardTitle className="text-white">Google Calendar</CardTitle>
+                  </div>
+                  {isCalendarConnected && (
+                    <CheckCircle2 className="w-5 h-5 text-green-400" />
+                  )}
+                </div>
+                <CardDescription className="text-gray-300">
+                  Connect your calendar to automatically create events
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {isCalendarConnected ? (
+                  <>
+                    <div className="flex items-center gap-2 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+                      <CheckCircle2 className="w-5 h-5 text-green-400" />
+                      <span className="text-sm text-green-300">Calendar Connected</span>
+                    </div>
+                    {calendarExpiresAt && (
+                      <p className="text-xs text-gray-400">
+                        Expires: {new Date(calendarExpiresAt).toLocaleDateString()}
+                      </p>
+                    )}
+                    <Button
+                      onClick={handleDisconnectCalendar}
+                      disabled={isConnectingCalendar}
+                      variant="outline"
+                      className="w-full border-red-500/50 text-red-300 hover:bg-red-500/10"
+                    >
+                      {isConnectingCalendar ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Disconnecting...
+                        </>
+                      ) : (
+                        <>
+                          <Unlink className="mr-2 h-4 w-4" />
+                          Disconnect
+                        </>
+                      )}
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                      <p className="text-sm text-yellow-300 mb-2">
+                        Your calendar is not connected
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        Connect your Google Calendar to automatically create events when learners book sessions with you.
+                      </p>
+                    </div>
+                    <Button
+                      onClick={handleConnectCalendar}
+                      disabled={isConnectingCalendar}
+                      className="w-full bg-gradient-to-r from-purple-600 to-purple-500"
+                    >
+                      {isConnectingCalendar ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Connecting...
+                        </>
+                      ) : (
+                        <>
+                          <LinkIcon className="mr-2 h-4 w-4" />
+                          Connect Google Calendar
+                        </>
+                      )}
+                    </Button>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Availability Card */}
-            <Card className="bg Orabolo-card-border rounded-lg p-4 border-2 border-[#A5B4FC]">
+            <Card className="bg-white/10 backdrop-blur-lg border-white/20">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
