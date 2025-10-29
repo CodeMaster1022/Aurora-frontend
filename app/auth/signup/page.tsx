@@ -120,7 +120,8 @@ export default function SignUpPage() {
       firstName: firstNameError,
       lastName: lastNameError,
       email: emailError,
-      password: passwordError
+      password: passwordError,
+      termsAccepted: ""
     })
     
     if (!termsAccepted) {

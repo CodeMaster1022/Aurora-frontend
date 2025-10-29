@@ -7,7 +7,7 @@ export default function TermsAndConditionsPage() {
   const { t } = useTranslation()
   
   return (
-    <div className="min-h-screen bg-[#0F172A]">
+    <div className="min-h-screen bg-[#0F172A] pt-12">
       <Header />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         <div className="bg-white rounded-lg shadow-lg p-6 sm:p-8 lg:p-12 space-y-8">
