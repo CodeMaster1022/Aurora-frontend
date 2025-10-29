@@ -36,16 +36,11 @@ export function SpeakerRatingModal({
       return
     }
 
-    if (!comment.trim()) {
-      setError("Please write a short review")
-      return
-    }
-
     try {
       setIsLoading(true)
       setError("")
       
-      await speakerService.rateLearner(sessionId, rating, comment.trim())
+      await speakerService.rateLearner(sessionId, rating, comment.trim() || "")
       
       // Show thank you message
       setShowThankYou(true)
@@ -102,7 +97,7 @@ export function SpeakerRatingModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-w-[95vw] mx-4">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center">
             {showThankYou ? "Thank you!" : "Rate Your Session"}
@@ -148,7 +143,7 @@ export function SpeakerRatingModal({
                 id="comment"
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                placeholder="Write a short review about the session..."
+                placeholder="Write a short review about the session (optional)..."
                 rows={4}
                 disabled={isLoading}
                 className="resize-none"
