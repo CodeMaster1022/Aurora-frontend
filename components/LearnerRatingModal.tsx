@@ -36,16 +36,11 @@ export function LearnerRatingModal({
       return
     }
 
-    if (!comment.trim()) {
-      setError("Please write a short review")
-      return
-    }
-
     try {
       setIsLoading(true)
       setError("")
       
-      await learnerService.rateSession(sessionId, rating, comment.trim())
+      await learnerService.rateSession(sessionId, rating, comment.trim() || "")
       
       // Show thank you message
       setShowThankYou(true)
@@ -60,19 +55,31 @@ export function LearnerRatingModal({
   const handleDonate = async () => {
     try {
       setIsCreatingDonation(true)
+      setError("")
       
       // Create Stripe checkout session
       const response = await learnerService.createDonation()
       
-      if (response.success && response.data.url) {
+      if (response.success && response.data?.url) {
         // Redirect to Stripe checkout
         window.location.href = response.data.url
       } else {
-        setError("Failed to create donation checkout")
+        // Check if it's a configuration error
+        if ((response as any).error === 'STRIPE_NOT_CONFIGURED') {
+          setError("Donation feature is temporarily unavailable. Please try again later.")
+        } else {
+          setError((response as any).message || "Failed to create donation checkout")
+        }
+        setIsCreatingDonation(false)
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error creating donation:", err)
-      setError(err instanceof Error ? err.message : "Failed to create donation")
+      // Check if it's the Stripe configuration error
+      if (err.response?.data?.error === 'STRIPE_NOT_CONFIGURED' || err.message?.includes('Stripe is not configured')) {
+        setError("Donation feature is temporarily unavailable. Please try again later.")
+      } else {
+        setError(err.message || "Failed to create donation")
+      }
       setIsCreatingDonation(false)
     }
   }
@@ -94,7 +101,7 @@ export function LearnerRatingModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-w-[95vw] mx-4">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center">
             {showThankYou ? "Thank you!" : "Rate Your Session"}

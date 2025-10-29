@@ -24,7 +24,7 @@ import {
   Trash2,
   AlertTriangle
 } from "lucide-react"
-import { learnerService, Session, Speaker } from "@/lib/services/learnerService"
+import { learnerService, Session, Speaker, Review } from "@/lib/services/learnerService"
 import { useAppSelector, useAppDispatch } from "@/lib/hooks/redux"
 import { getCurrentUser } from "@/lib/store/authSlice"
 import { LearnerRatingModal } from "@/components/LearnerRatingModal"
@@ -35,6 +35,7 @@ export default function LearnerDashboardPage() {
   const { user, isAuthenticated, isLoading: authLoading } = useAppSelector((state) => state.auth)
   const [upcomingSessions, setUpcomingSessions] = useState<Session[]>([])
   const [pastSessions, setPastSessions] = useState<Session[]>([])
+  const [reviews, setReviews] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState("")
   
@@ -96,6 +97,36 @@ export default function LearnerDashboardPage() {
     }
   }, [user, isAuthenticated, authLoading])
 
+  // Auto-open rating modal for ended sessions that haven't been reviewed
+  useEffect(() => {
+    // Only run if we have sessions and reviews loaded, and not currently loading
+    if (isLoading) return
+    if ((upcomingSessions.length === 0 && pastSessions.length === 0) || !user) return
+    
+    // Don't auto-open if any modal is already open
+    if (ratingModalOpen || cancelModalOpen) return
+    
+    // Check past sessions first (completed sessions)
+    const completedSessions = pastSessions.filter(s => s.status === 'completed')
+    for (const session of completedSessions) {
+      if (!hasBeenReviewed(session._id)) {
+        // Found a completed session that hasn't been reviewed - open modal
+        setSelectedSessionForRating(session)
+        setRatingModalOpen(true)
+        return // Only open for one session at a time
+      }
+    }
+    
+    // Also check upcoming sessions that have actually ended but still marked as scheduled
+    const endedSessions = upcomingSessions.filter(s => hasSessionEnded(s) && !hasBeenReviewed(s._id))
+    if (endedSessions.length > 0) {
+      // Found an ended session that hasn't been reviewed - open modal
+      setSelectedSessionForRating(endedSessions[0])
+      setRatingModalOpen(true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [upcomingSessions, pastSessions, reviews, isLoading, user])
+
   const fetchDashboardData = async () => {
     if (!user) {
       console.log('No user available, skipping dashboard fetch')
@@ -111,11 +142,12 @@ export default function LearnerDashboardPage() {
       const response = await learnerService.getDashboard()
       
       if (response.success && response.data) {
-        const { upcomingSessions, pastSessions } = response.data
+        const { upcomingSessions, pastSessions, reviews } = response.data
         
         // Update sessions
         setUpcomingSessions(upcomingSessions || [])
         setPastSessions(pastSessions || [])
+        setReviews(reviews || [])
         
         // Initialize profile data
         setFirstname(user.firstname || "")
@@ -232,6 +264,30 @@ export default function LearnerDashboardPage() {
 
   const formatTime = (timeString: string) => {
     return timeString
+  }
+
+  // Check if a session has been reviewed by this learner
+  const hasBeenReviewed = (sessionId: string) => {
+    return reviews.some(review => {
+      const reviewSessionId = typeof review.session === 'string' 
+        ? review.session 
+        : (review.session as any)?._id || review.session
+      return String(reviewSessionId) === String(sessionId)
+    })
+  }
+
+  // Check if a session has ended (date + time + duration has passed)
+  const hasSessionEnded = (session: Session): boolean => {
+    const sessionDate = new Date(session.date)
+    const sessionTime = session.time.split(':')
+    sessionDate.setHours(parseInt(sessionTime[0]), parseInt(sessionTime[1]), 0, 0)
+    
+    // Add session duration (default to 30 minutes if not specified)
+    const duration = session.duration || 30
+    const sessionEndTime = new Date(sessionDate.getTime() + duration * 60 * 1000)
+    
+    const now = new Date()
+    return sessionEndTime <= now
   }
 
   if (isLoading) {

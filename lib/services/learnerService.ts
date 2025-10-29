@@ -87,6 +87,7 @@ class LearnerService {
     data: {
       upcomingSessions: Session[];
       pastSessions: Session[];
+      reviews: Review[];
       profile: LearnerProfile;
     };
   }> {
@@ -95,6 +96,7 @@ class LearnerService {
       data: {
         upcomingSessions: Session[];
         pastSessions: Session[];
+        reviews: Review[];
         profile: LearnerProfile;
       };
     }>('/learner/dashboard');
