@@ -233,7 +233,7 @@ export default function SignUpPage() {
                 onChange={(e) => setFullName(e.target.value)}
                 onBlur={(e) => handleBlur("fullName", e.target.value)}
                 required
-                className={`border-0 border-b-2 rounded-none focus-visible:ring-0 px-0 py-3 text-base text-gray-900 ${
+                className={`border-0 border-b-2 rounded-none focus-visible:ring-0 px-3  py-3 text-base text-gray-900 ${
                   validationErrors.fullName 
                     ? "border-red-500 focus-visible:border-red-500" 
                     : "border-gray-300 focus-visible:border-purple-500"
@@ -253,7 +253,7 @@ export default function SignUpPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 onBlur={(e) => handleBlur("email", e.target.value)}
                 required
-                className={`border-0 border-b-2 rounded-none focus-visible:ring-0 px-0 py-3 text-base text-gray-900 ${
+                className={`border-0 border-b-2 rounded-none focus-visible:ring-0 px-3  py-3 text-base text-gray-900 ${
                   validationErrors.email 
                     ? "border-red-500 focus-visible:border-red-500" 
                     : "border-gray-300 focus-visible:border-purple-500"
@@ -273,7 +273,7 @@ export default function SignUpPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 onBlur={(e) => handleBlur("password", e.target.value)}
                 required
-                className={`border-0 border-b-2 rounded-none focus-visible:ring-0 px-0 py-3 pr-10 text-base text-gray-900 ${
+                className={`border-0 border-b-2 rounded-none focus-visible:ring-0 px-3  py-3 pr-10 text-base text-gray-900 ${
                   validationErrors.password 
                     ? "border-red-500 focus-visible:border-red-500" 
                     : "border-gray-300 focus-visible:border-purple-500"
