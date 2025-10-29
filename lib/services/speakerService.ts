@@ -1,6 +1,6 @@
 import { authService } from './authService';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://aurora-backend-three.vercel.app/api';
 
 export interface Learner {
   _id: string;

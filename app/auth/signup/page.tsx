@@ -16,27 +16,42 @@ export default function SignUpPage() {
   const dispatch = useAppDispatch()
   const { t } = useTranslation()
   const [showPassword, setShowPassword] = useState(false)
-  const [fullName, setFullName] = useState("")
+  const [firstName, setFirstName] = useState("")
+  const [lastName, setLastName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [validationErrors, setValidationErrors] = useState({
-    fullName: "",
+    firstName: "",
+    lastName: "",
     email: "",
     password: ""
   })
 
   // Validation functions
-  const validateFullName = (name: string) => {
+  const validateFirstName = (name: string) => {
     if (!name.trim()) {
-      return t('auth.signup.validate.fullNameRequired')
+      return t('auth.signup.validate.firstNameRequired')
     }
     if (name.trim().length < 2) {
-      return t('auth.signup.validate.fullNameMin')
+      return t('auth.signup.validate.firstNameMin')
     }
     if (!/^[a-zA-Z\s'-]+$/.test(name.trim())) {
-      return t('auth.signup.validate.fullNameInvalid')
+      return t('auth.signup.validate.firstNameInvalid')
+    }
+    return ""
+  }
+
+  const validateLastName = (name: string) => {
+    if (!name.trim()) {
+      return t('auth.signup.validate.lastNameRequired')
+    }
+    if (name.trim().length < 2) {
+      return t('auth.signup.validate.lastNameMin')
+    }
+    if (!/^[a-zA-Z\s'-]+$/.test(name.trim())) {
+      return t('auth.signup.validate.lastNameInvalid')
     }
     return ""
   }
@@ -71,8 +86,11 @@ export default function SignUpPage() {
   const handleBlur = (field: string, value: string) => {
     let error = ""
     switch (field) {
-      case "fullName":
-        error = validateFullName(value)
+      case "firstName":
+        error = validateFirstName(value)
+        break
+      case "lastName":
+        error = validateLastName(value)
         break
       case "email":
         error = validateEmail(value)
@@ -90,24 +108,27 @@ export default function SignUpPage() {
     setError("")
     
     // Validate all fields
-    const fullNameError = validateFullName(fullName)
+    const firstNameError = validateFirstName(firstName)
+    const lastNameError = validateLastName(lastName)
     const emailError = validateEmail(email)
     const passwordError = validatePassword(password)
     
     setValidationErrors({
-      fullName: fullNameError,
+      firstName: firstNameError,
+      lastName: lastNameError,
       email: emailError,
       password: passwordError
     })
     
-    if (fullNameError || emailError || passwordError) {
+    if (firstNameError || lastNameError || emailError || passwordError) {
       setIsLoading(false)
       return
     }
     
     try {
       const response = await authService.register({
-        fullName: fullName,
+        firstname: firstName,
+        lastname: lastName,
         email: email,
         password: password,
         confirmPassword: password,
@@ -226,23 +247,43 @@ export default function SignUpPage() {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Full Name */}
+            {/* First Name */}
             <div className="relative">
               <Input
                 type="text"
-                placeholder={t('auth.signup.fullName')}
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                onBlur={(e) => handleBlur("fullName", e.target.value)}
+                placeholder={t('auth.signup.firstName')}
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                onBlur={(e) => handleBlur("firstName", e.target.value)}
                 required
                 className={`border-0 border-b-2 rounded-none focus-visible:ring-0 px-3  py-3 text-base text-gray-900 ${
-                  validationErrors.fullName 
+                  validationErrors.firstName 
                     ? "border-red-500 focus-visible:border-red-500" 
                     : "border-gray-300 focus-visible:border-purple-500"
                 }`}
               />
-              {validationErrors.fullName && (
-                <p className="text-xs text-red-500 mt-1">{validationErrors.fullName}</p>
+              {validationErrors.firstName && (
+                <p className="text-xs text-red-500 mt-1">{validationErrors.firstName}</p>
+              )}
+            </div>
+
+            {/* Last Name */}
+            <div className="relative">
+              <Input
+                type="text"
+                placeholder={t('auth.signup.lastName')}
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                onBlur={(e) => handleBlur("lastName", e.target.value)}
+                required
+                className={`border-0 border-b-2 rounded-none focus-visible:ring-0 px-3  py-3 text-base text-gray-900 ${
+                  validationErrors.lastName 
+                    ? "border-red-500 focus-visible:border-red-500" 
+                    : "border-gray-300 focus-visible:border-purple-500"
+                }`}
+              />
+              {validationErrors.lastName && (
+                <p className="text-xs text-red-500 mt-1">{validationErrors.lastName}</p>
               )}
             </div>
 

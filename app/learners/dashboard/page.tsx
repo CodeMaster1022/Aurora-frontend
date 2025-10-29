@@ -330,7 +330,7 @@ export default function LearnerDashboardPage() {
                     variant="ghost"
                     size="icon"
                     onClick={() => setIsEditingProfile(!isEditingProfile)}
-                    className="text-white hover:bg-white/20"
+                    className="text-white hover:bg-white/20 cursor-pointer"
                   >
                     {isEditingProfile ? <X className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
                   </Button>
@@ -410,7 +410,7 @@ export default function LearnerDashboardPage() {
                     <Button
                       onClick={handleSaveProfile}
                       disabled={isUploading}
-                      className="w-full bg-gradient-to-r from-purple-600 to-purple-500"
+                      className="w-full cursor-pointer bg-gradient-to-r from-purple-600 to-purple-500"
                     >
                       {isUploading ? (
                         <>
@@ -513,7 +513,7 @@ export default function LearnerDashboardPage() {
                               onClick={() => handleCancelSession(session)}
                               variant="outline"
                               size="sm"
-                              className="text-red-400 border-red-400/50 hover:bg-red-400/10"
+                              className="text-red-400 cursor-pointer border-red-400/50 hover:bg-red-400/10"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
                               Cancel
@@ -586,7 +586,7 @@ export default function LearnerDashboardPage() {
                                 onClick={() => handleRateSession(session)}
                                 variant="outline"
                                 size="sm"
-                                className="text-purple-400 border-purple-400/50 hover:bg-purple-400/10"
+                                className="text-purple-400 cursor-pointer border-purple-400/50 hover:bg-purple-400/10"
                               >
                                 <Star className="mr-2 h-4 w-4" />
                                 Rate & Review
@@ -714,14 +714,14 @@ export default function LearnerDashboardPage() {
                   }}
                   variant="outline"
                   disabled={isCancelling}
-                  className="border-white/20 text-white hover:bg-white/10"
+                  className="border-white/20 cursor-pointer text-white hover:bg-white/10"
                 >
                   Keep Session
                 </Button>
                 <Button
                   onClick={handleConfirmCancellation}
                   disabled={isCancelling}
-                  className="bg-red-600 hover:bg-red-700 text-white"
+                  className="bg-red-600 cursor-pointer hover:bg-red-700 text-white"
                 >
                   {isCancelling ? (
                     <>

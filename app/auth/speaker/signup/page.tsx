@@ -520,7 +520,7 @@ export default function SignUpPage() {
                 type="button"
                 variant="ghost"
                 onClick={() => router.push("/dashboard")}
-                className="text-gray-600 hover:text-gray-900"
+                className="text-gray-600 hover:text-gray-900 cursor-pointer"
               >
                 {t('speakerSignup.skip')}
               </Button>
@@ -535,7 +535,7 @@ export default function SignUpPage() {
                   (currentStep === 3 && !formData.meetingPreference) ||
                   (currentStep === 5 && (!formData.password || !formData.confirmPassword))
                 }
-                className="px-8 py-2 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white rounded-lg disabled:opacity-50 transition-all"
+                className="px-8 py-2 cursor-pointer bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white rounded-lg cursor-pointer disabled:opacity-50 transition-all"
               >
                 {t('speakerSignup.next')}
               </Button>
@@ -543,7 +543,7 @@ export default function SignUpPage() {
               <Button
                 onClick={handleSubmit}
                 disabled={isLoading}
-                className="px-8 py-2 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white rounded-lg disabled:opacity-50 transition-all"
+                className="px-8 py-2 bg-gradient-to-r cursor-pointer from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white rounded-lg disabled:opacity-50 transition-all"
               >
                 {isLoading ? (
                   <>

@@ -512,7 +512,7 @@ export default function SpeakerDashboardPage() {
                     variant="ghost"
                     size="icon"
                     onClick={() => setIsEditingProfile(!isEditingProfile)}
-                    className="text-white hover:bg-white/20"
+                    className="text-white hover:bg-white/20 cursor-pointer"
                   >
                     {isEditingProfile ? <X /> : <Edit />}
                   </Button>
@@ -576,7 +576,7 @@ export default function SpeakerDashboardPage() {
                   <Button
                     onClick={handleSaveProfile}
                     disabled={isUploading}
-                    className="w-full bg-gradient-to-r from-purple-600 to-purple-500"
+                    className="w-full bg-gradient-to-r from-purple-600 to-purple-500 cursor-pointer"
                   >
                     {isUploading ? (
                       <>
@@ -626,7 +626,7 @@ export default function SpeakerDashboardPage() {
                       onClick={handleDisconnectCalendar}
                       disabled={isConnectingCalendar}
                       variant="outline"
-                      className="w-full border-red-500/50 text-red-300 hover:bg-red-500/10"
+                      className="w-full border-red-500/50 text-red-300 hover:bg-red-500/10 cursor-pointer"
                     >
                       {isConnectingCalendar ? (
                         <>
@@ -654,7 +654,7 @@ export default function SpeakerDashboardPage() {
                     <Button
                       onClick={handleConnectCalendar}
                       disabled={isConnectingCalendar}
-                      className="w-full bg-gradient-to-r from-purple-600 to-purple-500"
+                      className="w-full bg-gradient-to-r from-purple-600 to-purple-500 cursor-pointer"
                     >
                       {isConnectingCalendar ? (
                         <>
@@ -723,7 +723,7 @@ export default function SpeakerDashboardPage() {
                 <Button
                   onClick={handleSaveAvailability}
                   disabled={isSavingAvailability}
-                  className="w-full bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 mt-4"
+                  className="w-full bg-gradient-to-r from-purple-600 cursor-pointer to-purple-500 hover:from-purple-700 hover:to-purple-600 mt-4"
                 >
                   {isSavingAvailability ? (
                     <>
@@ -810,7 +810,7 @@ export default function SpeakerDashboardPage() {
                               variant="destructive"
                               size="sm"
                               onClick={() => handleCancelSession(session)}
-                              className="bg-red-500/20 hover:bg-red-500/30 text-red-300 border-red-500/30"
+                              className="bg-red-500/20 cursor-pointer hover:bg-red-500/30 text-red-300 border-red-500/30"
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>
@@ -882,7 +882,7 @@ export default function SpeakerDashboardPage() {
                               <Button
                                 size="sm"
                                 onClick={() => handleRateSession(session)}
-                                className="bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600"
+                                className="cursor-pointer bg-gradient-to-r  from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600"
                               >
                                 <Star className="w-3 h-3 mr-1" />
                                 {t('dashboard.sessions.rate')}
@@ -1086,7 +1086,7 @@ export default function SpeakerDashboardPage() {
                 setError("")
               }}
               disabled={isCancelling}
-              className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+              className="cursor-pointer bg-white/10 border-white/20 text-white hover:bg-white/20"
             >
               {t('dashboard.cancel.keep')}
             </Button>

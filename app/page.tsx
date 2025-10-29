@@ -5,6 +5,9 @@ import { FloatingCards } from "@/components/floating-cards"
 import { Play, ArrowRight, BookOpen, Users, Award, FileText, Calendar, UserCheck, Grid3X3, Square, Eye, CheckCircle, X, Send, Star, Download, Volume2, MessageCircle, CalendarDays, FastForward } from "lucide-react"
 import Image from "next/image"
 import studentImage from "@/public/image/student.png"
+import grandmother1 from "@/public/image/1.jpeg"
+import grandmother2 from "@/public/image/2.jpeg"
+import grandmother3 from "@/public/image/3.jpeg"
 
 import grandfatherImage from "@/public/image/grandfather.png"
 import { useTranslation } from "@/lib/hooks/useTranslation"
@@ -173,7 +176,7 @@ export default function HomePage() {
                 {/* Image */}
                 <div className="relative w-full h-48 bg-gray-200">
                   <Image
-                    src="https://i.pravatar.cc/150?img=1"
+                    src={grandmother1}
                     alt="John Damon"
                     width={200}
                     height={192}
@@ -210,7 +213,7 @@ export default function HomePage() {
                 {/* Image */}
                 <div className="relative w-full h-48 bg-gray-200">
                   <Image
-                    src="https://i.pravatar.cc/150?img=5"
+                    src={grandmother2}
                     alt="Martha Stuart"
                     width={200}
                     height={192}
@@ -247,7 +250,7 @@ export default function HomePage() {
                 {/* Image */}
                 <div className="relative w-full h-48 bg-gray-200">
                   <Image
-                    src="https://i.pravatar.cc/150?img=11"
+                    src={grandmother3}
                     alt="Leonard Washington"
                     width={200}
                     height={192}

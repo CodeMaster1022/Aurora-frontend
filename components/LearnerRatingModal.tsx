@@ -103,7 +103,7 @@ export function LearnerRatingModal({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md max-w-[95vw] mx-4">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-center">
+          <DialogTitle className="text-2xl font-bold text-center text-white">
             {showThankYou ? "Thank you!" : "Rate Your Session"}
           </DialogTitle>
         </DialogHeader>
@@ -140,7 +140,7 @@ export function LearnerRatingModal({
 
             {/* Comment */}
             <div className="space-y-2">
-              <label htmlFor="comment" className="text-sm font-medium">
+              <label htmlFor="comment" className="text-sm font-medium text-white">
                 Share your thoughts (optional)
               </label>
               <Textarea
@@ -164,7 +164,7 @@ export function LearnerRatingModal({
             <Button
               onClick={handleSubmit}
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600"
+              className="w-full cursor-pointer bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600"
             >
               {isLoading ? (
                 <>
@@ -192,7 +192,7 @@ export function LearnerRatingModal({
             <Button
               onClick={handleDonate}
               disabled={isCreatingDonation}
-              className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white"
+              className="w-full cursor-pointer bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white"
             >
               {isCreatingDonation ? (
                 <>

@@ -214,7 +214,7 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
           <Card className="bg-white/10 backdrop-blur-lg border-white/20">
             <CardContent className="p-12 text-center">
               <p className="text-gray-300 text-lg mb-4">{t('speakerProfile.notFound')}</p>
-              <Button onClick={() => router.push('/speakers')} variant="outline">
+              <Button onClick={() => router.push('/speakers')} variant="outline" className="cursor-pointer">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 {t('speakerProfile.backToSpeakers')}
               </Button>
@@ -232,7 +232,7 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
         <Button
           onClick={() => router.push('/speakers')}
           variant="outline"
-          className="mb-6 bg-white/10 border-white/20 text-white hover:bg-white/20"
+          className="mb-6 bg-white/10 border-white/20 text-white hover:bg-white/20 cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           {t('speakerProfile.backToSpeakers')}
@@ -292,8 +292,8 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
                 {/* {isAuthenticated && user && user.role === 'learner' && ( */}
                   <Dialog open={isBookingDialogOpen} onOpenChange={setIsBookingDialogOpen}>
                     <DialogTrigger asChild>
-                      <Button className="mt-4 bg-purple-600 hover:bg-purple-700 text-white">
-                        <Calendar className="w-4 h-4 mr-2" />
+                      <Button className="mt-4 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer">
+                        <Calendar className="w-4 h-4 mr-2 text-white" />
                         Book a Session
                       </Button>
                     </DialogTrigger>
@@ -448,7 +448,7 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
                             <Button
                               onClick={handleBooking}
                               disabled={isBooking}
-                              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                              className="w-full bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
                             >
                               {isBooking ? (
                                 <>

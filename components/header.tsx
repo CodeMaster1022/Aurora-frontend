@@ -75,7 +75,7 @@ export function Header() {
           <div className="flex items-center gap-2">
             <Image 
               src="/image/logo.png" 
-              alt="GEORGE Logo" 
+              alt="Aurora Logo" 
               width={120} 
               height={140}
               className="rounded-lg"
@@ -89,7 +89,7 @@ export function Header() {
                 <>
                   {user?.role === 'speaker' ? (
                     <>
-                      <Link href="/speakers/dashboard" className="text-gray-300  hover:text-orange-400 transition-colors text-lg font-medium">
+                      <Link href="/speakers/dashboard" className="text-gray-300 px-2 py-2 rounded-xl hover:text-orange-400 transition-colors text-lg font-medium">
                         {t('header.speakerDashboard')}
                       </Link>
                     </>
@@ -174,7 +174,7 @@ export function Header() {
               </div>
             ) : (
                   <>
-                    <button className="px-6 py-2.5 rounded-lg text-white border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-100 hover:text-[#49BBBD] font-semibold transition-all duration-300" onClick={() => router.push('/auth/signin')}>
+                    <button className="px-6 py-2.5 rounded-lg text-gray-300 border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-100 hover:text-[#49BBBD] font-semibold transition-all duration-300" onClick={() => router.push('/auth/signin')}>
                       {t('header.login')}
                     </button>
                     <button className="px-6 py-2.5 rounded-lg bg-[#524FD5] text-white hover:bg-orange-400 hover:text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5" onClick={() => router.push('/auth/speaker/signup')}>
@@ -218,12 +218,12 @@ export function Header() {
               <div className="flex items-center gap-2">
                 <Image 
                   src="/image/logo.png" 
-                  alt="GEORGE Logo" 
+                  alt="Aurora Logo" 
                   width={32} 
                   height={32}
                   className="rounded-lg"
                 />
-                <span className="text-xl font-bold text-white">GEORGE</span>
+                <span className="text-xl font-bold text-white">Aurora</span>
               </div>
               <button
                 onClick={() => setIsMenuOpen(false)}
@@ -253,7 +253,7 @@ export function Header() {
                   <>
                     {user?.role === 'speaker' ? (
                       <>
-                        <Link href="/speakers/dashboard" className="block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-colors text-lg font-medium">
+                        <Link href="/speakers/dashboard" className="block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-colors text-lg font-medium shadow-lg">
                           {t('header.speakerDashboard')}
                         </Link>
                       </>
@@ -323,7 +323,7 @@ export function Header() {
               {/* Mobile Menu Footer */}
               <div className="mt-auto pt-8 text-center">
                 <p className="text-white/70 text-sm">
-                  © 2024 GEORGE. All rights reserved.
+                  © 2024 Aurora. All rights reserved.
                 </p>
               </div>
             </div>

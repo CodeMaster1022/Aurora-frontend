@@ -60,16 +60,20 @@ export type TranslationKey =
   | 'auth.signup.google'
   | 'auth.signup.facebook'
   | 'auth.signup.or'
-  | 'auth.signup.fullName'
+  | 'auth.signup.firstName'
+  | 'auth.signup.lastName'
   | 'auth.signup.email'
   | 'auth.signup.password'
   | 'auth.signup.submit'
   | 'auth.signup.loading'
   | 'auth.signup.hasAccount'
   | 'auth.signup.login'
-  | 'auth.signup.validate.fullNameRequired'
-  | 'auth.signup.validate.fullNameMin'
-  | 'auth.signup.validate.fullNameInvalid'
+  | 'auth.signup.validate.firstNameRequired'
+  | 'auth.signup.validate.firstNameMin'
+  | 'auth.signup.validate.firstNameInvalid'
+  | 'auth.signup.validate.lastNameRequired'
+  | 'auth.signup.validate.lastNameMin'
+  | 'auth.signup.validate.lastNameInvalid'
   | 'auth.signup.validate.emailRequired'
   | 'auth.signup.validate.emailInvalid'
   | 'auth.signup.validate.passwordRequired'
@@ -391,16 +395,20 @@ export const translations: Record<Language, Translations> = {
     'auth.signup.google': 'Sign up with Google',
     'auth.signup.facebook': 'Sign up with Facebook',
     'auth.signup.or': '- OR -',
-    'auth.signup.fullName': 'Full Name',
+    'auth.signup.firstName': 'First Name',
+    'auth.signup.lastName': 'Last Name',
     'auth.signup.email': 'Email Address',
     'auth.signup.password': 'Password',
     'auth.signup.submit': 'Create Account',
     'auth.signup.loading': 'Creating account...',
     'auth.signup.hasAccount': 'Already have an account?',
     'auth.signup.login': 'Log in',
-    'auth.signup.validate.fullNameRequired': 'Full name is required',
-    'auth.signup.validate.fullNameMin': 'Full name must be at least 2 characters',
-    'auth.signup.validate.fullNameInvalid': 'Full name can only contain letters, spaces, hyphens, and apostrophes',
+    'auth.signup.validate.firstNameRequired': 'First name is required',
+    'auth.signup.validate.firstNameMin': 'First name must be at least 2 characters',
+    'auth.signup.validate.firstNameInvalid': 'First name can only contain letters, spaces, hyphens, and apostrophes',
+    'auth.signup.validate.lastNameRequired': 'Last name is required',
+    'auth.signup.validate.lastNameMin': 'Last name must be at least 2 characters',
+    'auth.signup.validate.lastNameInvalid': 'Last name can only contain letters, spaces, hyphens, and apostrophes',
     'auth.signup.validate.emailRequired': 'Email is required',
     'auth.signup.validate.emailInvalid': 'Please enter a valid email address',
     'auth.signup.validate.passwordRequired': 'Password is required',
@@ -719,16 +727,20 @@ export const translations: Record<Language, Translations> = {
     'auth.signup.google': 'Regístrate con Google',
     'auth.signup.facebook': 'Regístrate con Facebook',
     'auth.signup.or': '- O -',
-    'auth.signup.fullName': 'Nombre Completo',
+    'auth.signup.firstName': 'Nombre',
+    'auth.signup.lastName': 'Apellido',
     'auth.signup.email': 'Correo Electrónico',
     'auth.signup.password': 'Contraseña',
     'auth.signup.submit': 'Crear Cuenta',
     'auth.signup.loading': 'Creando cuenta...',
     'auth.signup.hasAccount': '¿Ya tienes una cuenta?',
     'auth.signup.login': 'Inicia sesión',
-    'auth.signup.validate.fullNameRequired': 'El nombre completo es obligatorio',
-    'auth.signup.validate.fullNameMin': 'El nombre debe tener al menos 2 caracteres',
-    'auth.signup.validate.fullNameInvalid': 'El nombre solo puede contener letras, espacios, guiones y apóstrofes',
+    'auth.signup.validate.firstNameRequired': 'El nombre es obligatorio',
+    'auth.signup.validate.firstNameMin': 'El nombre debe tener al menos 2 caracteres',
+    'auth.signup.validate.firstNameInvalid': 'El nombre solo puede contener letras, espacios, guiones y apóstrofes',
+    'auth.signup.validate.lastNameRequired': 'El apellido es obligatorio',
+    'auth.signup.validate.lastNameMin': 'El apellido debe tener al menos 2 caracteres',
+    'auth.signup.validate.lastNameInvalid': 'El apellido solo puede contener letras, espacios, guiones y apóstrofes',
     'auth.signup.validate.emailRequired': 'El correo electrónico es obligatorio',
     'auth.signup.validate.emailInvalid': 'Por favor ingresa un correo electrónico válido',
     'auth.signup.validate.passwordRequired': 'La contraseña es obligatoria',

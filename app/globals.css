@@ -2,7 +2,7 @@
 @import "tw-animate-css";
 
 :root {
-  /* Light mode - Updated color scheme to match GEORGE turquoise theme */
+  /* Light mode - Updated color scheme to match Aurora turquoise theme */
   --background: #0F172A; 
   --foreground: oklch(0.145 0 0); /* Dark text */
   --card: #FEFEFE; /* Light card backgrounds */
@@ -14,7 +14,7 @@
   --secondary: oklch(0.6 0.2 250); /* Blue accent */
   --secondary-foreground: oklch(1 0 0);
   --muted: oklch(0.95 0 0);
-  --muted-foreground: oklch(0.45 0 0);
+  --muted-foreground: #8d6666;
   --accent: oklch(0.6 0.2 250); /* Blue accent for interactions */
   --accent-foreground: oklch(1 0 0);
   --destructive: oklch(0.577 0.245 27.325);

@@ -8,9 +8,9 @@ import { ClientLayout } from '@/components/ClientLayout'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'GEORGE App',
-  description: 'Created with GEORGE',
-  generator: 'GEORGE.app',
+  title: 'Aurora App',
+  description: 'Created with Aurora',
+  generator: 'Aurora.app',
 }
 
 export default function RootLayout({

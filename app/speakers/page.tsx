@@ -238,7 +238,7 @@ export default function SpeakersPage() {
               <Button
                 onClick={clearFilters}
                 variant="outline"
-                className="mt-4"
+                className="mt-4 cursor-pointer"
               >
                 {t('speakers.clearFilters')}
               </Button>

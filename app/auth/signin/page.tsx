@@ -89,8 +89,16 @@ export default function SignInPage() {
       const result = await dispatch(loginUser({ email, password }))
       
       if (loginUser.fulfilled.match(result)) {
-        // Login successful - navigate to dashboard
-        router.push("/speakers/dashboard")
+        // Login successful - navigate to dashboard based on role
+        const userRole = result.payload.user?.role
+        if (userRole === 'learner') {
+          router.push("/learners/dashboard")
+        } else if (userRole === 'speaker') {
+          router.push("/speakers/dashboard")
+        } else {
+          // Fallback to speakers dashboard for other roles (admin, moderator)
+          router.push("/speakers/dashboard")
+        }
       } else if (loginUser.rejected.match(result)) {
         // Login failed - show error
         setError(result.payload as string || t('auth.signin.submit'))
