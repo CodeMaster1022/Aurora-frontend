@@ -1,16 +1,16 @@
+"use client"
+
 import { Header } from "@/components/header"
 import { FloatingCards } from "@/components/floating-cards"
 import { Play, ArrowRight, BookOpen, Users, Award, FileText, Calendar, UserCheck, Grid3X3, Square, Eye, CheckCircle, X, Send, Star, Download, Volume2, MessageCircle, CalendarDays, FastForward } from "lucide-react"
 import Image from "next/image"
 import studentImage from "@/public/image/student.png"
-import bookImage from "@/public/image/book.png"
-import authImage from "@/public/image/auth.png"
-import registerImage from "@/public/image/register.png"
-import teacherImage from "@/public/image/teacher.png"
-import childImage from "@/public/image/child.png"
+
 import grandfatherImage from "@/public/image/grandfather.png"
+import { useTranslation } from "@/lib/hooks/useTranslation"
 
 export default function HomePage() {
+  const { t } = useTranslation()
   return (
     <div className="min-h-screen relative overflow-hidden">
       <Header />
@@ -22,14 +22,14 @@ export default function HomePage() {
                 <div className="space-y-4">
                   {/* "Never stop learning" badge */}
                   <div className="inline-block bg-white text-[#7357F5] px-4 py-2 rounded-md text-sm font-medium">
-                    Never stop learning
+                    {t('home.badge')}
                   </div>
                   
                   {/* Main headline - 3 lines */}
                   <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight">
-                    <span className="text-[#524FD5] block">Practica tu inglés conectando</span>
-                    <span className="text-[#524FD5] block">con personas que tienen</span>
-                    <span className="text-[#524FD5] block">mucho que contar</span>
+                    <span className="text-[#524FD5] block">{t('home.title.line1')}</span>
+                    <span className="text-[#524FD5] block">{t('home.title.line2')}</span>
+                    <span className="text-[#524FD5] block">{t('home.title.line3')}</span>
                   </h1>
                 </div>
 
@@ -37,7 +37,7 @@ export default function HomePage() {
                 <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
                   <div className="flex items-center gap-0 rounded-2xl pr-6 py-4">
                     <button className="group bg-[#524FD5] text-white font-semibold hover:bg-[#4240C5] px-6 py-5 text-base rounded-xl rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 uppercase tracking-wide">
-                      Explora speakers
+                      {t('home.cta.explore')}
                     </button>
                     
                     {/* Profile Pictures */}
@@ -78,7 +78,7 @@ export default function HomePage() {
                         ))}
                         <Star className="w-5 h-5 fill-black text-black" style={{ clipPath: 'inset(0 50% 0 0)' }} />
                       </div>
-                      <p className="text-sm text-black font-medium whitespace-nowrap px-3">( 10k+ Reviews )</p>
+                      <p className="text-sm text-black font-medium whitespace-nowrap px-3">{t('home.reviews')}</p>
                     </div>
                   </div>
                 </div>
@@ -137,32 +137,32 @@ export default function HomePage() {
             {/* Section Header */}
             <div className="text-center mb-12 sm:mb-16">
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
-                Popular Speakers
+                {t('home.popularSpeakers')}
               </h2>
               <p className="text-lg sm:text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
-                Mejora tu speaking mientras haces sonreír a alguien que te escucha desde un hogar en Estados Unidos
+                {t('home.popularSpeakersDesc')}
               </p>
             </div>
 
             {/* Filter Buttons */}
             <div className="flex flex-wrap justify-center gap-3 mb-12">
               <button className="px-4 py-2 rounded-lg bg-[#524FD5] text-white font-medium transition-colors">
-                Todos
+                {t('home.filter.all')}
               </button>
               <button className="px-4 py-2 rounded-lg bg-transparent text-white border border-white font-medium hover:bg-white/10 transition-colors">
-                Literatura
+                {t('home.filter.literature')}
               </button>
               <button className="px-4 py-2 rounded-lg bg-transparent text-white border border-white font-medium hover:bg-white/10 transition-colors">
-                Arquitectura
+                {t('home.filter.architecture')}
               </button>
               <button className="px-4 py-2 rounded-lg bg-transparent text-white border border-white font-medium hover:bg-white/10 transition-colors">
-                Ingenieria
+                {t('home.filter.engineering')}
               </button>
               <button className="px-4 py-2 rounded-lg bg-transparent text-white border border-white font-medium hover:bg-white/10 transition-colors">
-                Negocios
+                {t('home.filter.business')}
               </button>
               <button className="px-4 py-2 rounded-lg bg-transparent text-white border border-white font-medium hover:bg-white/10 transition-colors">
-                Cocina
+                {t('home.filter.cooking')}
               </button>
             </div>
 
@@ -182,7 +182,7 @@ export default function HomePage() {
                 </div>
                 {/* Content */}
                 <div className="p-4 flex-1 flex flex-col">
-                  <p className="text-gray-400 text-sm mb-2">79 años</p>
+                  <p className="text-gray-400 text-sm mb-2">79 {t('home.speakerCard.age')}</p>
                   <h3 className="text-white font-bold text-lg mb-3">John Damon</h3>
                   <p className="text-gray-400 text-sm mb-4 flex-1">
                     Product Management Masterclass, you will learn with Sarah Johnson - Head of Product Customer Platform Gojek Indonesia.
@@ -194,12 +194,12 @@ export default function HomePage() {
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="">
-                      <span className="text-white font-bold mr-2">Free</span>
+                      <span className="text-white font-bold mr-2">{t('home.speakerCard.free')}</span>
                       <span className="text-gray-500 text-sm line-through">$ 300</span>
                     </div>
                     {/* Button */}
                     <button className="px-3 cursor-pointer bg-[#524FD5] text-white py-2 rounded-md font-medium hover:bg-[#4240C5] transition-colors">
-                      Agenda
+                      {t('home.speakerCard.book')}
                     </button>
                   </div>
                 </div>
@@ -219,7 +219,7 @@ export default function HomePage() {
                 </div>
                 {/* Content */}
                 <div className="p-4 flex-1 flex flex-col">
-                  <p className="text-gray-400 text-sm mb-2">81 años</p>
+                  <p className="text-gray-400 text-sm mb-2">81 {t('home.speakerCard.age')}</p>
                   <h3 className="text-white font-bold text-lg mb-3">Martha Stuart</h3>
                   <p className="text-gray-400 text-sm mb-4 flex-1">
                     Product Management Masterclass, you will learn with Sarah Johnson - Head of Product Customer Platform Gojek Indonesia.
@@ -231,12 +231,12 @@ export default function HomePage() {
                   </div>
                   <div className="flex items-center justify-between ">
                     <div className="">
-                      <span className="text-white font-bold mr-2">Free</span>
+                      <span className="text-white font-bold mr-2">{t('home.speakerCard.free')}</span>
                       <span className="text-gray-500 text-sm line-through">$300</span>
                     </div>
                     {/* Button */}
                     <button className="px-3 cursor-pointer bg-[#524FD5] text-white py-2 rounded-md font-medium hover:bg-[#4240C5] transition-colors">
-                      Agenda
+                      {t('home.speakerCard.book')}
                     </button>
                   </div>
                 </div>
@@ -256,7 +256,7 @@ export default function HomePage() {
                 </div>
                 {/* Content */}
                 <div className="p-4 flex-1 flex flex-col">
-                  <p className="text-gray-400 text-sm mb-2">68 años</p>
+                  <p className="text-gray-400 text-sm mb-2">68 {t('home.speakerCard.age')}</p>
                   <h3 className="text-white font-bold text-lg mb-3">Leonard Washington</h3>
                   <p className="text-gray-400 text-sm mb-4 flex-1">
                     Product Management Masterclass, you will learn with Sarah Johnson - Head of Product Customer Platform Gojek Indonesia.
@@ -268,12 +268,12 @@ export default function HomePage() {
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="">
-                      <span className="text-white font-bold mr-2">Free</span>
+                      <span className="text-white font-bold mr-2">{t('home.speakerCard.free')}</span>
                       <span className="text-gray-500 text-sm line-through">$300</span>
                     </div>
                     {/* Button */}
                     <button className="px-3 cursor-pointer bg-[#524FD5] text-white py-2 rounded-md font-medium hover:bg-[#4240C5] transition-colors">
-                      Agenda
+                      {t('home.speakerCard.book')}
                     </button>
                   </div>
                 </div>
@@ -293,7 +293,7 @@ export default function HomePage() {
                 </div>
                 {/* Content */}
                 <div className="p-4 flex-1 flex flex-col">
-                  <p className="text-gray-400 text-sm mb-2">83 años</p>
+                  <p className="text-gray-400 text-sm mb-2">83 {t('home.speakerCard.age')}</p>
                   <h3 className="text-white font-bold text-lg mb-3">Clara Berman</h3>
                   <p className="text-gray-400 text-sm mb-4 flex-1">
                     Product Management Masterclass, you will learn with Sarah Johnson - Head of Product Customer Platform Gojek Indonesia.
@@ -306,12 +306,12 @@ export default function HomePage() {
                   {/* Pricing */}
                   <div className="flex items-center justify-between ">
                     <div className="">
-                      <span className="text-white font-bold mr-2">Free</span>
+                      <span className="text-white font-bold mr-2">{t('home.speakerCard.free')}</span>
                       <span className="text-gray-500 text-sm line-through">$300</span>
                     </div>
                     {/* Button */}
                     <button className="px-3 cursor-pointer bg-[#524FD5] text-white py-2 rounded-md font-medium hover:bg-[#4240C5] transition-colors">
-                      Agenda
+                      {t('home.speakerCard.book')}
                     </button>
                   </div>
                 </div>
@@ -321,7 +321,7 @@ export default function HomePage() {
             {/* Ver todos Button */}
             <div className="text-center">
               <button className="bg-white text-[#524FD5] px-8 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors cursor-pointer">
-                Ver todos
+                {t('home.viewAll')}
               </button>
             </div>
           </div>
@@ -335,11 +335,11 @@ export default function HomePage() {
               <div>
                 {/* Header Badge */}
                 <div className="inline-block bg-white text-[#0F172A] px-4 py-2 rounded-full text-sm font-medium mb-6">
-                  Practica tu speaking
+                  {t('home.howItWorks.badge')}
                 </div>
                 {/* Title */}
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#524FD5] mb-12">
-                  ¿Cómo funciona?
+                  {t('home.howItWorks.title')}
                 </h2>
                 {/* Steps */}
                 <div className="space-y-8">
@@ -350,7 +350,7 @@ export default function HomePage() {
                     </div>
                     <div className="flex-1">
                       <p className="text-white text-lg">
-                        Elige tu Speaker: Explora perfiles con temas de conversación que te interesen.
+                        {t('home.howItWorks.step1')}
                       </p>
                     </div>
                   </div>
@@ -361,7 +361,7 @@ export default function HomePage() {
                     </div>
                     <div className="flex-1">
                       <p className="text-white text-lg">
-                        Agenda tu Sesión: Selecciona fecha, horario y tema de conversación.
+                        {t('home.howItWorks.step2')}
                       </p>
                     </div>
                   </div>
@@ -372,7 +372,7 @@ export default function HomePage() {
                     </div>
                     <div className="flex-1">
                       <p className="text-white text-lg">
-                        Practica y Conecta: Disfruta de conversación auténtica.
+                        {t('home.howItWorks.step3')}
                       </p>
                     </div>
                   </div>
@@ -390,11 +390,11 @@ export default function HomePage() {
               <div>
                 {/* Header Badge */}
                 <div className="inline-block bg-white text-[#0F172A] px-4 py-2 rounded-full text-sm font-medium mb-6">
-                  Contribuyes mientras aprendes
+                  {t('home.whyDifferent.badge')}
                 </div>
                 {/* Title */}
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#524FD5] mb-12">
-                  Por qué Aurora es diferente
+                  {t('home.whyDifferent.title')}
                 </h2>
                 {/* Points */}
                 <div className="space-y-8">
@@ -405,7 +405,7 @@ export default function HomePage() {
                     </div>
                     <div className="flex-1">
                       <p className="text-white text-lg">
-                        Aprendes con propósito: Tu práctica ayuda a reducir la soledad en hogares de retiro.
+                        {t('home.whyDifferent.point1')}
                       </p>
                     </div>
                   </div>
@@ -416,7 +416,7 @@ export default function HomePage() {
                     </div>
                     <div className="flex-1">
                       <p className="text-white text-lg">
-                        Conversaciones reales: No hay guiones, solo personas y momentos genuinos.
+                        {t('home.whyDifferent.point2')}
                       </p>
                     </div>
                   </div>
@@ -427,7 +427,7 @@ export default function HomePage() {
                     </div>
                     <div className="flex-1">
                       <p className="text-white text-lg">
-                        Impacto mutuo: Ellos te ayudan a mejorar tu inglés, tú les das compañía y conexión.
+                        {t('home.whyDifferent.point3')}
                       </p>
                     </div>
                   </div>
@@ -443,30 +443,30 @@ export default function HomePage() {
               {/* Left Content - Text */}
               <div className="space-y-8 text-center lg:text-left order-2 lg:order-1">
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight">
-                  Conviértete en<br />
-                  <span className="text-white">speaker</span>
+                  {t('home.becomeSpeaker.title')}<br />
+                  <span className="text-white">{t('home.becomeSpeaker.titleSpeaker')}</span>
                 </h2>
                 
                 {/* Bullet Points */}
                 <div className="space-y-4 text-white">
                   <div className="flex items-start gap-3">
                     <Star className="w-6 h-6 fill-white text-white flex-shrink-0 mt-1" />
-                    <p className="text-lg">Registrate como speaker.</p>
+                    <p className="text-lg">{t('home.becomeSpeaker.point1')}</p>
                   </div>
                   <div className="flex items-start gap-3">
                     <Star className="w-6 h-6 fill-white text-white flex-shrink-0 mt-1" />
-                    <p className="text-lg">Define tus horarios disponibles.</p>
+                    <p className="text-lg">{t('home.becomeSpeaker.point2')}</p>
                   </div>
                   <div className="flex items-start gap-3">
                     <Star className="w-6 h-6 fill-white text-white flex-shrink-0 mt-1" />
-                    <p className="text-lg">Empieza a conversar y compartir historias.</p>
+                    <p className="text-lg">{t('home.becomeSpeaker.point3')}</p>
                   </div>
                 </div>
 
                 {/* CTA Button */}
                 <div className="flex justify-center lg:justify-start">
                   <button className="bg-white text-[#7357F5] font-semibold hover:bg-[#24B86D] px-8 py-4 text-base rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 uppercase tracking-wide">
-                    CONVERTIRME EN SPEAKER
+                    {t('home.becomeSpeaker.cta')}
                   </button>
                 </div>
               </div>
@@ -511,19 +511,19 @@ export default function HomePage() {
               <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
                 {/* Left Side - Links Section */}
                 <div className="space-y-2 py-24">
-                  <h3 className="text-lg font-bold text-[#4B0082] mb-3">Links</h3>
+                  <h3 className="text-lg font-bold text-[#4B0082] mb-3">{t('home.footer.links')}</h3>
                   <div className="space-y-1">
                     <a href="#" className="block text-[#4B0082] hover:underline text-base">
-                      Términos y condiciones
+                      {t('home.footer.terms')}
                     </a>
                     <a href="#" className="block text-[#4B0082] hover:underline text-base">
-                      Aviso de privacidad
+                      {t('home.footer.privacy')}
                     </a>
                   </div>
                 </div>
               </div>
               <div className="text-[#4B0082] text-base w-full mx-auto text-center">
-                <p>© 2025 Aurora. Todos los derechos reservados</p>
+                <p>{t('home.footer.copyright')}</p>
               </div>
             </div>
           </div>

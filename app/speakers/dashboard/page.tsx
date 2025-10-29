@@ -32,6 +32,7 @@ import { speakerService, Session, Review, SpeakerAvailability } from "@/lib/serv
 import { useAppSelector, useAppDispatch } from "@/lib/hooks/redux"
 import { getCurrentUser } from "@/lib/store/authSlice"
 import { SpeakerRatingModal } from "@/components/SpeakerRatingModal"
+import { useTranslation } from "@/lib/hooks/useTranslation"
 import Image from "next/image"
 
 interface ReviewWithType extends Review {
@@ -40,6 +41,7 @@ interface ReviewWithType extends Review {
 
 export default function SpeakerDashboardPage() {
   const dispatch = useAppDispatch()
+  const { t } = useTranslation()
   const { user, isAuthenticated, isLoading: authLoading } = useAppSelector((state) => state.auth)
   const [upcomingSessions, setUpcomingSessions] = useState<Session[]>([])
   const [pastSessions, setPastSessions] = useState<Session[]>([])
@@ -72,13 +74,13 @@ export default function SpeakerDashboardPage() {
 
   // Days of the week
   const daysOfWeek = [
-    { key: "monday", label: "Monday" },
-    { key: "tuesday", label: "Tuesday" },
-    { key: "wednesday", label: "Wednesday" },
-    { key: "thursday", label: "Thursday" },
-    { key: "friday", label: "Friday" },
-    { key: "saturday", label: "Saturday" },
-    { key: "sunday", label: "Sunday" }
+    { key: "monday", translationKey: 'dashboard.availability.days.monday' },
+    { key: "tuesday", translationKey: 'dashboard.availability.days.tuesday' },
+    { key: "wednesday", translationKey: 'dashboard.availability.days.wednesday' },
+    { key: "thursday", translationKey: 'dashboard.availability.days.thursday' },
+    { key: "friday", translationKey: 'dashboard.availability.days.friday' },
+    { key: "saturday", translationKey: 'dashboard.availability.days.saturday' },
+    { key: "sunday", translationKey: 'dashboard.availability.days.sunday' }
   ]
 
   // Initialize default availability for all 7 days
@@ -144,7 +146,7 @@ export default function SpeakerDashboardPage() {
       // Clean up URL
       window.history.replaceState({}, '', window.location.pathname)
     } else if (calendarStatus === 'error') {
-      setError('Failed to connect Google Calendar. Please try again.')
+        setError(t('dashboard.errors.calendarConnectFailed'))
       // Clean up URL
       window.history.replaceState({}, '', window.location.pathname)
     }
@@ -220,7 +222,7 @@ export default function SpeakerDashboardPage() {
     else if (!isAuthenticated) {
       console.log('Not authenticated, showing error')
       setIsLoading(false)
-      setError("Please log in to access your dashboard")
+      setError(t('dashboard.errors.loginRequired'))
     }
     // If authenticated but no user yet, wait for getCurrentUser to complete
     else if (isAuthenticated && !user) {
@@ -283,7 +285,7 @@ export default function SpeakerDashboardPage() {
       }
     } catch (err) {
       console.error("Error fetching dashboard data:", err)
-      setError("Failed to load dashboard data")
+      setError(t('dashboard.errors.loadFailed'))
     } finally {
       setIsLoading(false)
     }
@@ -297,7 +299,7 @@ export default function SpeakerDashboardPage() {
       setIsEditingProfile(false)
     } catch (err) {
       console.error("Error saving profile:", err)
-      setError("Failed to save profile")
+      setError(t('dashboard.errors.saveFailed'))
     } finally {
       setIsUploading(false)
     }
@@ -310,7 +312,7 @@ export default function SpeakerDashboardPage() {
       setError("") // Clear any errors on success
     } catch (err) {
       console.error("Error saving availability:", err)
-      setError("Failed to save availability")
+      setError(t('dashboard.errors.availabilityFailed'))
     } finally {
       setIsSavingAvailability(false)
     }
@@ -326,7 +328,7 @@ export default function SpeakerDashboardPage() {
         // Update user in Redux store if needed
       } catch (err) {
         console.error("Error uploading avatar:", err)
-        setError("Failed to upload avatar")
+        setError(t('dashboard.errors.avatarFailed'))
       } finally {
         setIsUploading(false)
       }
@@ -408,7 +410,7 @@ export default function SpeakerDashboardPage() {
       fetchDashboardData()
     } catch (err: any) {
       console.error("Error cancelling session:", err)
-      setError(err.message || "Failed to cancel session")
+      setError(err.message || t('dashboard.errors.cancelFailed'))
     } finally {
       setIsCancelling(false)
     }
@@ -441,12 +443,12 @@ export default function SpeakerDashboardPage() {
         // Redirect to Google OAuth
         window.location.href = authUrl.toString()
       } else {
-        setError('Failed to initiate Google Calendar connection')
+        setError(t('dashboard.errors.calendarInitFailed'))
         setIsConnectingCalendar(false)
       }
     } catch (err) {
       console.error('Error connecting calendar:', err)
-      setError('Failed to connect Google Calendar')
+      setError(t('dashboard.errors.calendarConnectFailed'))
       setIsConnectingCalendar(false)
     }
   }
@@ -463,7 +465,7 @@ export default function SpeakerDashboardPage() {
       setCalendarExpiresAt(null)
     } catch (err) {
       console.error('Error disconnecting calendar:', err)
-      setError('Failed to disconnect Google Calendar')
+      setError(t('dashboard.errors.calendarDisconnectFailed'))
     } finally {
       setIsConnectingCalendar(false)
     }
@@ -485,8 +487,8 @@ export default function SpeakerDashboardPage() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Speaker Dashboard</h1>
-          <p className="text-gray-300">Manage your sessions, reviews, and profile</p>
+          <h1 className="text-4xl font-bold text-white mb-2">{t('dashboard.title')}</h1>
+          <p className="text-gray-300">{t('dashboard.subtitle')}</p>
         </div>
 
         {error && (
@@ -503,8 +505,8 @@ export default function SpeakerDashboardPage() {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div>
-                    <CardTitle className="text-white mb-2">Profile</CardTitle>
-                    <CardDescription className="text-gray-300">Manage your profile information</CardDescription>
+                    <CardTitle className="text-white mb-2">{t('dashboard.profile.title')}</CardTitle>
+                    <CardDescription className="text-gray-300">{t('dashboard.profile.description')}</CardDescription>
                   </div>
                   <Button
                     variant="ghost"
@@ -557,17 +559,17 @@ export default function SpeakerDashboardPage() {
                 {/* Bio */}
                 {isEditingProfile ? (
                   <div>
-                    <Label className="text-white mb-2">Bio</Label>
+                    <Label className="text-white mb-2">{t('dashboard.profile.bio')}</Label>
                     <Textarea
                       value={bio}
                       onChange={(e) => setBio(e.target.value)}
                       rows={3}
                       className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                      placeholder="Tell us about yourself..."
+                      placeholder={t('dashboard.profile.bioPlaceholder')}
                     />
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-300">{bio || "No bio available"}</p>
+                  <p className="text-sm text-gray-300">{bio || t('dashboard.profile.noBio')}</p>
                 )}
 
                 {isEditingProfile && (
@@ -579,12 +581,12 @@ export default function SpeakerDashboardPage() {
                     {isUploading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Saving...
+                        {t('dashboard.profile.saving')}
                       </>
                     ) : (
                       <>
                         <Save className="mr-2 h-4 w-4" />
-                        Save Changes
+                        {t('dashboard.profile.save')}
                       </>
                     )}
                   </Button>
@@ -598,14 +600,14 @@ export default function SpeakerDashboardPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Calendar className="text-purple-400 w-5 h-5" />
-                    <CardTitle className="text-white">Google Calendar</CardTitle>
+                    <CardTitle className="text-white">{t('dashboard.calendar.title')}</CardTitle>
                   </div>
                   {isCalendarConnected && (
                     <CheckCircle2 className="w-5 h-5 text-green-400" />
                   )}
                 </div>
                 <CardDescription className="text-gray-300">
-                  Connect your calendar to automatically create events
+                  {t('dashboard.calendar.description')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -613,11 +615,11 @@ export default function SpeakerDashboardPage() {
                   <>
                     <div className="flex items-center gap-2 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
                       <CheckCircle2 className="w-5 h-5 text-green-400" />
-                      <span className="text-sm text-green-300">Calendar Connected</span>
+                      <span className="text-sm text-green-300">{t('dashboard.calendar.connected')}</span>
                     </div>
                     {calendarExpiresAt && (
                       <p className="text-xs text-gray-400">
-                        Expires: {new Date(calendarExpiresAt).toLocaleDateString()}
+                        {t('dashboard.calendar.expires')} {new Date(calendarExpiresAt).toLocaleDateString()}
                       </p>
                     )}
                     <Button
@@ -629,12 +631,12 @@ export default function SpeakerDashboardPage() {
                       {isConnectingCalendar ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Disconnecting...
+                          {t('dashboard.calendar.disconnecting')}
                         </>
                       ) : (
                         <>
                           <Unlink className="mr-2 h-4 w-4" />
-                          Disconnect
+                          {t('dashboard.calendar.disconnect')}
                         </>
                       )}
                     </Button>
@@ -643,10 +645,10 @@ export default function SpeakerDashboardPage() {
                   <>
                     <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
                       <p className="text-sm text-yellow-300 mb-2">
-                        Your calendar is not connected
+                        {t('dashboard.calendar.notConnected')}
                       </p>
                       <p className="text-xs text-gray-400">
-                        Connect your Google Calendar to automatically create events when learners book sessions with you.
+                        {t('dashboard.calendar.notConnectedDesc')}
                       </p>
                     </div>
                     <Button
@@ -657,12 +659,12 @@ export default function SpeakerDashboardPage() {
                       {isConnectingCalendar ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Connecting...
+                          {t('dashboard.calendar.connecting')}
                         </>
                       ) : (
                         <>
                           <LinkIcon className="mr-2 h-4 w-4" />
-                          Connect Google Calendar
+                          {t('dashboard.calendar.connect')}
                         </>
                       )}
                     </Button>
@@ -677,17 +679,18 @@ export default function SpeakerDashboardPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Settings className="text-[#7C3AED] w-5 h-5" />
-                    <CardTitle className="text-white">Availability</CardTitle>
+                    <CardTitle className="text-white">{t('dashboard.availability.title')}</CardTitle>
                   </div>
                   <Badge variant="secondary" className="bg-purple-500/20 text-purple-300">
-                    {availability.filter(a => a.isAvailable).length} days active
+                    {availability.filter(a => a.isAvailable).length} {t('dashboard.availability.daysActive')}
                   </Badge>
                 </div>
-                <CardDescription className="text-gray-300">Set your available days and hours</CardDescription>
+                <CardDescription className="text-gray-300">{t('dashboard.availability.description')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 {availability.map((day, index) => {
-                  const dayLabel = daysOfWeek.find(d => d.key === day.day)?.label || day.day
+                  const dayData = daysOfWeek.find(d => d.key === day.day)
+                  const dayLabel = dayData ? t(dayData.translationKey as any) : day.day
                   return (
                     <div key={day.day} className="space-y-2 p-3 bg-white/5 rounded-lg">
                       <div className="flex items-center justify-between">
@@ -705,7 +708,7 @@ export default function SpeakerDashboardPage() {
                             onChange={(e) => handleTimeChange(index, "startTime", e.target.value)}
                             className="bg-white/10 border-white/20 text-white"
                           />
-                          <span className="text-gray-400">to</span>
+                          <span className="text-gray-400">{t('dashboard.availability.to')}</span>
                           <Input
                             type="time"
                             value={day.endTime || "17:00"}
@@ -725,12 +728,12 @@ export default function SpeakerDashboardPage() {
                   {isSavingAvailability ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
+                      {t('dashboard.availability.saving')}
                     </>
                   ) : (
                     <>
                       <Save className="mr-2 h-4 w-4" />
-                      Save Availability
+                      {t('dashboard.availability.save')}
                     </>
                   )}
                 </Button>
@@ -745,10 +748,10 @@ export default function SpeakerDashboardPage() {
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <Calendar className="w-5 h-5" />
-                  Upcoming Sessions
+                  {t('dashboard.sessions.upcoming.title')}
                 </CardTitle>
                 <CardDescription className="text-gray-300">
-                  {upcomingSessions.length} sessions scheduled
+                  {upcomingSessions.length} {t('dashboard.sessions.upcoming.count')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -763,18 +766,18 @@ export default function SpeakerDashboardPage() {
                           <div className="flex-1">
                             <h4 className="text-lg font-semibold text-white mb-1">{session.title}</h4>
                             <p className="text-sm text-gray-300 mb-2">
-                              with <span className="font-medium">
+                              {t('dashboard.sessions.with')} <span className="font-medium">
                                 {typeof session.learner === 'object' 
                                   ? `${session.learner.firstname} ${session.learner.lastname}`
                                   : session.learner}
                               </span>
                             </p>
                             {(session as any).topics && (session as any).topics.length > 0 && (
-                              <p className="text-xs text-gray-400 mb-2">Topics: {(session as any).topics.join(', ')}</p>
+                              <p className="text-xs text-gray-400 mb-2">{t('dashboard.sessions.topics')} {(session as any).topics.join(', ')}</p>
                             )}
                             {(session as any).icebreaker && (
                               <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 mb-2 mt-2">
-                                <p className="text-xs font-semibold text-yellow-400 mb-1">💡 Icebreaker</p>
+                                <p className="text-xs font-semibold text-yellow-400 mb-1">{t('dashboard.sessions.icebreaker')}</p>
                                 <p className="text-xs text-yellow-200">{(session as any).icebreaker}</p>
                               </div>
                             )}
@@ -817,7 +820,7 @@ export default function SpeakerDashboardPage() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-center text-gray-400 py-8">No upcoming sessions</p>
+                  <p className="text-center text-gray-400 py-8">{t('dashboard.sessions.upcoming.none')}</p>
                 )}
               </CardContent>
             </Card>
@@ -825,12 +828,12 @@ export default function SpeakerDashboardPage() {
             {/* Past Sessions */}
             <Card className="bg-white/10 backdrop-blur-lg border-white/20">
               <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
+                  <CardTitle className="text-white flex items-center gap-2">
                   <Calendar className="w-5 h-5" />
-                  Past Sessions
+                  {t('dashboard.sessions.past.title')}
                 </CardTitle>
                 <CardDescription className="text-gray-300">
-                  {pastSessions.length} completed and cancelled sessions
+                  {pastSessions.length} {t('dashboard.sessions.past.count')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -863,7 +866,7 @@ export default function SpeakerDashboardPage() {
                             </div>
                             {(session as any).cancellationReason && (
                               <p className="text-xs text-red-300 mt-1 italic">
-                                Reason: {(session as any).cancellationReason}
+                                {t('dashboard.sessions.reason')} {(session as any).cancellationReason}
                               </p>
                             )}
                           </div>
@@ -882,7 +885,7 @@ export default function SpeakerDashboardPage() {
                                 className="bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600"
                               >
                                 <Star className="w-3 h-3 mr-1" />
-                                Rate
+                                {t('dashboard.sessions.rate')}
                               </Button>
                             )}
                           </div>
@@ -891,7 +894,7 @@ export default function SpeakerDashboardPage() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-center text-gray-400 py-8">No past sessions</p>
+                  <p className="text-center text-gray-400 py-8">{t('dashboard.sessions.past.none')}</p>
                 )}
               </CardContent>
             </Card>
@@ -903,10 +906,10 @@ export default function SpeakerDashboardPage() {
                 <CardHeader>
                   <CardTitle className="text-white flex items-center gap-2">
                     <Star className="w-5 h-5" />
-                    Reviews Received
+                    {t('dashboard.reviews.received.title')}
                   </CardTitle>
                   <CardDescription className="text-gray-300">
-                    {receivedReviews.length} reviews
+                    {receivedReviews.length} {t('dashboard.reviews.received.count')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -928,7 +931,7 @@ export default function SpeakerDashboardPage() {
                           </div>
                           <p className="text-sm text-white mb-1">{review.comment}</p>
                           <p className="text-xs text-gray-400">
-                            from {typeof review.from === 'object' 
+                            {t('dashboard.reviews.received.from')} {typeof review.from === 'object' 
                               ? `${review.from.firstname} ${review.from.lastname}`
                               : review.from} • {new Date(review.createdAt).toLocaleDateString()}
                           </p>
@@ -936,7 +939,7 @@ export default function SpeakerDashboardPage() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-center text-gray-400 py-8">No reviews yet</p>
+                    <p className="text-center text-gray-400 py-8">{t('dashboard.reviews.received.none')}</p>
                   )}
                 </CardContent>
               </Card>
@@ -946,10 +949,10 @@ export default function SpeakerDashboardPage() {
                 <CardHeader>
                   <CardTitle className="text-white flex items-center gap-2">
                     <MessageSquare className="w-5 h-5" />
-                    Reviews Given
+                    {t('dashboard.reviews.given.title')}
                   </CardTitle>
                   <CardDescription className="text-gray-300">
-                    {givenReviews.length} reviews
+                    {givenReviews.length} {t('dashboard.reviews.given.count')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -971,7 +974,7 @@ export default function SpeakerDashboardPage() {
                           </div>
                           <p className="text-sm text-white mb-1">{review.comment}</p>
                           <p className="text-xs text-gray-400">
-                            for {typeof review.to === 'object' 
+                            {t('dashboard.reviews.given.for')} {typeof review.to === 'object' 
                               ? `${review.to.firstname} ${review.to.lastname}`
                               : review.to} • {new Date(review.createdAt).toLocaleDateString()}
                           </p>
@@ -979,7 +982,7 @@ export default function SpeakerDashboardPage() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-center text-gray-400 py-8">No reviews yet</p>
+                    <p className="text-center text-gray-400 py-8">{t('dashboard.reviews.received.none')}</p>
                   )}
                 </CardContent>
               </Card>
@@ -1007,21 +1010,21 @@ export default function SpeakerDashboardPage() {
       <Dialog open={cancelModalOpen} onOpenChange={setCancelModalOpen}>
         <DialogContent className="bg-gray-900 border-gray-700 text-white">
           <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
+              <DialogTitle className="text-white flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-yellow-500" />
-              Cancel Session
+              {t('dashboard.cancel.title')}
             </DialogTitle>
             <DialogDescription className="text-gray-400">
               {selectedSessionForCancellation && (
                 <>
-                  Are you sure you want to cancel this session?
+                  {t('dashboard.cancel.confirm')}
                   <div className="mt-4 space-y-2 text-sm">
                     <div className="bg-white/5 p-3 rounded-lg">
                       <p className="font-semibold text-white mb-1">
                         {selectedSessionForCancellation.title}
                       </p>
                       <p className="text-gray-300 mb-2">
-                        with{' '}
+                        {t('dashboard.sessions.with')}{' '}
                         <span className="font-medium">
                           {typeof selectedSessionForCancellation.learner === 'object'
                             ? `${selectedSessionForCancellation.learner.firstname} ${selectedSessionForCancellation.learner.lastname}`
@@ -1036,14 +1039,14 @@ export default function SpeakerDashboardPage() {
                       </div>
                     </div>
                     <div className="bg-yellow-500/10 border border-yellow-500/20 p-3 rounded-lg">
-                      <p className="text-yellow-400 text-xs font-semibold mb-1">Cancellation Policy:</p>
+                      <p className="text-yellow-400 text-xs font-semibold mb-1">{t('dashboard.cancel.policy')}</p>
                       <ul className="text-xs text-yellow-300/80 space-y-1 list-disc list-inside">
-                        <li>Sessions must be cancelled at least 24 hours before the scheduled time</li>
-                        <li>The learner will be automatically notified</li>
-                        <li>This time slot will become available again for booking</li>
+                        <li>{t('dashboard.cancel.policy24h')}</li>
+                        <li>{t('dashboard.cancel.policyNotify')}</li>
+                        <li>{t('dashboard.cancel.policyAvailable')}</li>
                         {getHoursUntilSession(selectedSessionForCancellation) < 24 && (
                           <li className="text-red-400 font-semibold">
-                            Warning: This session is less than 24 hours away. Cancellation may still be allowed but the learner may not have adequate notice.
+                            {t('dashboard.cancel.warning')}
                           </li>
                         )}
                       </ul>
@@ -1056,13 +1059,13 @@ export default function SpeakerDashboardPage() {
           <div className="space-y-4 py-4">
             <div>
               <Label htmlFor="cancellation-reason" className="text-white mb-2 block">
-                Cancellation Reason <span className="text-gray-500 text-xs">(optional)</span>
+                {t('dashboard.cancel.reasonLabel')} <span className="text-gray-500 text-xs">{t('dashboard.cancel.reasonOptional')}</span>
               </Label>
               <textarea
                 id="cancellation-reason"
                 value={cancellationReason}
                 onChange={(e) => setCancellationReason(e.target.value)}
-                placeholder="Please provide a reason for cancellation (optional)..."
+                placeholder={t('dashboard.cancel.reasonPlaceholder')}
                 rows={4}
                 className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-md text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
@@ -1085,7 +1088,7 @@ export default function SpeakerDashboardPage() {
               disabled={isCancelling}
               className="bg-white/10 border-white/20 text-white hover:bg-white/20"
             >
-              Keep Session
+              {t('dashboard.cancel.keep')}
             </Button>
             <Button
               variant="destructive"
@@ -1096,12 +1099,12 @@ export default function SpeakerDashboardPage() {
               {isCancelling ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Cancelling...
+                  {t('dashboard.cancel.cancelling')}
                 </>
               ) : (
                 <>
                   <Trash2 className="mr-2 h-4 w-4" />
-                  Cancel Session
+                  {t('dashboard.cancel.confirmButton')}
                 </>
               )}
             </Button>

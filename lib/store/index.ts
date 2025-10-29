@@ -1,10 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from './authSlice';
+import languageReducer from './languageSlice';
 // import profileReducer from './profileSlice';
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
+    language: languageReducer,
     // profile: profileReducer,
   },
   middleware: (getDefaultMiddleware) =>

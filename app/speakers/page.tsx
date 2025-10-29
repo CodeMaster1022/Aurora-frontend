@@ -7,10 +7,12 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Search, Star, Loader2, Filter } from "lucide-react"
 import { learnerService } from "@/lib/services/learnerService"
+import { useTranslation } from "@/lib/hooks/useTranslation"
 import Image from "next/image"
 import Link from "next/link"
 
 export default function SpeakersPage() {
+  const { t } = useTranslation()
   const [speakers, setSpeakers] = useState<any[]>([])
   const [filteredSpeakers, setFilteredSpeakers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -18,16 +20,16 @@ export default function SpeakersPage() {
   const [selectedTopic, setSelectedTopic] = useState<string>("")
 
   const topics = [
-    "Business",
-    "Technology",
-    "Health",
-    "Education",
-    "Arts",
-    "Sports",
-    "Travel",
-    "Food",
-    "Science",
-    "Entertainment"
+    { key: "Business", translationKey: 'speakers.filter.business' },
+    { key: "Technology", translationKey: 'speakers.filter.technology' },
+    { key: "Health", translationKey: 'speakers.filter.health' },
+    { key: "Education", translationKey: 'speakers.filter.education' },
+    { key: "Arts", translationKey: 'speakers.filter.arts' },
+    { key: "Sports", translationKey: 'speakers.filter.sports' },
+    { key: "Travel", translationKey: 'speakers.filter.travel' },
+    { key: "Food", translationKey: 'speakers.filter.food' },
+    { key: "Science", translationKey: 'speakers.filter.science' },
+    { key: "Entertainment", translationKey: 'speakers.filter.entertainment' }
   ]
 
   useEffect(() => {
@@ -93,10 +95,10 @@ export default function SpeakersPage() {
         {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
-            Find Your Perfect Speaker
+            {t('speakers.title')}
           </h1>
           <p className="text-gray-300 text-lg">
-            Connect with native speakers to practice and improve your language skills
+            {t('speakers.subtitle')}
           </p>
         </div>
 
@@ -107,7 +109,7 @@ export default function SpeakersPage() {
             <div className="relative mb-6">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <Input
-                placeholder="Search by speaker name..."
+                placeholder={t('speakers.search.placeholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-gray-400 h-12 text-lg"
@@ -118,7 +120,7 @@ export default function SpeakersPage() {
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <Filter className="w-5 h-5 text-purple-400" />
-                <h3 className="text-white font-semibold">Filter by Topic</h3>
+                <h3 className="text-white font-semibold">{t('speakers.filter.title')}</h3>
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button
@@ -127,21 +129,21 @@ export default function SpeakersPage() {
                   className="bg-purple-600 hover:bg-purple-700 text-white"
                   size="sm"
                 >
-                  All Topics
+                  {t('speakers.filter.allTopics')}
                 </Button>
                 {topics.map((topic) => (
                   <Button
-                    key={topic}
-                    onClick={() => setSelectedTopic(topic)}
-                    variant={selectedTopic === topic ? "default" : "outline"}
+                    key={topic.key}
+                    onClick={() => setSelectedTopic(topic.key)}
+                    variant={selectedTopic === topic.key ? "default" : "outline"}
                     className={
-                      selectedTopic === topic
+                      selectedTopic === topic.key
                         ? "bg-purple-600 hover:bg-purple-700 text-white"
                         : "bg-white/10 border-white/20 text-gray-300 hover:bg-white/20"
                     }
                     size="sm"
                   >
-                    {topic}
+                    {t(topic.translationKey as any)}
                   </Button>
                 ))}
               </div>
@@ -149,7 +151,7 @@ export default function SpeakersPage() {
 
             {/* Results Count */}
             <div className="mt-4 text-gray-300 text-sm">
-              {filteredSpeakers.length} speaker{filteredSpeakers.length !== 1 ? 's' : ''} found
+              {filteredSpeakers.length} {filteredSpeakers.length !== 1 ? t('speakers.results.countPlural') : t('speakers.results.count')}
             </div>
           </CardContent>
         </Card>
@@ -184,10 +186,10 @@ export default function SpeakersPage() {
                       <div className="flex items-center gap-1 mb-2">
                         <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                         <span className="text-gray-300 text-sm">
-                          {speaker.rating ? speaker.rating.toFixed(1) : 'New'}
+                          {speaker.rating ? speaker.rating.toFixed(1) : t('speakers.card.new')}
                         </span>
                         <span className="text-gray-500 text-sm">
-                          ({speaker.reviewsCount || 0} reviews)
+                          ({speaker.reviewsCount || 0} {t('speakers.card.reviews')})
                         </span>
                       </div>
                     </div>
@@ -220,7 +222,7 @@ export default function SpeakersPage() {
 
                     {/* Session Stats */}
                     <div className="mt-4 pt-4 border-t border-white/10 text-center text-sm text-gray-400">
-                      {speaker.totalSessions || 0} completed sessions
+                      {speaker.totalSessions || 0} {t('speakers.card.sessions')}
                     </div>
                   </CardContent>
                 </Card>
@@ -231,14 +233,14 @@ export default function SpeakersPage() {
           <Card className="bg-white/10 backdrop-blur-lg border-white/20">
             <CardContent className="p-12 text-center">
               <p className="text-gray-300 text-lg">
-                No speakers found matching your criteria.
+                {t('speakers.noResults')}
               </p>
               <Button
                 onClick={clearFilters}
                 variant="outline"
                 className="mt-4"
               >
-                Clear Filters
+                {t('speakers.clearFilters')}
               </Button>
             </CardContent>
           </Card>

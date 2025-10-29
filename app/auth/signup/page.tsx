@@ -9,10 +9,12 @@ import Link from "next/link"
 import { authService } from "@/lib/services/authService"
 import { useAppDispatch } from "@/lib/hooks/redux"
 import { setUser } from "@/lib/store/authSlice"
+import { useTranslation } from "@/lib/hooks/useTranslation"
 
 export default function SignUpPage() {
   const router = useRouter()
   const dispatch = useAppDispatch()
+  const { t } = useTranslation()
   const [showPassword, setShowPassword] = useState(false)
   const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
@@ -28,40 +30,40 @@ export default function SignUpPage() {
   // Validation functions
   const validateFullName = (name: string) => {
     if (!name.trim()) {
-      return "Full name is required"
+      return t('auth.signup.validate.fullNameRequired')
     }
     if (name.trim().length < 2) {
-      return "Full name must be at least 2 characters"
+      return t('auth.signup.validate.fullNameMin')
     }
     if (!/^[a-zA-Z\s'-]+$/.test(name.trim())) {
-      return "Full name can only contain letters, spaces, hyphens, and apostrophes"
+      return t('auth.signup.validate.fullNameInvalid')
     }
     return ""
   }
 
   const validateEmail = (email: string) => {
     if (!email.trim()) {
-      return "Email is required"
+      return t('auth.signup.validate.emailRequired')
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
-      return "Please enter a valid email address"
+      return t('auth.signup.validate.emailInvalid')
     }
     return ""
   }
 
   const validatePassword = (password: string) => {
     if (!password) {
-      return "Password is required"
+      return t('auth.signup.validate.passwordRequired')
     }
     if (password.length < 8) {
-      return "Password must be at least 8 characters"
+      return t('auth.signup.validate.passwordMin')
     }
     if (!/[A-Za-z]/.test(password)) {
-      return "Password must contain at least one letter"
+      return t('auth.signup.validate.passwordLetter')
     }
     if (!/[0-9]/.test(password)) {
-      return "Password must contain at least one number"
+      return t('auth.signup.validate.passwordNumber')
     }
     return ""
   }
@@ -168,7 +170,7 @@ export default function SignUpPage() {
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text'
           }}>
-            Aurora
+            {t('auth.signup.title')}
           </h1>
           <p className="text-xl text-gray-300 font-light">Happy & Fluent</p>
         </div>
@@ -178,7 +180,7 @@ export default function SignUpPage() {
       <div className="flex-1 lg:flex-[1.5] bg-white rounded-tl-2xl lg:rounded-tl-3xl rounded-bl-2xl lg:rounded-bl-3xl flex items-center justify-center p-8 lg:p-12">
         <div className="w-full max-w-md">
           <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
-            Create Account
+            {t('auth.signup.createAccount')}
           </h2>
 
           {/* Social Sign Up Buttons */}
@@ -193,7 +195,7 @@ export default function SignUpPage() {
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
               </svg>
-              <span className="font-medium">Sign up with Google</span>
+              <span className="font-medium">{t('auth.signup.google')}</span>
             </button>
 
             <button
@@ -204,14 +206,14 @@ export default function SignUpPage() {
                 <circle cx="12" cy="12" r="10" fill="#1877F2"/>
                 <path d="M16 8h-2c-.55 0-1 .45-1 1v1h3v2h-3v6h-2v-6H9v-2h2V9c0-1.1.9-2 2-2h3v1z" fill="white"/>
               </svg>
-              <span className="font-medium">Sign up with Facebook</span>
+              <span className="font-medium">{t('auth.signup.facebook')}</span>
             </button>
           </div>
 
           {/* Divider */}
           <div className="flex items-center gap-3 mb-6">
             <div className="flex-1 border-t border-gray-300"></div>
-            <span className="text-gray-500 text-sm">- OR -</span>
+            <span className="text-gray-500 text-sm">{t('auth.signup.or')}</span>
             <div className="flex-1 border-t border-gray-300"></div>
           </div>
 
@@ -228,7 +230,7 @@ export default function SignUpPage() {
             <div className="relative">
               <Input
                 type="text"
-                placeholder="Full Name"
+                placeholder={t('auth.signup.fullName')}
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 onBlur={(e) => handleBlur("fullName", e.target.value)}
@@ -248,7 +250,7 @@ export default function SignUpPage() {
             <div className="relative">
               <Input
                 type="email"
-                placeholder="Email Address"
+                placeholder={t('auth.signup.email')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 onBlur={(e) => handleBlur("email", e.target.value)}
@@ -268,7 +270,7 @@ export default function SignUpPage() {
             <div className="relative">
               <Input
                 type={showPassword ? "text" : "password"}
-                placeholder="Password"
+                placeholder={t('auth.signup.password')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 onBlur={(e) => handleBlur("password", e.target.value)}
@@ -307,19 +309,19 @@ export default function SignUpPage() {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Creating account...
+                  {t('auth.signup.loading')}
                 </>
               ) : (
-                "Create Account"
+                t('auth.signup.submit')
               )}
             </Button>
           </form>
 
           {/* Login Link */}
           <p className="text-center mt-6 text-gray-600 text-sm">
-            Already have an account?{" "}
+            {t('auth.signup.hasAccount')}{" "}
             <Link href="/auth/signin" className="text-purple-600 hover:text-purple-700 font-semibold">
-              Log in
+              {t('auth.signup.login')}
             </Link>
           </p>
         </div>

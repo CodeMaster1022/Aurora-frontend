@@ -10,11 +10,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Star, Loader2, ArrowLeft, Calendar, Users, MessageSquare, CheckCircle2 } from "lucide-react"
 import { learnerService } from "@/lib/services/learnerService"
 import { useAppSelector } from "@/lib/hooks/redux"
+import { useTranslation } from "@/lib/hooks/useTranslation"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
 export default function SpeakerProfilePage({ params }: { params: { id: string } }) {
+  const { t } = useTranslation()
   const [speaker, setSpeaker] = useState<any>(null)
   const [reviews, setReviews] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -55,13 +57,13 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
 
   // Days of the week for display
   const daysOfWeek = [
-    { key: "monday", label: "Monday" },
-    { key: "tuesday", label: "Tuesday" },
-    { key: "wednesday", label: "Wednesday" },
-    { key: "thursday", label: "Thursday" },
-    { key: "friday", label: "Friday" },
-    { key: "saturday", label: "Saturday" },
-    { key: "sunday", label: "Sunday" }
+    { key: "monday", translationKey: 'dashboard.availability.days.monday' },
+    { key: "tuesday", translationKey: 'dashboard.availability.days.tuesday' },
+    { key: "wednesday", translationKey: 'dashboard.availability.days.wednesday' },
+    { key: "thursday", translationKey: 'dashboard.availability.days.thursday' },
+    { key: "friday", translationKey: 'dashboard.availability.days.friday' },
+    { key: "saturday", translationKey: 'dashboard.availability.days.saturday' },
+    { key: "sunday", translationKey: 'dashboard.availability.days.sunday' }
   ]
 
   // Get day name from date string
@@ -116,8 +118,9 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
     const dayAvailability = speaker.availability.find((avail: any) => avail.day === dayName)
     
     if (!dayAvailability || !dayAvailability.isAvailable) {
-      const dayLabel = dayName.charAt(0).toUpperCase() + dayName.slice(1)
-      return `Speaker is not available on ${dayLabel}. Please select a day when the speaker is available.`
+      const dayTranslation = daysOfWeek.find(d => d.key === dayName)
+      const dayLabel = dayTranslation ? t(dayTranslation.translationKey as any) : dayName.charAt(0).toUpperCase() + dayName.slice(1)
+      return `${t('speakerProfile.bookSession.unavailableDay')} ${dayLabel}.`
     }
     
     // Check if time is within availability window
@@ -132,7 +135,9 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
     const sessionEndMinutes = requestedMinutes + 30
     
     if (requestedMinutes < startMinutes || sessionEndMinutes > endMinutes) {
-      return `Speaker is only available between ${dayAvailability.startTime} and ${dayAvailability.endTime} on ${dayName.charAt(0).toUpperCase() + dayName.slice(1)}. Please select a time within this range.`
+      const dayTranslation = daysOfWeek.find(d => d.key === dayName)
+      const dayLabel = dayTranslation ? t(dayTranslation.translationKey as any) : dayName.charAt(0).toUpperCase() + dayName.slice(1)
+      return `${t('speakerProfile.bookSession.timeNotInRange')} ${dayAvailability.startTime} ${t('dashboard.availability.to')} ${dayAvailability.endTime} ${t('dashboard.availability.to')} ${dayLabel}.`
     }
     
     return null
@@ -140,7 +145,7 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
 
   const handleBooking = async () => {
     if (!formData.title || !formData.date || !formData.time) {
-      setBookingError("Please fill in all required fields")
+      setBookingError(t('speakerProfile.bookSession.allFieldsRequired'))
       return
     }
 
@@ -154,7 +159,7 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
     const topics = [formData.topic1, formData.topic2].filter(t => t.trim() !== "")
     
     if (topics.length > 2) {
-      setBookingError("Maximum 2 topics allowed")
+      setBookingError(t('speakerProfile.bookSession.maxTopics'))
       return
     }
 
@@ -188,7 +193,7 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
       }, 2000)
     } catch (error: any) {
       console.error("Error booking session:", error)
-      setBookingError(error.message || "Failed to book session")
+      setBookingError(error.message || t('speakerProfile.bookSession.failed'))
     } finally {
       setIsBooking(false)
     }
@@ -208,10 +213,10 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
         <div className="max-w-4xl mx-auto">
           <Card className="bg-white/10 backdrop-blur-lg border-white/20">
             <CardContent className="p-12 text-center">
-              <p className="text-gray-300 text-lg mb-4">Speaker not found</p>
+              <p className="text-gray-300 text-lg mb-4">{t('speakerProfile.notFound')}</p>
               <Button onClick={() => router.push('/speakers')} variant="outline">
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Speakers
+                {t('speakerProfile.backToSpeakers')}
               </Button>
             </CardContent>
           </Card>
@@ -230,7 +235,7 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
           className="mb-6 bg-white/10 border-white/20 text-white hover:bg-white/20"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Speakers
+          {t('speakerProfile.backToSpeakers')}
         </Button>
 
         {/* Profile Header */}
@@ -264,10 +269,10 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
                 <div className="flex items-center justify-center md:justify-start gap-2 mb-4">
                   <Star className="w-6 h-6 text-yellow-400 fill-yellow-400" />
                   <span className="text-white text-xl font-semibold">
-                    {speaker.rating ? speaker.rating.toFixed(1) : 'New'}
+                    {speaker.rating ? speaker.rating.toFixed(1) : t('speakerProfile.new')}
                   </span>
                   <span className="text-gray-300">
-                    ({speaker.reviewsCount || 0} review{speaker.reviewsCount !== 1 ? 's' : ''})
+                    ({speaker.reviewsCount || 0} {speaker.reviewsCount !== 1 ? t('speakerProfile.reviews') : t('speakerProfile.review')})
                   </span>
                 </div>
 
@@ -275,11 +280,11 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
                 <div className="flex flex-wrap gap-4 justify-center md:justify-start">
                   <div className="flex items-center gap-2 text-gray-300">
                     <Calendar className="w-5 h-5 text-purple-400" />
-                    <span className="text-sm">{speaker.totalSessions || 0} Sessions</span>
+                    <span className="text-sm">{speaker.totalSessions || 0} {t('speakerProfile.sessions')}</span>
                   </div>
                   <div className="flex items-center gap-2 text-gray-300">
                     <Users className="w-5 h-5 text-purple-400" />
-                    <span className="text-sm">{speaker.completedSessions || 0} Completed</span>
+                    <span className="text-sm">{speaker.completedSessions || 0} {t('speakerProfile.completed')}</span>
                   </div>
                 </div>
 
@@ -294,15 +299,15 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
                     </DialogTrigger>
                     <DialogContent className="bg-[#1A1A33] border-white/20 text-white">
                       <DialogHeader>
-                        <DialogTitle className="text-white text-2xl">Book a Session</DialogTitle>
+                        <DialogTitle className="text-white text-2xl">{t('speakerProfile.bookSession.title')}</DialogTitle>
                       </DialogHeader>
                       <div className="space-y-4">
                         {bookingSuccess ? (
                           <div className="text-center py-8">
                             <CheckCircle2 className="w-16 h-16 mx-auto text-green-400 mb-4" />
-                            <h3 className="text-xl font-semibold text-white mb-2">Session Booked!</h3>
+                            <h3 className="text-xl font-semibold text-white mb-2">{t('speakerProfile.bookSession.success.title')}</h3>
                             <p className="text-gray-300">
-                              Your session has been confirmed. Check your email for details.
+                              {t('speakerProfile.bookSession.success.message')}
                             </p>
                           </div>
                         ) : (
@@ -310,7 +315,7 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
                             {/* Speaker Availability Schedule */}
                             {speaker?.availability && (
                               <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                                <Label className="text-white font-semibold mb-3 block">Speaker Availability</Label>
+                                <Label className="text-white font-semibold mb-3 block confirmed">{t('speakerProfile.bookSession.availability')}</Label>
                                 <div className="space-y-2 max-h-48 overflow-y-auto">
                                   {daysOfWeek.map((day) => {
                                     const dayAvailability = speaker.availability.find(
@@ -327,14 +332,14 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
                                         }`}
                                       >
                                         <span className={isAvailable ? "text-green-300" : "text-gray-400"}>
-                                          {day.label}
+                                          {t(day.translationKey as any)}
                                         </span>
                                         {isAvailable ? (
                                           <span className="text-green-400 text-xs">
                                             {dayAvailability.startTime} - {dayAvailability.endTime}
                                           </span>
                                         ) : (
-                                          <span className="text-gray-500 text-xs">Not available</span>
+                                          <span className="text-gray-500 text-xs">{t('speakerProfile.bookSession.notAvailable')}</span>
                                         )}
                                       </div>
                                     )
@@ -344,18 +349,18 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
                             )}
 
                             <div>
-                              <Label htmlFor="title" className="text-white">Session Title *</Label>
+                              <Label htmlFor="title" className="text-white">{t('speakerProfile.bookSession.sessionTitle')}</Label>
                               <Input
                                 id="title"
                                 value={formData.title}
                                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                placeholder="E.g., Practice Conversation"
+                                placeholder={t('speakerProfile.bookSession.sessionTitlePlaceholder')}
                                 className="bg-white/10 border-white/20 text-white mt-2"
                               />
                             </div>
 
                             <div>
-                              <Label htmlFor="date" className="text-white">Date *</Label>
+                              <Label htmlFor="date" className="text-white">{t('speakerProfile.bookSession.date')}</Label>
                               <Input
                                 id="date"
                                 type="date"
@@ -364,7 +369,9 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
                                   const selectedDate = e.target.value
                                   // Validate if selected date is available
                                   if (selectedDate && !isDateAvailable(selectedDate)) {
-                                    setBookingError(`Speaker is not available on ${getDayNameFromDate(selectedDate).charAt(0).toUpperCase() + getDayNameFromDate(selectedDate).slice(1)}. Please select an available day.`)
+                                    const dayTranslation = daysOfWeek.find(d => d.key === getDayNameFromDate(selectedDate))
+                                    const dayLabel = dayTranslation ? t(dayTranslation.translationKey as any) : getDayNameFromDate(selectedDate).charAt(0).toUpperCase() + getDayNameFromDate(selectedDate).slice(1)
+                                    setBookingError(`${t('speakerProfile.bookSession.unavailableDay')} ${dayLabel}.`)
                                     setFormData({ ...formData, date: "", time: "" }) // Clear invalid date and time
                                   } else {
                                     setFormData({ ...formData, date: selectedDate, time: "" }) // Reset time when date changes
@@ -380,13 +387,13 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
                                 if (dayAvailability && dayAvailability.isAvailable) {
                                   return (
                                     <p className="text-xs text-green-400 mt-1">
-                                      Available: {dayAvailability.startTime} - {dayAvailability.endTime}
+                                      {t('speakerProfile.bookSession.dateAvailable')} {dayAvailability.startTime} - {dayAvailability.endTime}
                                     </p>
                                   )
                                 } else {
                                   return (
                                     <p className="text-xs text-red-400 mt-1">
-                                      Not available on this day
+                                      {t('speakerProfile.bookSession.dateNotAvailable')}
                                     </p>
                                   )
                                 }
@@ -394,7 +401,7 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
                             </div>
 
                             <div>
-                              <Label htmlFor="time" className="text-white">Time *</Label>
+                              <Label htmlFor="time" className="text-white">{t('speakerProfile.bookSession.time')}</Label>
                               <Input
                                 id="time"
                                 type="time"
@@ -412,22 +419,22 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
                                 const { min, max } = getTimeConstraints(formData.date)
                                 return (
                                   <p className="text-xs text-blue-400 mt-1">
-                                    Select time between {min} and {max} (30 min session)
+                                    {t('speakerProfile.bookSession.timeHint')} {min} {t('dashboard.availability.to')} {max} {t('speakerProfile.bookSession.topicsMax')}
                                   </p>
                                 )
                               })()}
                             </div>
 
                             <div>
-                              <Label className="text-white">Topics (max 2, optional)</Label>
+                              <Label className="text-white">{t('speakerProfile.bookSession.topics')}</Label>
                               <Input
-                                placeholder="Topic 1"
+                                placeholder={t('speakerProfile.bookSession.topic1')}
                                 value={formData.topic1}
                                 onChange={(e) => setFormData({ ...formData, topic1: e.target.value })}
                                 className="bg-white/10 border-white/20 text-white mt-2 mb-2"
                               />
                               <Input
-                                placeholder="Topic 2"
+                                placeholder={t('speakerProfile.bookSession.topic2')}
                                 value={formData.topic2}
                                 onChange={(e) => setFormData({ ...formData, topic2: e.target.value })}
                                 className="bg-white/10 border-white/20 text-white"
@@ -446,10 +453,10 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
                               {isBooking ? (
                                 <>
                                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                  Booking...
+                                  {t('speakerProfile.bookSession.booking')}
                                 </>
                               ) : (
-                                "Confirm Booking"
+                                t('speakerProfile.bookSession.confirmBooking')
                               )}
                             </Button>
                           </>
@@ -464,7 +471,7 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
             {/* Bio */}
             {speaker.bio && (
               <div className="mt-6 pt-6 border-t border-white/10">
-                <h3 className="text-white font-semibold mb-3">About</h3>
+                <h3 className="text-white font-semibold mb-3">{t('speakerProfile.about')}</h3>
                 <p className="text-gray-300 leading-relaxed">{speaker.bio}</p>
               </div>
             )}
@@ -472,7 +479,7 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
             {/* Interests */}
             {speaker.interests && speaker.interests.length > 0 && (
               <div className="mt-6 pt-6 border-t border-white/10">
-                <h3 className="text-white font-semibold mb-3">Topics & Interests</h3>
+                <h3 className="text-white font-semibold mb-3">{t('speakerProfile.topicsInterests')}</h3>
                 <div className="flex flex-wrap gap-2">
                   {speaker.interests.map((interest: string, idx: number) => (
                     <Badge
@@ -493,7 +500,7 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <MessageSquare className="w-5 h-5" />
-              Reviews ({reviews.length})
+              {t('speakerProfile.reviews')} ({reviews.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -529,7 +536,7 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
                           <p className="text-white font-medium">
                             {review.from && typeof review.from === 'object'
                               ? `${review.from.firstname} ${review.from.lastname}`
-                              : 'Anonymous'
+                              : t('speakerProfile.bookSession.anonymous')
                             }
                           </p>
                           <p className="text-gray-400 text-sm">
@@ -567,7 +574,7 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
             ) : (
               <div className="text-center py-8">
                 <MessageSquare className="w-16 h-16 mx-auto text-gray-500 mb-4" />
-                <p className="text-gray-300">No reviews yet</p>
+                <p className="text-gray-300">{t('speakerProfile.bookSession.noReviews')}</p>
               </div>
             )}
           </CardContent>

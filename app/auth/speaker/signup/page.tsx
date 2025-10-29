@@ -9,10 +9,12 @@ import Link from "next/link"
 import { authService } from "@/lib/services/authService"
 import { useAppDispatch } from "@/lib/hooks/redux"
 import { setUser } from "@/lib/store/authSlice"
+import { useTranslation } from "@/lib/hooks/useTranslation"
 
 export default function SignUpPage() {
   const router = useRouter()
   const dispatch = useAppDispatch()
+  const { t } = useTranslation()
   const [currentStep, setCurrentStep] = useState(1)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -42,37 +44,37 @@ export default function SignUpPage() {
 
   // Validation functions
   const validateFirstName = (name: string) => {
-    if (!name.trim()) return "First name is required"
-    if (name.trim().length < 2) return "First name must be at least 2 characters"
-    if (!/^[a-zA-Z\s'-]+$/.test(name.trim())) return "First name can only contain letters"
+    if (!name.trim()) return t('speakerSignup.step1.validate.firstNameRequired')
+    if (name.trim().length < 2) return t('speakerSignup.step1.validate.firstNameMin')
+    if (!/^[a-zA-Z\s'-]+$/.test(name.trim())) return t('speakerSignup.step1.validate.firstNameInvalid')
     return ""
   }
 
   const validateLastName = (name: string) => {
-    if (!name.trim()) return "Last name is required"
-    if (name.trim().length < 2) return "Last name must be at least 2 characters"
-    if (!/^[a-zA-Z\s'-]+$/.test(name.trim())) return "Last name can only contain letters"
+    if (!name.trim()) return t('speakerSignup.step1.validate.lastNameRequired')
+    if (name.trim().length < 2) return t('speakerSignup.step1.validate.lastNameMin')
+    if (!/^[a-zA-Z\s'-]+$/.test(name.trim())) return t('speakerSignup.step1.validate.lastNameInvalid')
     return ""
   }
 
   const validateEmail = (email: string) => {
-    if (!email.trim()) return "Email is required"
+    if (!email.trim()) return t('speakerSignup.step1.validate.emailRequired')
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) return "Please enter a valid email address"
+    if (!emailRegex.test(email)) return t('speakerSignup.step1.validate.emailInvalid')
     return ""
   }
 
   const validatePassword = (password: string) => {
-    if (!password) return "Password is required"
-    if (password.length < 8) return "Password must be at least 8 characters"
-    if (!/[A-Za-z]/.test(password)) return "Password must contain at least one letter"
-    if (!/[0-9]/.test(password)) return "Password must contain at least one number"
+    if (!password) return t('speakerSignup.step5.validate.passwordRequired')
+    if (password.length < 8) return t('speakerSignup.step5.validate.passwordMin')
+    if (!/[A-Za-z]/.test(password)) return t('speakerSignup.step5.validate.passwordLetter')
+    if (!/[0-9]/.test(password)) return t('speakerSignup.step5.validate.passwordNumber')
     return ""
   }
 
   const validateConfirmPassword = (password: string, confirmPassword: string) => {
-    if (!confirmPassword) return "Please confirm your password"
-    if (password !== confirmPassword) return "Passwords do not match"
+    if (!confirmPassword) return t('speakerSignup.step5.validate.confirmRequired')
+    if (password !== confirmPassword) return t('speakerSignup.step5.validate.passwordsMatch')
     return ""
   }
 
@@ -147,7 +149,7 @@ export default function SignUpPage() {
     try {
       // Validate passwords match
       if (formData.password !== formData.confirmPassword) {
-        setError("Passwords do not match")
+        setError(t('speakerSignup.error.passwordsMatch'))
         setIsLoading(false)
         return
       }
@@ -173,7 +175,7 @@ export default function SignUpPage() {
       }
     } catch (err) {
       console.error("Registration error:", err)
-      setError(err instanceof Error ? err.message : "Failed to create account. Please try again.")
+      setError(err instanceof Error ? err.message : t('speakerSignup.error.createFailed'))
     } finally {
       setIsLoading(false)
     }
@@ -222,9 +224,9 @@ export default function SignUpPage() {
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text'
           }}>
-            Aurora
+            {t('speakerSignup.title')}
           </h1>
-          <p className="text-xl text-gray-300 font-light">Happy & Fluent</p>
+          <p className="text-xl text-gray-300 font-light">{t('speakerSignup.tagline')}</p>
         </div>
       </div>
 
@@ -234,8 +236,8 @@ export default function SignUpPage() {
           {/* Header with Progress */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold text-gray-900">Account set up</h2>
-              <span className="text-sm text-gray-500">{currentStep}/{totalSteps}</span>
+              <h2 className="text-2xl font-bold text-gray-900">{t('speakerSignup.accountSetup')}</h2>
+              <span className="text-sm text-gray-500">{currentStep}{t('speakerSignup.step')}{totalSteps}</span>
             </div>
             
             {/* Progress Bar */}
@@ -252,7 +254,7 @@ export default function SignUpPage() {
               className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
             >
               <ArrowLeft className="h-4 w-4" />
-              <span>Back</span>
+              <span>{t('speakerSignup.back')}</span>
             </button>
           </div>
 
@@ -267,16 +269,16 @@ export default function SignUpPage() {
           <div className="bg-white rounded-lg shadow-sm p-8 mb-6">
             {currentStep === 1 && (
               <div>
-                <h3 className="text-3xl font-bold text-gray-900 mb-2">Tell us a bit about you</h3>
-                <p className="text-gray-600 mb-8">That will help us better account setup for you.</p>
+                <h3 className="text-3xl font-bold text-gray-900 mb-2">{t('speakerSignup.step1.title')}</h3>
+                <p className="text-gray-600 mb-8">{t('speakerSignup.step1.description')}</p>
                 
                 <div className="space-y-6">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">First name</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('speakerSignup.step1.firstName')}</label>
                       <Input
                         type="text"
-                        placeholder="First name"
+                        placeholder={t('speakerSignup.step1.firstNamePlaceholder')}
                         value={formData.firstName}
                         onChange={(e) => handleInputChange("firstName", e.target.value)}
                         onBlur={(e) => handleBlur("firstName", e.target.value)}
@@ -292,10 +294,10 @@ export default function SignUpPage() {
                       )}
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Last name</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('speakerSignup.step1.lastName')}</label>
                       <Input
                         type="text"
-                        placeholder="Last name"
+                        placeholder={t('speakerSignup.step1.lastNamePlaceholder')}
                         value={formData.lastName}
                         onChange={(e) => handleInputChange("lastName", e.target.value)}
                         onBlur={(e) => handleBlur("lastName", e.target.value)}
@@ -313,10 +315,10 @@ export default function SignUpPage() {
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Mail</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{t('speakerSignup.step1.mail')}</label>
                     <Input
                       type="email"
-                      placeholder="Email address"
+                      placeholder={t('speakerSignup.step1.emailPlaceholder')}
                       value={formData.email}
                       onChange={(e) => handleInputChange("email", e.target.value)}
                       onBlur={(e) => handleBlur("email", e.target.value)}
@@ -337,8 +339,8 @@ export default function SignUpPage() {
 
             {currentStep === 2 && (
               <div>
-                <h3 className="text-3xl font-bold text-gray-900 mb-2">What topics do you like?</h3>
-                <p className="text-gray-600 mb-8">Select up to 4 topics you're interested in</p>
+                <h3 className="text-3xl font-bold text-gray-900 mb-2">{t('speakerSignup.step2.title')}</h3>
+                <p className="text-gray-600 mb-8">{t('speakerSignup.step2.description')}</p>
                 
                 <div className="flex flex-wrap gap-3">
                   {[
@@ -364,7 +366,7 @@ export default function SignUpPage() {
                 
                 {formData.interests.length > 0 && (
                   <p className="mt-6 text-sm text-gray-500">
-                    Selected: {formData.interests.length}/4
+                    {t('speakerSignup.step2.selected')} {formData.interests.length}/4
                   </p>
                 )}
               </div>
@@ -372,36 +374,36 @@ export default function SignUpPage() {
 
             {currentStep === 3 && (
               <div>
-                <h3 className="text-3xl font-bold text-gray-900 mb-2">When do you prefer to meet?</h3>
-                <p className="text-gray-600 mb-8">Select your preferred meeting time</p>
+                <h3 className="text-3xl font-bold text-gray-900 mb-2">{t('speakerSignup.step3.title')}</h3>
+                <p className="text-gray-600 mb-8">{t('speakerSignup.step3.description')}</p>
                 
                 <div className="space-y-4">
                   {[
-                    "Mornings",
-                    "Afternoon",
-                    "Nights",
-                    "Other"
+                    { key: "Mornings", label: t('speakerSignup.step3.mornings') },
+                    { key: "Afternoon", label: t('speakerSignup.step3.afternoon') },
+                    { key: "Nights", label: t('speakerSignup.step3.nights') },
+                    { key: "Other", label: t('speakerSignup.step3.other') }
                   ].map((option) => (
                     <button
-                      key={option}
+                      key={option.key}
                       type="button"
-                      onClick={() => handleInputChange("meetingPreference", option)}
+                      onClick={() => handleInputChange("meetingPreference", option.key)}
                       className={`w-full text-left p-4 border-2 rounded-lg transition-all flex items-center gap-3 ${
-                        formData.meetingPreference === option
+                        formData.meetingPreference === option.key
                           ? "border-purple-600 bg-purple-50"
                           : "border-gray-300 hover:border-gray-400"
                       }`}
                     >
                       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                        formData.meetingPreference === option
+                        formData.meetingPreference === option.key
                           ? "border-purple-600 bg-purple-600"
                           : "border-gray-300"
                       }`}>
-                        {formData.meetingPreference === option && (
+                        {formData.meetingPreference === option.key && (
                           <div className="w-2 h-2 rounded-full bg-white"></div>
                         )}
                       </div>
-                      <span className="text-gray-900 font-medium">{option}</span>
+                      <span className="text-gray-900 font-medium">{option.label}</span>
                     </button>
                   ))}
                 </div>
@@ -410,8 +412,8 @@ export default function SignUpPage() {
 
             {currentStep === 4 && (
               <div>
-                <h3 className="text-3xl font-bold text-gray-900 mb-2">Choose your avatar</h3>
-                <p className="text-gray-600 mb-8">Please share your profile picture</p>
+                <h3 className="text-3xl font-bold text-gray-900 mb-2">{t('speakerSignup.step4.title')}</h3>
+                <p className="text-gray-600 mb-8">{t('speakerSignup.step4.description')}</p>
                 
                 <div className="flex flex-col items-center gap-6">
                   {avatarPreview && (
@@ -431,7 +433,7 @@ export default function SignUpPage() {
                     htmlFor="avatar-upload"
                     className="px-8 py-3 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white rounded-lg cursor-pointer transition-all font-medium"
                   >
-                    Select image
+                    {t('speakerSignup.step4.selectImage')}
                   </label>
                 </div>
               </div>
@@ -439,15 +441,15 @@ export default function SignUpPage() {
 
             {currentStep === 5 && (
               <div>
-                <h3 className="text-3xl font-bold text-gray-900 mb-2">Set up your password</h3>
-                <p className="text-gray-600 mb-8">Create a secure password to complete your account.</p>
+                <h3 className="text-3xl font-bold text-gray-900 mb-2">{t('speakerSignup.step5.title')}</h3>
+                <p className="text-gray-600 mb-8">{t('speakerSignup.step5.description')}</p>
                 
                 <div className="space-y-6">
                   <div className="relative">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{t('speakerSignup.step5.password')}</label>
                     <Input
                       type={showPassword ? "text" : "password"}
-                      placeholder="Password"
+                      placeholder={t('speakerSignup.step5.passwordPlaceholder')}
                       value={formData.password}
                       onChange={(e) => handleInputChange("password", e.target.value)}
                       onBlur={(e) => handleBlur("password", e.target.value)}
@@ -472,15 +474,15 @@ export default function SignUpPage() {
                     {validationErrors.password ? (
                       <p className="text-xs text-red-500 mt-2">{validationErrors.password}</p>
                     ) : (
-                      <p className="text-xs text-gray-500 mt-2">Must be at least 8 characters with letters and numbers</p>
+                      <p className="text-xs text-gray-500 mt-2">{t('speakerSignup.step5.hint')}</p>
                     )}
                   </div>
                   
                   <div className="relative">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{t('speakerSignup.step5.confirmPassword')}</label>
                     <Input
                       type={showConfirmPassword ? "text" : "password"}
-                      placeholder="Confirm password"
+                      placeholder={t('speakerSignup.step5.confirmPasswordPlaceholder')}
                       value={formData.confirmPassword}
                       onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
                       onBlur={(e) => handleBlur("confirmPassword", e.target.value)}
@@ -520,7 +522,7 @@ export default function SignUpPage() {
                 onClick={() => router.push("/dashboard")}
                 className="text-gray-600 hover:text-gray-900"
               >
-                Skip
+                {t('speakerSignup.skip')}
               </Button>
             )}
             
@@ -535,7 +537,7 @@ export default function SignUpPage() {
                 }
                 className="px-8 py-2 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white rounded-lg disabled:opacity-50 transition-all"
               >
-                Next
+                {t('speakerSignup.next')}
               </Button>
             ) : (
               <Button
@@ -546,10 +548,10 @@ export default function SignUpPage() {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Creating account...
+                    {t('speakerSignup.creating')}
                   </>
                 ) : (
-                  "Create Account"
+                  t('speakerSignup.createAccount')
                 )}
               </Button>
             )}
@@ -558,9 +560,9 @@ export default function SignUpPage() {
           {/* Login Link */}
           {currentStep === 1 && (
             <p className="text-center mt-6 text-gray-600 text-sm">
-              Already have an account?{" "}
+              {t('speakerSignup.hasAccount')}{" "}
               <Link href="/auth/signin" className="text-purple-600 hover:text-purple-700 font-semibold">
-                Log in
+                {t('speakerSignup.login')}
               </Link>
             </p>
           )}

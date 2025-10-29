@@ -1,11 +1,13 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Menu, X, User, LogOut, Settings } from "lucide-react"
+import { Menu, X, User, LogOut, Settings, Globe } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAppSelector, useAppDispatch } from "@/lib/hooks/redux"
 import { logoutUser } from "@/lib/store/authSlice"
+import { setLanguage } from "@/lib/store/languageSlice"
+import { useTranslation } from "@/lib/hooks/useTranslation"
 import Link from "next/link"
 import Image from "next/image"
 
@@ -16,6 +18,12 @@ export function Header() {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const { user, isAuthenticated } = useAppSelector((state) => state.auth)
+  const { t, language } = useTranslation()
+
+  const toggleLanguage = () => {
+    const newLanguage = language === 'en' ? 'es' : 'en'
+    dispatch(setLanguage(newLanguage))
+  }
   // Add scroll effect for header
   useEffect(() => {
     const handleScroll = () => {
@@ -81,29 +89,29 @@ export function Header() {
                 <>
                   {user?.role === 'speaker' ? (
                     <>
-                      <Link href="/speakers/dashboard" className="text-gray-900  hover:text-orange-400 transition-colors text-lg font-medium">
-                        Speaker Dashboard
+                      <Link href="/speakers/dashboard" className="text-gray-300  hover:text-orange-400 transition-colors text-lg font-medium">
+                        {t('header.speakerDashboard')}
                       </Link>
                     </>
                   ) : (
                     <>
-                      <Link href="/learners/dashboard" className="text-gray-900  hover:text-orange-400 transition-colors text-lg font-medium">
-                        Dashboard
+                      <Link href="/learners/dashboard" className="text-gray-300  hover:text-orange-400 transition-colors text-lg font-medium">
+                        {t('header.dashboard')}
                       </Link>
-                      <Link href="/speakers" className="text-gray-900  hover:text-orange-400 transition-colors text-lg font-medium">
-                        Speakers
+                      <Link href="/speakers" className="text-gray-300  hover:text-orange-400 transition-colors text-lg font-medium">
+                        {t('header.speakers')}
                       </Link>
                     </>
                   )}
                 </>
               ) : (
                 <>
-                  <Link href="/" className="text-gray-900  hover:text-orange-400 transition-colors text-lg font-medium">
-                    Home
-                  </Link>
-                  <Link href="#" className="text-gray-900  hover:text-orange-400 transition-colors text-lg font-medium">
-                    Nosotros
-                  </Link>
+                      <Link href="/" className="text-gray-300  hover:text-orange-400 transition-colors text-lg font-medium">
+                        {t('header.home')}
+                      </Link>
+                      <Link href="#" className="text-gray-300  hover:text-orange-400 transition-colors text-lg font-medium">
+                        {t('header.nosotros')}
+                      </Link>
                 </>
               )}
             </div>
@@ -111,6 +119,15 @@ export function Header() {
 
           {/* Auth Buttons */}
           <div className="hidden md:flex items-center gap-3">
+            {/* Language Switcher */}
+            <button
+              onClick={toggleLanguage}
+              className="p-2 text-gray-300 hover:text-orange-400 transition-colors rounded-full hover:bg-white/20"
+              aria-label={`Switch to ${language === 'en' ? 'Español' : 'English'}`}
+              title={`Switch to ${language === 'en' ? 'Español' : 'English'}`}
+            >
+              <Globe className="w-5 h-5" />
+            </button>
             {isAuthenticated ? (
               <div className="relative user-menu-container">
                 <button 
@@ -132,7 +149,7 @@ export function Header() {
                         className="w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2"
                       >
                         <Settings className="w-4 h-4" />
-                        Dashboard
+                        {t('header.dashboard')}
                       </button>
                     )}
                     <button
@@ -143,25 +160,25 @@ export function Header() {
                       className="w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2"
                     >
                       <Settings className="w-4 h-4" />
-                      Profile
+                      {t('header.profile')}
                     </button>
                     <button
                       onClick={handleLogout}
                       className="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
                     >
                       <LogOut className="w-4 h-4" />
-                      Logout
+                      {t('header.logout')}
                     </button>
                   </div>
                 )}
               </div>
             ) : (
                   <>
-                    <button className="px-6 py-2.5 rounded-lg text-black border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-100 hover:text-[#49BBBD] font-semibold transition-all duration-300" onClick={() => router.push('/auth/signin')}>
-                      Inicia sesión
+                    <button className="px-6 py-2.5 rounded-lg text-white border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-100 hover:text-[#49BBBD] font-semibold transition-all duration-300" onClick={() => router.push('/auth/signin')}>
+                      {t('header.login')}
                     </button>
                     <button className="px-6 py-2.5 rounded-lg bg-[#524FD5] text-white hover:bg-orange-400 hover:text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5" onClick={() => router.push('/auth/speaker/signup')}>
-                      Spreaker
+                      {t('header.speaker')}
                     </button>
                   </>
             )}
@@ -218,33 +235,46 @@ export function Header() {
 
             {/* Menu Items */}
             <div className="flex flex-col p-4">
+              {/* Language Switcher - Mobile */}
+              <div className="mb-4 pb-4 border-b border-white/20">
+                <button
+                  onClick={toggleLanguage}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-colors"
+                  aria-label={`Switch to ${language === 'en' ? 'Español' : 'English'}`}
+                >
+                  <Globe className="w-5 h-5" />
+                  <span className="text-lg font-medium">
+                    {language === 'en' ? 'Español' : 'English'}
+                  </span>
+                </button>
+              </div>
               <nav className="space-y-2">
                 {isAuthenticated ? (
                   <>
                     {user?.role === 'speaker' ? (
                       <>
                         <Link href="/speakers/dashboard" className="block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-colors text-lg font-medium">
-                          Speaker Dashboard
+                          {t('header.speakerDashboard')}
                         </Link>
                       </>
                     ) : (
                       <>
                         <Link href="/dashboard" className="block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-colors text-lg font-medium">
-                          Dashboard
+                          {t('header.dashboard')}
                         </Link>
                       </>
                     )}
                     <Link href="/discover" className="block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-colors text-lg font-medium">
-                      Discover
+                      {t('header.discover')}
                     </Link>
                   </>
                 ) : (
                   <>
                     <Link href="/" className="block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-colors text-lg font-medium">
-                      Home
+                      {t('header.home')}
                     </Link>
                     <Link href="#" className="block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-colors text-lg font-medium">
-                      Nosotros
+                      {t('header.nosotros')}
                     </Link>
                   </>
                 )}
@@ -265,7 +295,7 @@ export function Header() {
                       }}
                     >
                       <Settings className="w-4 h-4" />
-                      Profile
+                      {t('header.profile')}
                     </button>
                     <button 
                       className="w-full px-6 py-3 rounded-full bg-red-500 text-white hover:bg-red-600 font-semibold transition-all duration-300 shadow-lg flex items-center justify-center gap-2" 
@@ -275,16 +305,16 @@ export function Header() {
                       }}
                     >
                       <LogOut className="w-4 h-4" />
-                      Logout
+                      {t('header.logout')}
                     </button>
                   </>
                 ) : (
                   <>
                     <button className="w-full px-6 py-3 rounded-full text-white border-2 border-white/30 hover:border-white hover:bg-white hover:text-[#49BBBD] font-semibold transition-all duration-300" onClick={() => router.push('/auth')}>
-                      Login
+                      {t('header.login')}
                     </button>
                     <button className="w-full px-6 py-3 rounded-full bg-white text-[#49BBBD] hover:bg-orange-400 hover:text-white font-semibold transition-all duration-300 shadow-lg" onClick={() => router.push('/auth')}>
-                      Sign Up
+                      {t('header.signup')}
                     </button>
                   </>
                 )}

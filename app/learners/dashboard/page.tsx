@@ -28,10 +28,12 @@ import { learnerService, Session, Speaker, Review } from "@/lib/services/learner
 import { useAppSelector, useAppDispatch } from "@/lib/hooks/redux"
 import { getCurrentUser } from "@/lib/store/authSlice"
 import { LearnerRatingModal } from "@/components/LearnerRatingModal"
+import { useTranslation } from "@/lib/hooks/useTranslation"
 import Image from "next/image"
 
 export default function LearnerDashboardPage() {
   const dispatch = useAppDispatch()
+  const { t } = useTranslation()
   const { user, isAuthenticated, isLoading: authLoading } = useAppSelector((state) => state.auth)
   const [upcomingSessions, setUpcomingSessions] = useState<Session[]>([])
   const [pastSessions, setPastSessions] = useState<Session[]>([])
@@ -88,7 +90,7 @@ export default function LearnerDashboardPage() {
     else if (!isAuthenticated) {
       console.log('Not authenticated, showing error')
       setIsLoading(false)
-      setError("Please log in to access your dashboard")
+      setError(t('learnerDashboard.errors.loginRequired'))
     }
     // If authenticated but no user yet, wait for getCurrentUser to complete
     else if (isAuthenticated && !user) {
@@ -161,7 +163,7 @@ export default function LearnerDashboardPage() {
       }
     } catch (err) {
       console.error("Error fetching dashboard data:", err)
-      setError("Failed to load dashboard data")
+      setError(t('learnerDashboard.errors.loadFailed'))
     } finally {
       setIsLoading(false)
     }
@@ -178,7 +180,7 @@ export default function LearnerDashboardPage() {
       }
     } catch (err) {
       console.error("Error saving profile:", err)
-      setError("Failed to save profile")
+      setError(t('learnerDashboard.errors.saveFailed'))
     } finally {
       setIsUploading(false)
     }
@@ -194,7 +196,7 @@ export default function LearnerDashboardPage() {
         // Update user in Redux store if needed
       } catch (err) {
         console.error("Error uploading avatar:", err)
-        setError("Failed to upload avatar")
+        setError(t('learnerDashboard.errors.avatarFailed'))
       } finally {
         setIsUploading(false)
       }
@@ -236,7 +238,7 @@ export default function LearnerDashboardPage() {
       fetchDashboardData()
     } catch (err: any) {
       console.error("Error cancelling session:", err)
-      setError(err.message || "Failed to cancel session")
+      setError(err.message || t('learnerDashboard.errors.cancelFailed'))
     } finally {
       setIsCancelling(false)
     }
@@ -303,8 +305,8 @@ export default function LearnerDashboardPage() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">Learner Dashboard</h1>
-          <p className="text-gray-300 text-sm sm:text-base">Manage your learning sessions and track your progress</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{t('learnerDashboard.title')}</h1>
+          <p className="text-gray-300 text-sm sm:text-base">{t('learnerDashboard.subtitle')}</p>
         </div>
 
         {error && (
