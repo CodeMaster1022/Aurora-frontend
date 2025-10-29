@@ -80,6 +80,17 @@ export type TranslationKey =
   | 'auth.signup.validate.passwordMin'
   | 'auth.signup.validate.passwordLetter'
   | 'auth.signup.validate.passwordNumber'
+  | 'auth.signup.validate.termsRequired'
+  | 'auth.signup.termsText'
+  | 'auth.signup.termsLink'
+  | 'auth.signup.termsAnd'
+  | 'auth.signup.privacyLink'
+  | 'auth.terms.modal.title'
+  | 'auth.terms.modal.description'
+  | 'auth.terms.modal.content'
+  | 'auth.terms.modal.accept'
+  | 'auth.terms.modal.accepting'
+  | 'auth.terms.error'
   
   | 'auth.signin.title'
   | 'auth.signin.email'
@@ -415,6 +426,17 @@ export const translations: Record<Language, Translations> = {
     'auth.signup.validate.passwordMin': 'Password must be at least 8 characters',
     'auth.signup.validate.passwordLetter': 'Password must contain at least one letter',
     'auth.signup.validate.passwordNumber': 'Password must contain at least one number',
+    'auth.signup.validate.termsRequired': 'You must accept the Terms and Conditions and Privacy Policy to continue',
+    'auth.signup.termsText': 'I have read and accept the',
+    'auth.signup.termsLink': 'Terms and Conditions',
+    'auth.signup.termsAnd': 'and the',
+    'auth.signup.privacyLink': 'Privacy Policy',
+    'auth.terms.modal.title': 'Terms and Privacy Policy Acceptance Required',
+    'auth.terms.modal.description': 'To continue using Aurora, please review and accept our Terms and Conditions and Privacy Policy.',
+    'auth.terms.modal.content': 'As a new requirement, all users (including existing users) must accept our updated Terms and Conditions and Privacy Policy to continue using the platform. Please read the documents carefully and accept them below.',
+    'auth.terms.modal.accept': 'Accept and Continue',
+    'auth.terms.modal.accepting': 'Accepting...',
+    'auth.terms.error': 'Failed to accept terms. Please try again.',
     
     'auth.signin.title': 'Aurora',
     'auth.signin.email': 'Email Address',
@@ -747,6 +769,17 @@ export const translations: Record<Language, Translations> = {
     'auth.signup.validate.passwordMin': 'La contraseña debe tener al menos 8 caracteres',
     'auth.signup.validate.passwordLetter': 'La contraseña debe contener al menos una letra',
     'auth.signup.validate.passwordNumber': 'La contraseña debe contener al menos un número',
+    'auth.signup.validate.termsRequired': 'Debes aceptar los Términos y Condiciones y el Aviso de Privacidad para continuar',
+    'auth.signup.termsText': 'He leído y acepto los',
+    'auth.signup.termsLink': 'Términos y Condiciones',
+    'auth.signup.termsAnd': 'y el',
+    'auth.signup.privacyLink': 'Aviso de Privacidad',
+    'auth.terms.modal.title': 'Aceptación de Términos y Aviso de Privacidad Requerida',
+    'auth.terms.modal.description': 'Para continuar usando Aurora, por favor revisa y acepta nuestros Términos y Condiciones y Aviso de Privacidad.',
+    'auth.terms.modal.content': 'Como nuevo requisito, todos los usuarios (incluyendo usuarios existentes) deben aceptar nuestros Términos y Condiciones y Aviso de Privacidad actualizados para continuar usando la plataforma. Por favor lee los documentos cuidadosamente y acéptalos a continuación.',
+    'auth.terms.modal.accept': 'Aceptar y Continuar',
+    'auth.terms.modal.accepting': 'Aceptando...',
+    'auth.terms.error': 'Error al aceptar los términos. Por favor intenta de nuevo.',
     
     'auth.signin.title': 'Aurora',
     'auth.signin.email': 'Correo Electrónico',

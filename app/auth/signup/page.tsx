@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { authService } from "@/lib/services/authService"
@@ -20,13 +21,15 @@ export default function SignUpPage() {
   const [lastName, setLastName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [termsAccepted, setTermsAccepted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [validationErrors, setValidationErrors] = useState({
     firstName: "",
     lastName: "",
     email: "",
-    password: ""
+    password: "",
+    termsAccepted: ""
   })
 
   // Validation functions
@@ -120,6 +123,12 @@ export default function SignUpPage() {
       password: passwordError
     })
     
+    if (!termsAccepted) {
+      setValidationErrors(prev => ({ ...prev, termsAccepted: t('auth.signup.validate.termsRequired') }))
+      setIsLoading(false)
+      return
+    }
+
     if (firstNameError || lastNameError || emailError || passwordError) {
       setIsLoading(false)
       return
@@ -132,6 +141,8 @@ export default function SignUpPage() {
         email: email,
         password: password,
         confirmPassword: password,
+        termsAccepted: true,
+        privacyAccepted: true,
       })
       
       if (response.success && response.data) {
@@ -335,6 +346,51 @@ export default function SignUpPage() {
               </button>
               {validationErrors.password && (
                 <p className="text-xs text-red-500 mt-1">{validationErrors.password}</p>
+              )}
+            </div>
+
+            {/* Terms and Conditions Checkbox */}
+            <div className="space-y-2">
+              <div className="flex items-start gap-3">
+                <Checkbox
+                  id="terms"
+                  checked={termsAccepted}
+                  onCheckedChange={(checked) => {
+                    setTermsAccepted(checked as boolean)
+                    if (checked) {
+                      setValidationErrors(prev => ({ ...prev, termsAccepted: "" }))
+                    }
+                  }}
+                  className="mt-0.5"
+                />
+                <label
+                  htmlFor="terms"
+                  className="text-sm text-gray-700 leading-relaxed cursor-pointer"
+                >
+                  {t('auth.signup.termsText')}{" "}
+                  <a
+                    href="/terms-and-conditions"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-purple-600 hover:text-purple-700 underline"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {t('auth.signup.termsLink')}
+                  </a>
+                  {" "}{t('auth.signup.termsAnd')}{" "}
+                  <a
+                    href="/privacy-policy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-purple-600 hover:text-purple-700 underline"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {t('auth.signup.privacyLink')}
+                  </a>.
+                </label>
+              </div>
+              {validationErrors.termsAccepted && (
+                <p className="text-xs text-red-500">{validationErrors.termsAccepted}</p>
               )}
             </div>
 

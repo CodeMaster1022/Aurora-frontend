@@ -19,6 +19,10 @@ export interface User {
     endTime: string;
     isAvailable: boolean;
   }>;
+  termsAccepted?: boolean;
+  termsAcceptedAt?: string;
+  privacyAccepted?: boolean;
+  privacyAcceptedAt?: string;
 }
 
 export interface AuthState {
@@ -41,6 +45,8 @@ export interface RegisterCredentials {
   password: string;
   confirmPassword: string;
   role?: 'learner' | 'admin' | 'moderator' | 'speaker';
+  termsAccepted?: boolean;
+  privacyAccepted?: boolean;
 }
 
 export interface SpeakerRegisterCredentials {
@@ -52,6 +58,8 @@ export interface SpeakerRegisterCredentials {
   interests?: string[];
   meetingPreference?: string;
   avatar?: File;
+  termsAccepted?: boolean;
+  privacyAccepted?: boolean;
 }
 
 export interface AuthResponse {

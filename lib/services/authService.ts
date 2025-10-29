@@ -138,6 +138,12 @@ class AuthService {
     });
   }
 
+  async acceptTerms(): Promise<AuthResponse> {
+    return this.makeRequest<AuthResponse>('/auth/accept-terms', {
+      method: 'POST',
+    });
+  }
+
   // Token management
   setToken(token: string): void {
     if (typeof window !== 'undefined') {

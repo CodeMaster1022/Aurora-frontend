@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { authService } from "@/lib/services/authService"
@@ -33,13 +34,15 @@ export default function SignUpPage() {
   
   const [isLoading, setIsLoading] = useState(false)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+  const [termsAccepted, setTermsAccepted] = useState(false)
   const [error, setError] = useState("")
   const [validationErrors, setValidationErrors] = useState({
     firstName: "",
     lastName: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    termsAccepted: ""
   })
 
   // Validation functions
@@ -153,6 +156,13 @@ export default function SignUpPage() {
         setIsLoading(false)
         return
       }
+
+      // Validate terms acceptance
+      if (!termsAccepted) {
+        setValidationErrors(prev => ({ ...prev, termsAccepted: t('auth.signup.validate.termsRequired') }))
+        setIsLoading(false)
+        return
+      }
       
       const response = await authService.registerSpeaker({
         firstName: formData.firstName,
@@ -163,6 +173,8 @@ export default function SignUpPage() {
         interests: formData.interests,
         meetingPreference: formData.meetingPreference,
         avatar: formData.avatar || undefined,
+        termsAccepted: true,
+        privacyAccepted: true,
       })
       
       if (response.success && response.data) {
@@ -171,7 +183,7 @@ export default function SignUpPage() {
         dispatch(setUser(response.data.user))
         
         // Redirect to dashboard
-        router.push("/dashboard")
+        router.push("/learners/dashboard")
       }
     } catch (err) {
       console.error("Registration error:", err)
@@ -508,6 +520,51 @@ export default function SignUpPage() {
                       <p className="text-xs text-red-500 mt-2">{validationErrors.confirmPassword}</p>
                     )}
                   </div>
+
+                  {/* Terms and Conditions Checkbox */}
+                  <div className="space-y-2 mt-6">
+                    <div className="flex items-start gap-3">
+                      <Checkbox
+                        id="terms-speaker"
+                        checked={termsAccepted}
+                        onCheckedChange={(checked) => {
+                          setTermsAccepted(checked as boolean)
+                          if (checked) {
+                            setValidationErrors(prev => ({ ...prev, termsAccepted: "" }))
+                          }
+                        }}
+                        className="mt-0.5"
+                      />
+                      <label
+                        htmlFor="terms-speaker"
+                        className="text-sm text-gray-700 leading-relaxed cursor-pointer"
+                      >
+                        {t('auth.signup.termsText')}{" "}
+                        <a
+                          href="/terms-and-conditions"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-purple-600 hover:text-purple-700 underline"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {t('auth.signup.termsLink')}
+                        </a>
+                        {" "}{t('auth.signup.termsAnd')}{" "}
+                        <a
+                          href="/privacy-policy"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-purple-600 hover:text-purple-700 underline"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {t('auth.signup.privacyLink')}
+                        </a>.
+                      </label>
+                    </div>
+                    {validationErrors.termsAccepted && (
+                      <p className="text-xs text-red-500">{validationErrors.termsAccepted}</p>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
@@ -533,7 +590,7 @@ export default function SignUpPage() {
                 disabled={
                   (currentStep === 1 && (!formData.firstName || !formData.lastName || !formData.email)) ||
                   (currentStep === 3 && !formData.meetingPreference) ||
-                  (currentStep === 5 && (!formData.password || !formData.confirmPassword))
+                  (currentStep === 5 && (!formData.password || !formData.confirmPassword || !termsAccepted))
                 }
                 className="px-8 py-2 cursor-pointer bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white rounded-lg cursor-pointer disabled:opacity-50 transition-all"
               >
@@ -542,7 +599,7 @@ export default function SignUpPage() {
             ) : (
               <Button
                 onClick={handleSubmit}
-                disabled={isLoading}
+                disabled={isLoading || !termsAccepted}
                 className="px-8 py-2 bg-gradient-to-r cursor-pointer from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white rounded-lg disabled:opacity-50 transition-all"
               >
                 {isLoading ? (

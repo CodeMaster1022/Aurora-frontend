@@ -516,10 +516,10 @@ export default function HomePage() {
                 <div className="space-y-2 py-24">
                   <h3 className="text-lg font-bold text-[#4B0082] mb-3">{t('home.footer.links')}</h3>
                   <div className="space-y-1">
-                    <a href="#" className="block text-[#4B0082] hover:underline text-base">
+                    <a href="/terms-and-conditions" target="_blank" rel="noopener noreferrer" className="block text-[#4B0082] hover:underline text-base">
                       {t('home.footer.terms')}
                     </a>
-                    <a href="#" className="block text-[#4B0082] hover:underline text-base">
+                    <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="block text-[#4B0082] hover:underline text-base">
                       {t('home.footer.privacy')}
                     </a>
                   </div>
