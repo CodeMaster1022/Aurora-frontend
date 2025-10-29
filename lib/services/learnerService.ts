@@ -252,6 +252,20 @@ class LearnerService {
       }
     );
   }
+
+  // Cancel a scheduled session
+  async cancelSession(
+    sessionId: string,
+    reason?: string
+  ): Promise<{ success: boolean; message: string; data: { session: Session } }> {
+    return this.makeRequest<{ success: boolean; message: string; data: { session: Session } }>(
+      `/learner/sessions/${sessionId}/cancel`,
+      {
+        method: 'PUT',
+        body: JSON.stringify({ reason }),
+      }
+    );
+  }
 }
 
 export const learnerService = new LearnerService();

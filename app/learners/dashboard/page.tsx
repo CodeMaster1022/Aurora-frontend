@@ -20,7 +20,9 @@ import {
   Camera,
   User,
   CheckCircle2,
-  MessageSquare
+  MessageSquare,
+  Trash2,
+  AlertTriangle
 } from "lucide-react"
 import { learnerService, Session, Speaker } from "@/lib/services/learnerService"
 import { useAppSelector, useAppDispatch } from "@/lib/hooks/redux"
@@ -47,6 +49,12 @@ export default function LearnerDashboardPage() {
   // Rating dialog states
   const [ratingModalOpen, setRatingModalOpen] = useState(false)
   const [selectedSessionForRating, setSelectedSessionForRating] = useState<Session | null>(null)
+
+  // Cancellation dialog states
+  const [cancelModalOpen, setCancelModalOpen] = useState(false)
+  const [selectedSessionForCancellation, setSelectedSessionForCancellation] = useState<Session | null>(null)
+  const [cancellationReason, setCancellationReason] = useState("")
+  const [isCancelling, setIsCancelling] = useState(false)
 
   useEffect(() => {
     console.log('=== Learner Dashboard First Render ===')
@@ -169,6 +177,48 @@ export default function LearnerDashboardPage() {
   const handleRatingSuccess = () => {
     // Refresh dashboard data
     fetchDashboardData()
+  }
+
+  const handleCancelSession = (session: Session) => {
+    setSelectedSessionForCancellation(session)
+    setCancellationReason("")
+    setCancelModalOpen(true)
+  }
+
+  const handleConfirmCancellation = async () => {
+    if (!selectedSessionForCancellation) return
+
+    try {
+      setIsCancelling(true)
+      setError("")
+      
+      await learnerService.cancelSession(
+        selectedSessionForCancellation._id,
+        cancellationReason.trim() || undefined
+      )
+
+      // Close modal and refresh data
+      setCancelModalOpen(false)
+      setSelectedSessionForCancellation(null)
+      setCancellationReason("")
+      fetchDashboardData()
+    } catch (err: any) {
+      console.error("Error cancelling session:", err)
+      setError(err.message || "Failed to cancel session")
+    } finally {
+      setIsCancelling(false)
+    }
+  }
+
+  // Calculate hours until session for cancellation rules
+  const getHoursUntilSession = (session: Session): number => {
+    const sessionDate = new Date(session.date)
+    const sessionTime = session.time.split(':')
+    sessionDate.setHours(parseInt(sessionTime[0]), parseInt(sessionTime[1]), 0, 0)
+    
+    const now = new Date()
+    const hoursUntil = (sessionDate.getTime() - now.getTime()) / (1000 * 60 * 60)
+    return hoursUntil
   }
 
   const formatDate = (dateString: string) => {
@@ -397,9 +447,20 @@ export default function LearnerDashboardPage() {
                               </a>
                             )}
                           </div>
-                          <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 self-start">
-                            {session.status}
-                          </Badge>
+                          <div className="flex flex-col items-end gap-2">
+                            <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30">
+                              {session.status}
+                            </Badge>
+                            <Button
+                              onClick={() => handleCancelSession(session)}
+                              variant="outline"
+                              size="sm"
+                              className="text-red-400 border-red-400/50 hover:bg-red-400/10"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Cancel
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -451,23 +512,37 @@ export default function LearnerDashboardPage() {
                                 </div>
                               </div>
                             </div>
-                            <Badge className="bg-green-500/20 text-green-300 border-green-500/30 self-start">
-                              {session.status}
+                            <Badge className={`${
+                              session.status === 'completed'
+                                ? 'bg-green-500/20 text-green-300 border-green-500/30'
+                                : 'bg-gray-500/20 text-gray-300 border-gray-500/30'
+                            } self-start`}>
+                              {session.status.charAt(0).toUpperCase() + session.status.slice(1)}
                             </Badge>
                           </div>
                           
-                          {/* Rate Button */}
-                          <div className="flex justify-end">
-                            <Button
-                              onClick={() => handleRateSession(session)}
-                              variant="outline"
-                              size="sm"
-                              className="text-purple-400 border-purple-400/50 hover:bg-purple-400/10"
-                            >
-                              <Star className="mr-2 h-4 w-4" />
-                              Rate & Review
-                            </Button>
-                          </div>
+                          {/* Rate Button - Only show for completed sessions */}
+                          {session.status === 'completed' && (
+                            <div className="flex justify-end">
+                              <Button
+                                onClick={() => handleRateSession(session)}
+                                variant="outline"
+                                size="sm"
+                                className="text-purple-400 border-purple-400/50 hover:bg-purple-400/10"
+                              >
+                                <Star className="mr-2 h-4 w-4" />
+                                Rate & Review
+                              </Button>
+                            </div>
+                          )}
+                          
+                          {/* Show cancellation reason if cancelled */}
+                          {session.status === 'cancelled' && (session as any).cancellationReason && (
+                            <div className="mt-2 p-2 bg-gray-500/10 border border-gray-500/20 rounded text-xs text-gray-400">
+                              <span className="font-medium">Cancellation reason: </span>
+                              {(session as any).cancellationReason}
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -495,6 +570,118 @@ export default function LearnerDashboardPage() {
           onSuccess={handleRatingSuccess}
         />
       )}
+
+      {/* Cancellation Modal */}
+      <Dialog open={cancelModalOpen} onOpenChange={setCancelModalOpen}>
+        <DialogContent className="bg-[#1A1A33] border-white/20 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-white text-2xl flex items-center gap-2">
+              <AlertTriangle className="w-6 h-6 text-yellow-400" />
+              Cancel Session
+            </DialogTitle>
+          </DialogHeader>
+          {selectedSessionForCancellation && (
+            <div className="space-y-4">
+              {/* Cancellation Rules */}
+              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
+                <h4 className="text-yellow-400 font-semibold mb-2 flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5" />
+                  Cancellation Policy
+                </h4>
+                <ul className="text-sm text-yellow-200 space-y-1 list-disc list-inside">
+                  <li>Sessions must be cancelled at least 24 hours before the scheduled time</li>
+                  {(() => {
+                    const hoursUntil = getHoursUntilSession(selectedSessionForCancellation)
+                    return (
+                      <li>
+                        This session is {hoursUntil > 0 
+                          ? `${Math.round(hoursUntil)} hours away`
+                          : 'less than an hour away'}
+                        {hoursUntil < 24 && hoursUntil > 0 && (
+                          <span className="text-red-400"> (May not be eligible for cancellation)</span>
+                        )}
+                      </li>
+                    )
+                  })()}
+                  <li>The speaker will be automatically notified of the cancellation</li>
+                </ul>
+              </div>
+
+              {/* Session Details */}
+              <div className="bg-white/5 rounded-lg p-4">
+                <h4 className="text-white font-semibold mb-2">Session Details</h4>
+                <p className="text-gray-300 text-sm mb-1">
+                  <span className="font-medium">{selectedSessionForCancellation.title}</span>
+                </p>
+                <p className="text-gray-400 text-xs">
+                  with {typeof selectedSessionForCancellation.speaker === 'object'
+                    ? `${selectedSessionForCancellation.speaker.firstname} ${selectedSessionForCancellation.speaker.lastname}`
+                    : selectedSessionForCancellation.speaker}
+                </p>
+                <p className="text-gray-400 text-xs">
+                  {formatDate(selectedSessionForCancellation.date)} at {selectedSessionForCancellation.time}
+                </p>
+              </div>
+
+              {/* Cancellation Reason */}
+              <div>
+                <Label htmlFor="cancellationReason" className="text-white">
+                  Reason for Cancellation (Optional)
+                </Label>
+                <Textarea
+                  id="cancellationReason"
+                  value={cancellationReason}
+                  onChange={(e) => setCancellationReason(e.target.value)}
+                  placeholder="Please let us know why you're cancelling..."
+                  className="bg-white/10 border-white/20 text-white mt-2"
+                  rows={3}
+                />
+              </div>
+
+              {/* Error Message */}
+              {error && (
+                <div className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded p-2">
+                  {error}
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 justify-end">
+                <Button
+                  onClick={() => {
+                    setCancelModalOpen(false)
+                    setSelectedSessionForCancellation(null)
+                    setCancellationReason("")
+                    setError("")
+                  }}
+                  variant="outline"
+                  disabled={isCancelling}
+                  className="border-white/20 text-white hover:bg-white/10"
+                >
+                  Keep Session
+                </Button>
+                <Button
+                  onClick={handleConfirmCancellation}
+                  disabled={isCancelling}
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                >
+                  {isCancelling ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Cancelling...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Confirm Cancellation
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

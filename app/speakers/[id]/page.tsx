@@ -53,9 +53,101 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
     }
   }
 
+  // Days of the week for display
+  const daysOfWeek = [
+    { key: "monday", label: "Monday" },
+    { key: "tuesday", label: "Tuesday" },
+    { key: "wednesday", label: "Wednesday" },
+    { key: "thursday", label: "Thursday" },
+    { key: "friday", label: "Friday" },
+    { key: "saturday", label: "Saturday" },
+    { key: "sunday", label: "Sunday" }
+  ]
+
+  // Get day name from date string
+  const getDayNameFromDate = (dateString: string): string => {
+    if (!dateString) return ""
+    const date = new Date(dateString)
+    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+    return days[date.getDay()]
+  }
+
+  // Check if a date falls on a day when speaker is available
+  const isDateAvailable = (dateString: string): boolean => {
+    if (!dateString || !speaker?.availability) return false
+    const dayName = getDayNameFromDate(dateString)
+    const dayAvailability = speaker.availability.find((avail: any) => avail.day === dayName)
+    return dayAvailability?.isAvailable || false
+  }
+
+  // Get min and max time for selected date based on availability
+  const getTimeConstraints = (dateString: string): { min: string; max: string } => {
+    if (!dateString || !speaker?.availability) {
+      return { min: '00:00', max: '23:59' }
+    }
+    
+    const dayName = getDayNameFromDate(dateString)
+    const dayAvailability = speaker.availability.find((avail: any) => avail.day === dayName)
+    
+    if (!dayAvailability || !dayAvailability.isAvailable) {
+      return { min: '00:00', max: '00:00' } // Invalid range to prevent selection
+    }
+    
+    const startTime = dayAvailability.startTime || '00:00'
+    const endTime = dayAvailability.endTime || '23:59'
+    
+    // Calculate max time accounting for 30-minute session duration
+    // If end time is 17:00, max selectable time should be 16:30 (so session ends at 17:00)
+    const [endHour, endMin] = endTime.split(':').map(Number)
+    const endMinutes = endHour * 60 + endMin
+    const maxMinutes = endMinutes - 30 // Subtract 30 minutes for session duration
+    const maxHour = Math.floor(maxMinutes / 60)
+    const maxMin = maxMinutes % 60
+    const maxTime = `${String(maxHour).padStart(2, '0')}:${String(maxMin).padStart(2, '0')}`
+    
+    return { min: startTime, max: maxTime }
+  }
+
+  // Validate time against speaker availability (client-side hint)
+  const validateBookingTime = (date: string, time: string): string | null => {
+    if (!date || !time || !speaker?.availability) return null
+    
+    const dayName = getDayNameFromDate(date)
+    const dayAvailability = speaker.availability.find((avail: any) => avail.day === dayName)
+    
+    if (!dayAvailability || !dayAvailability.isAvailable) {
+      const dayLabel = dayName.charAt(0).toUpperCase() + dayName.slice(1)
+      return `Speaker is not available on ${dayLabel}. Please select a day when the speaker is available.`
+    }
+    
+    // Check if time is within availability window
+    const [requestedHour, requestedMinute] = time.split(':').map(Number)
+    const requestedMinutes = requestedHour * 60 + requestedMinute
+    const [startHour, startMinute] = (dayAvailability.startTime || '00:00').split(':').map(Number)
+    const [endHour, endMinute] = (dayAvailability.endTime || '23:59').split(':').map(Number)
+    const startMinutes = startHour * 60 + startMinute
+    const endMinutes = endHour * 60 + endMinute
+    
+    // Session is 30 minutes, so check if end time is also within availability
+    const sessionEndMinutes = requestedMinutes + 30
+    
+    if (requestedMinutes < startMinutes || sessionEndMinutes > endMinutes) {
+      return `Speaker is only available between ${dayAvailability.startTime} and ${dayAvailability.endTime} on ${dayName.charAt(0).toUpperCase() + dayName.slice(1)}. Please select a time within this range.`
+    }
+    
+    return null
+  }
+
   const handleBooking = async () => {
     if (!formData.title || !formData.date || !formData.time) {
       setBookingError("Please fill in all required fields")
+      return
+    }
+
+    // Client-side validation for availability
+    const availabilityError = validateBookingTime(formData.date, formData.time)
+    if (availabilityError) {
+      setBookingError(availabilityError)
       return
     }
 
@@ -112,7 +204,7 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
 
   if (!speaker) {
     return (
-      <div className="min-h-screen bg我在-[#1A1A33] pt-24 pb-12 px-4 sm:px-6">
+      <div className="min-h-screen bg-[#1A1A33] pt-24 pb-12 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto">
           <Card className="bg-white/10 backdrop-blur-lg border-white/20">
             <CardContent className="p-12 text-center">
@@ -192,7 +284,7 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
                 </div>
 
                 {/* Book Session Button */}
-                {isAuthenticated && user && user.role === 'learner' && (
+                {/* {isAuthenticated && user && user.role === 'learner' && ( */}
                   <Dialog open={isBookingDialogOpen} onOpenChange={setIsBookingDialogOpen}>
                     <DialogTrigger asChild>
                       <Button className="mt-4 bg-purple-600 hover:bg-purple-700 text-white">
@@ -215,6 +307,42 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
                           </div>
                         ) : (
                           <>
+                            {/* Speaker Availability Schedule */}
+                            {speaker?.availability && (
+                              <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                                <Label className="text-white font-semibold mb-3 block">Speaker Availability</Label>
+                                <div className="space-y-2 max-h-48 overflow-y-auto">
+                                  {daysOfWeek.map((day) => {
+                                    const dayAvailability = speaker.availability.find(
+                                      (avail: any) => avail.day === day.key
+                                    )
+                                    const isAvailable = dayAvailability?.isAvailable || false
+                                    return (
+                                      <div
+                                        key={day.key}
+                                        className={`flex items-center justify-between text-sm p-2 rounded ${
+                                          isAvailable
+                                            ? "bg-green-500/10 border border-green-500/20"
+                                            : "bg-gray-500/10 border border-gray-500/20 opacity-50"
+                                        }`}
+                                      >
+                                        <span className={isAvailable ? "text-green-300" : "text-gray-400"}>
+                                          {day.label}
+                                        </span>
+                                        {isAvailable ? (
+                                          <span className="text-green-400 text-xs">
+                                            {dayAvailability.startTime} - {dayAvailability.endTime}
+                                          </span>
+                                        ) : (
+                                          <span className="text-gray-500 text-xs">Not available</span>
+                                        )}
+                                      </div>
+                                    )
+                                  })}
+                                </div>
+                              </div>
+                            )}
+
                             <div>
                               <Label htmlFor="title" className="text-white">Session Title *</Label>
                               <Input
@@ -232,9 +360,37 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
                                 id="date"
                                 type="date"
                                 value={formData.date}
-                                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                                onChange={(e) => {
+                                  const selectedDate = e.target.value
+                                  // Validate if selected date is available
+                                  if (selectedDate && !isDateAvailable(selectedDate)) {
+                                    setBookingError(`Speaker is not available on ${getDayNameFromDate(selectedDate).charAt(0).toUpperCase() + getDayNameFromDate(selectedDate).slice(1)}. Please select an available day.`)
+                                    setFormData({ ...formData, date: "", time: "" }) // Clear invalid date and time
+                                  } else {
+                                    setFormData({ ...formData, date: selectedDate, time: "" }) // Reset time when date changes
+                                    setBookingError("") // Clear error when date changes
+                                  }
+                                }}
+                                min={new Date().toISOString().split('T')[0]} // Prevent past dates
                                 className="bg-white/10 border-white/20 text-white mt-2"
                               />
+                              {formData.date && speaker?.availability && (() => {
+                                const dayName = getDayNameFromDate(formData.date)
+                                const dayAvailability = speaker.availability.find((avail: any) => avail.day === dayName)
+                                if (dayAvailability && dayAvailability.isAvailable) {
+                                  return (
+                                    <p className="text-xs text-green-400 mt-1">
+                                      Available: {dayAvailability.startTime} - {dayAvailability.endTime}
+                                    </p>
+                                  )
+                                } else {
+                                  return (
+                                    <p className="text-xs text-red-400 mt-1">
+                                      Not available on this day
+                                    </p>
+                                  )
+                                }
+                              })()}
                             </div>
 
                             <div>
@@ -243,9 +399,23 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
                                 id="time"
                                 type="time"
                                 value={formData.time}
-                                onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                                className="bg-white/10 border-white/20 text-white mt-2"
+                                onChange={(e) => {
+                                  setFormData({ ...formData, time: e.target.value })
+                                  setBookingError("") // Clear error when time changes
+                                }}
+                                min={formData.date ? getTimeConstraints(formData.date).min : undefined}
+                                max={formData.date ? getTimeConstraints(formData.date).max : undefined}
+                                disabled={!formData.date || !isDateAvailable(formData.date)}
+                                className="bg-white/10 border-white/20 text-white mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
                               />
+                              {formData.date && isDateAvailable(formData.date) && (() => {
+                                const { min, max } = getTimeConstraints(formData.date)
+                                return (
+                                  <p className="text-xs text-blue-400 mt-1">
+                                    Select time between {min} and {max} (30 min session)
+                                  </p>
+                                )
+                              })()}
                             </div>
 
                             <div>
@@ -287,7 +457,7 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
                       </div>
                     </DialogContent>
                   </Dialog>
-                )}
+                {/* )} */}
               </div>
             </div>
 

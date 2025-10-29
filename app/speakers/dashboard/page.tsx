@@ -51,6 +51,7 @@ export default function SpeakerDashboardPage() {
   const [availability, setAvailability] = useState<SpeakerAvailability[]>([])
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
+  const [isSavingAvailability, setIsSavingAvailability] = useState(false)
 
   // Rating modal states
   const [ratingModalOpen, setRatingModalOpen] = useState(false)
@@ -71,6 +72,43 @@ export default function SpeakerDashboardPage() {
     { key: "saturday", label: "Saturday" },
     { key: "sunday", label: "Sunday" }
   ]
+
+  // Initialize default availability for all 7 days
+  const getDefaultAvailability = (): SpeakerAvailability[] => {
+    return daysOfWeek.map(day => ({
+      day: day.key,
+      startTime: "09:00",
+      endTime: "17:00",
+      isAvailable: false
+    }))
+  }
+
+  // Ensure all 7 days are present in availability array, sorted by day order
+  const normalizeAvailability = (availabilities: SpeakerAvailability[]): SpeakerAvailability[] => {
+    const defaultAvail = getDefaultAvailability()
+    
+    // Create a map of existing availabilities by day
+    const availMap = new Map<string, SpeakerAvailability>()
+    availabilities.forEach(avail => {
+      availMap.set(avail.day, avail)
+    })
+    
+    // Merge defaults with existing data, preserving existing entries
+    // This ensures all 7 days are present in the correct order (Monday to Sunday)
+    return defaultAvail.map(defaultDay => {
+      const existing = availMap.get(defaultDay.day)
+      if (existing) {
+        // Preserve existing data but ensure all fields are present
+        return {
+          day: existing.day,
+          startTime: existing.startTime || defaultDay.startTime,
+          endTime: existing.endTime || defaultDay.endTime,
+          isAvailable: existing.isAvailable !== undefined ? existing.isAvailable : defaultDay.isAvailable
+        }
+      }
+      return defaultDay
+    })
+  }
 
   useEffect(() => {
     console.log('=== Dashboard First Render ===')
@@ -116,6 +154,13 @@ export default function SpeakerDashboardPage() {
       console.error('Error checking calendar status:', error)
     }
   }
+
+  // Initialize availability if empty after data load
+  useEffect(() => {
+    if (availability.length === 0 && !isLoading) {
+      setAvailability(getDefaultAvailability())
+    }
+  }, [availability.length, isLoading])
 
   useEffect(() => {
     console.log('Dashboard fetch effect - user:', !!user, 'isAuthenticated:', isAuthenticated, 'authLoading:', authLoading)
@@ -182,7 +227,16 @@ export default function SpeakerDashboardPage() {
         // Update profile data
         if (profile) {
           setBio(profile.bio || "")
-          setAvailability(profile.availability || [])
+          // Normalize availability to ensure all 7 days are present
+          const profileAvailability = profile.availability || []
+          console.log('Loaded availability from backend:', profileAvailability)
+          const normalizedAvailability = normalizeAvailability(profileAvailability)
+          console.log('Normalized availability:', normalizedAvailability)
+          setAvailability(normalizedAvailability)
+        } else {
+          // If no profile data, initialize with default availability
+          console.log('No profile data, initializing with defaults')
+          setAvailability(getDefaultAvailability())
         }
       }
       // Set avatar if user has one
@@ -208,6 +262,19 @@ export default function SpeakerDashboardPage() {
       setError("Failed to save profile")
     } finally {
       setIsUploading(false)
+    }
+  }
+
+  const handleSaveAvailability = async () => {
+    try {
+      setIsSavingAvailability(true)
+      await speakerService.updateAvailability(availability)
+      setError("") // Clear any errors on success
+    } catch (err) {
+      console.error("Error saving availability:", err)
+      setError("Failed to save availability")
+    } finally {
+      setIsSavingAvailability(false)
     }
   }
 
@@ -526,13 +593,13 @@ export default function SpeakerDashboardPage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {availability.map((day, index) => {
-                  const dayLabel = daysOfWeek.find(d => d.key === day.day)?.label
+                  const dayLabel = daysOfWeek.find(d => d.key === day.day)?.label || day.day
                   return (
                     <div key={day.day} className="space-y-2 p-3 bg-white/5 rounded-lg">
                       <div className="flex items-center justify-between">
                         <span className="text-white font-medium">{dayLabel}</span>
                         <Switch
-                          checked={day.isAvailable}
+                          checked={day.isAvailable || false}
                           onCheckedChange={() => handleAvailabilityToggle(index)}
                         />
                       </div>
@@ -540,14 +607,14 @@ export default function SpeakerDashboardPage() {
                         <div className="flex items-center gap-2">
                           <Input
                             type="time"
-                            value={day.startTime}
+                            value={day.startTime || "09:00"}
                             onChange={(e) => handleTimeChange(index, "startTime", e.target.value)}
                             className="bg-white/10 border-white/20 text-white"
                           />
                           <span className="text-gray-400">to</span>
                           <Input
                             type="time"
-                            value={day.endTime}
+                            value={day.endTime || "17:00"}
                             onChange={(e) => handleTimeChange(index, "endTime", e.target.value)}
                             className="bg-white/10 border-white/20 text-white"
                           />
@@ -556,6 +623,23 @@ export default function SpeakerDashboardPage() {
                     </div>
                   )
                 })}
+                <Button
+                  onClick={handleSaveAvailability}
+                  disabled={isSavingAvailability}
+                  className="w-full bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 mt-4"
+                >
+                  {isSavingAvailability ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Save Availability
+                    </>
+                  )}
+                </Button>
               </CardContent>
             </Card>
           </div>
