@@ -29,6 +29,8 @@ export default function SignUpPage() {
     confirmPassword: "",
     interests: [] as string[],
     meetingPreference: "",
+    age: "",
+    cost: "",
     avatar: null as File | null
   })
   
@@ -42,6 +44,8 @@ export default function SignUpPage() {
     email: "",
     password: "",
     confirmPassword: "",
+    age: "",
+    cost: "",
     termsAccepted: ""
   })
 
@@ -98,6 +102,16 @@ export default function SignUpPage() {
         break
       case "confirmPassword":
         error = validateConfirmPassword(formData.password, value)
+        break
+      case "age":
+        if (value && (isNaN(Number(value)) || Number(value) < 18 || Number(value) > 120)) {
+          error = "Please enter a valid age between 18 and 120"
+        }
+        break
+      case "cost":
+        if (value && (isNaN(Number(value)) || Number(value) < 0)) {
+          error = "Please enter a valid cost (must be 0 or greater)"
+        }
         break
     }
     setValidationErrors(prev => ({ ...prev, [field]: error }))
@@ -172,6 +186,8 @@ export default function SignUpPage() {
         confirmPassword: formData.confirmPassword,
         interests: formData.interests,
         meetingPreference: formData.meetingPreference,
+        age: formData.age ? Number(formData.age) : undefined,
+        cost: formData.cost ? Number(formData.cost) : undefined,
         avatar: formData.avatar || undefined,
         termsAccepted: true,
         privacyAccepted: true,
@@ -203,7 +219,7 @@ export default function SignUpPage() {
     console.log("Facebook signup")
   }
 
-  const totalSteps = 5
+  const totalSteps = 6
 
   return (
     <div className="min-h-screen flex bg-[#1A1A33]">
@@ -453,6 +469,58 @@ export default function SignUpPage() {
 
             {currentStep === 5 && (
               <div>
+                <h3 className="text-3xl font-bold text-gray-900 mb-2">Age & Cost</h3>
+                <p className="text-gray-600 mb-8">Tell us a bit more about yourself</p>
+                
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Age</label>
+                    <Input
+                      type="number"
+                      placeholder="Enter your age"
+                      value={formData.age}
+                      onChange={(e) => handleInputChange("age", e.target.value)}
+                      onBlur={(e) => handleBlur("age", e.target.value)}
+                      min={18}
+                      max={120}
+                      className={`border rounded-lg px-4 py-3 text-gray-900 ${
+                        validationErrors.age 
+                          ? "border-red-500 focus-visible:border-red-500" 
+                          : "border-gray-300 focus-visible:border-purple-500"
+                      }`}
+                    />
+                    {validationErrors.age && (
+                      <p className="text-xs text-red-500 mt-1">{validationErrors.age}</p>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Cost per Session (USD)</label>
+                    <Input
+                      type="number"
+                      placeholder="Enter your hourly rate"
+                      value={formData.cost}
+                      onChange={(e) => handleInputChange("cost", e.target.value)}
+                      onBlur={(e) => handleBlur("cost", e.target.value)}
+                      min={0}
+                      step="0.01"
+                      className={`border rounded-lg px-4 py-3 text-gray-900 ${
+                        validationErrors.cost 
+                          ? "border-red-500 focus-visible:border-red-500" 
+                          : "border-gray-300 focus-visible:border-purple-500"
+                      }`}
+                    />
+                    {validationErrors.cost && (
+                      <p className="text-xs text-red-500 mt-1">{validationErrors.cost}</p>
+                    )}
+                    <p className="text-xs text-gray-500 mt-2">Optional: Leave blank if you haven't decided yet</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {currentStep === 6 && (
+              <div>
                 <h3 className="text-3xl font-bold text-gray-900 mb-2">{t('speakerSignup.step5.title')}</h3>
                 <p className="text-gray-600 mb-8">{t('speakerSignup.step5.description')}</p>
                 
@@ -590,7 +658,7 @@ export default function SignUpPage() {
                 disabled={
                   (currentStep === 1 && (!formData.firstName || !formData.lastName || !formData.email)) ||
                   (currentStep === 3 && !formData.meetingPreference) ||
-                  (currentStep === 5 && (!formData.password || !formData.confirmPassword || !termsAccepted))
+                  (currentStep === 6 && (!formData.password || !formData.confirmPassword || !termsAccepted))
                 }
                 className="px-8 py-2 cursor-pointer bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white rounded-lg cursor-pointer disabled:opacity-50 transition-all"
               >

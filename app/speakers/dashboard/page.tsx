@@ -52,10 +52,20 @@ export default function SpeakerDashboardPage() {
   // Profile editing states
   const [isEditingProfile, setIsEditingProfile] = useState(false)
   const [bio, setBio] = useState("")
+  const [age, setAge] = useState<string>("")
+  const [cost, setCost] = useState<string>("")
+  const [interests, setInterests] = useState<string[]>([])
   const [availability, setAvailability] = useState<SpeakerAvailability[]>([])
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [isSavingAvailability, setIsSavingAvailability] = useState(false)
+  
+  // Available topic options
+  const availableTopics = [
+    "Technology", "Business", "Science", "Art", "Music", 
+    "Sports", "Travel", "Food", "Health", "Education",
+    "Fashion", "Literature", "History", "Languages", "Gaming"
+  ]
 
   // Rating modal states
   const [ratingModalOpen, setRatingModalOpen] = useState(false)
@@ -267,6 +277,9 @@ export default function SpeakerDashboardPage() {
         // Update profile data
         if (profile) {
           setBio(profile.bio || "")
+          setAge(profile.age ? profile.age.toString() : "")
+          setCost(profile.cost ? profile.cost.toString() : "")
+          setInterests(user?.interests || [])
           // Normalize availability to ensure all 7 days are present
           const profileAvailability = profile.availability || []
           console.log('Loaded availability from backend:', profileAvailability)
@@ -277,6 +290,7 @@ export default function SpeakerDashboardPage() {
           // If no profile data, initialize with default availability
           console.log('No profile data, initializing with defaults')
           setAvailability(getDefaultAvailability())
+          setInterests(user?.interests || [])
         }
       }
       // Set avatar if user has one
@@ -294,7 +308,16 @@ export default function SpeakerDashboardPage() {
   const handleSaveProfile = async () => {
     try {
       setIsUploading(true)
-      await speakerService.updateProfile({ bio, availability })
+      
+      // Update user interests in backend
+      await speakerService.updateInterests(interests)
+      
+      await speakerService.updateProfile({ 
+        bio, 
+        age: age ? Number(age) : undefined,
+        cost: cost ? Number(cost) : undefined,
+        availability 
+      })
       await speakerService.updateAvailability(availability)
       setIsEditingProfile(false)
     } catch (err) {
@@ -303,6 +326,19 @@ export default function SpeakerDashboardPage() {
     } finally {
       setIsUploading(false)
     }
+  }
+
+  const handleInterestToggle = (interest: string) => {
+    setInterests(prev => {
+      if (prev.includes(interest)) {
+        // Remove interest
+        return prev.filter(i => i !== interest)
+      } else if (prev.length < 4) {
+        // Add interest (max 4)
+        return [...prev, interest]
+      }
+      return prev
+    })
   }
 
   const handleSaveAvailability = async () => {
@@ -520,41 +556,91 @@ export default function SpeakerDashboardPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Avatar */}
-                <div className="flex flex-col items-center space-y-3">
-                  <div className="relative">
-                    {avatarPreview ? (
-                      <Image
-                        src={avatarPreview}
-                        alt="Avatar"
-                        width={96}
-                        height={96}
-                        className="rounded-full border-4 border-purple-500"
-                      />
-                    ) : (
-                      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center">
-                        <User className="w-12 h-12 text-white" />
-                      </div>
-                    )}
-                    {isEditingProfile && (
-                      <label className="absolute bottom-0 right-0 bg-purple-600 p-2 rounded-full cursor-pointer hover:bg-purple-700 transition-colors">
-                        <Camera className="w-4 h-4 text-white" />
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleAvatarUpload}
-                          className="hidden"
-                          disabled={isUploading}
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="relative w-full max-w-[200px] mx-auto">
+                    <div className="relative z-10 w-full aspect-square flex items-end">
+                      {avatarPreview ? (
+                        <Image
+                          src={avatarPreview}
+                          alt="Avatar"
+                          width={200}
+                          height={200}
+                          className="w-full h-full object-cover rounded-2xl drop-shadow-2xl"
                         />
-                      </label>
-                    )}
+                      ) : (
+                        <div className="w-full h-full rounded-2xl bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center drop-shadow-2xl">
+                          <User className="w-20 h-20 text-white" />
+                        </div>
+                      )}
+                      {isEditingProfile && (
+                        <label className="absolute top-2 right-2 bg-purple-600 p-2 rounded-full cursor-pointer hover:bg-purple-700 transition-colors z-20 shadow-lg">
+                          <Camera className="w-4 h-4 text-white" />
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleAvatarUpload}
+                            className="hidden"
+                            disabled={isUploading}
+                          />
+                        </label>
+                      )}
+                    </div>
+
+                    {/* Decorative Elements */}
+                    <div className="absolute -top-2 -right-2 w-12 h-12 bg-purple-500/30 rounded-full blur-xl animate-pulse"></div>
+                    <div className="absolute -bottom-2 -left-2 w-10 h-10 bg-cyan-500/30 rounded-full blur-xl animate-pulse" style={{ animationDelay: '700ms' }}></div>
                   </div>
                   <div className="text-center">
-                    <h3 className="text-lg font-semibold text-white">
+                    <h3 className="text-xl font-bold text-white mb-1">
                       {user?.firstname} {user?.lastname}
                     </h3>
                     <p className="text-sm text-gray-400">{user?.email}</p>
                   </div>
                 </div>
+
+                {/* Interests/Topics */}
+                {isEditingProfile ? (
+                  <div>
+                    <Label className="text-white mb-2">Topics & Interests</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {availableTopics.map((topic) => (
+                        <button
+                          key={topic}
+                          type="button"
+                          onClick={() => handleInterestToggle(topic)}
+                          disabled={!interests.includes(topic) && interests.length >= 4}
+                          className={`px-3 py-1.5 rounded-full transition-all text-xs font-medium ${
+                            interests.includes(topic)
+                              ? "bg-gradient-to-r from-purple-500 to-cyan-500 text-white border-2 border-purple-400"
+                              : "bg-white/10 border border-white/20 text-gray-300 hover:border-purple-400/50"
+                          } ${!interests.includes(topic) && interests.length >= 4 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                        >
+                          {topic}
+                        </button>
+                      ))}
+                    </div>
+                    {interests.length > 0 && (
+                      <p className="mt-2 text-xs text-gray-400">
+                        Selected: {interests.length}/4
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  user?.interests && user.interests.length > 0 && (
+                    <div>
+                      <div className="flex flex-wrap gap-2 justify-center">
+                        {user.interests.map((interest, index) => (
+                          <div 
+                            key={index}
+                            className="px-3 py-1 bg-gradient-to-r from-purple-500/20 to-cyan-500/20 border border-purple-400/30 rounded-full"
+                          >
+                            <span className="text-purple-200 text-xs font-medium">{interest}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                )}
 
                 {/* Bio */}
                 {isEditingProfile ? (
@@ -570,6 +656,53 @@ export default function SpeakerDashboardPage() {
                   </div>
                 ) : (
                   <p className="text-sm text-gray-300">{bio || t('dashboard.profile.noBio')}</p>
+                )}
+
+                {/* Age and Cost */}
+                {isEditingProfile ? (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-white mb-2">Age</Label>
+                      <Input
+                        type="number"
+                        value={age}
+                        onChange={(e) => setAge(e.target.value)}
+                        min={18}
+                        max={120}
+                        className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                        placeholder="Enter your age"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-white mb-2">Cost per Session (USD)</Label>
+                      <Input
+                        type="number"
+                        value={cost}
+                        onChange={(e) => setCost(e.target.value)}
+                        min={0}
+                        step="0.01"
+                        className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                        placeholder="Enter hourly rate"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  (age || cost) && (
+                    <div className="flex flex-wrap gap-2">
+                      {age && (
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-500/20 border border-purple-500/30 rounded-full">
+                          <span className="text-purple-300 text-sm font-medium">Age:</span>
+                          <span className="text-white text-sm font-semibold">{age}</span>
+                        </div>
+                      )}
+                      {cost && (
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-cyan-500/20 border border-cyan-500/30 rounded-full">
+                          <span className="text-cyan-300 text-sm font-medium">Cost:</span>
+                          <span className="text-white text-sm font-semibold">${cost}</span>
+                        </div>
+                      )}
+                    </div>
+                  )
                 )}
 
                 {isEditingProfile && (

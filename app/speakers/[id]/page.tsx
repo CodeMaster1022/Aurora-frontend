@@ -36,6 +36,14 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
     topic2: ""
   })
 
+  // Available topics for selection
+  const availableTopics = [
+    "Technology", "Business", "Science", "Art", "Music", 
+    "Sports", "Travel", "Food", "Health", "Education",
+    "Fashion", "Literature", "History", "Languages", "Gaming",
+    "Photography", "Fitness", "Cooking", "Finance", "Psychology"
+  ]
+
   useEffect(() => {
     fetchSpeakerProfile()
   }, [params.id])
@@ -231,82 +239,134 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
         {/* Back Button */}
         <Button
           onClick={() => router.push('/speakers')}
-          variant="outline"
-          className="mb-6 bg-white/10 border-white/20 text-white hover:bg-white/20 cursor-pointer"
+          variant="ghost"
+          className="mb-6 text-white/70 hover:text-white hover:bg-white/10 cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          {t('speakerProfile.backToSpeakers')}
+          Back to Speakers
         </Button>
 
-        {/* Profile Header */}
-        <Card className="bg-white/10 backdrop-blur-lg border-white/20 mb-6">
-          <CardContent className="p-8">
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-              {/* Avatar */}
+        {/* Hero Section with Large Image */}
+        <Card className="bg-transparent border-white/20 mb-8 overflow-hidden shadow-2xl p-0">
+          <CardContent className="p-0">
+            <div className="relative w-full h-[400px]">
               {speaker.avatar ? (
                 <Image
                   src={speaker.avatar}
                   alt={`${speaker.firstname} ${speaker.lastname}`}
-                  width={150}
-                  height={150}
-                  className="rounded-full border-4 border-purple-500"
+                  fill
+                  className="object-cover"
+                  priority
+                  quality={90}
                 />
               ) : (
-                <div className="w-40 h-40 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center">
-                  <span className="text-white text-4xl font-bold">
+                <div className="w-full h-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center">
+                  <span className="text-white text-8xl font-bold drop-shadow-2xl">
                     {speaker.firstname?.[0]}{speaker.lastname?.[0]}
                   </span>
                 </div>
               )}
+              
+              {/* Gradient Overlays for Better Contrast */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A33] via-transparent to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-transparent via-purple-500/5 to-purple-500/10"></div>
+              
+              {/* Decorative Corner Accent */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/20 to-transparent rounded-bl-[200px]"></div>
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-cyan-500/20 to-transparent rounded-tr-[200px]"></div>
+              
+              {/* Subtle Border Glow */}
+              <div className="absolute inset-0 border border-purple-500/20 pointer-events-none"></div>
+            </div>
+          </CardContent>
+        </Card>
 
-              {/* Name and Info */}
-              <div className="flex-1 text-center md:text-left">
-                <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">
-                  {speaker.firstname} {speaker.lastname}
-                </h1>
+        {/* Profile Header */}
+        <Card className="bg-white/10 backdrop-blur-lg border-white/20 mb-6">
+          <CardContent className="p-6">
+            <div className="flex flex-col md:flex-row items-start gap-6">
+              {/* Profile Info Section */}
+              <div className="flex-1">
+                {/* Age and Name */}
+                <div className="mb-4">
+                  {speaker.age && (
+                    <p className="text-gray-400 text-sm mb-2">{speaker.age} years</p>
+                  )}
+                  <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">
+                    {speaker.firstname} {speaker.lastname}
+                  </h1>
+                </div>
                 
-                {/* Rating */}
-                <div className="flex items-center justify-center md:justify-start gap-2 mb-4">
-                  <Star className="w-6 h-6 text-yellow-400 fill-yellow-400" />
-                  <span className="text-white text-xl font-semibold">
-                    {speaker.rating ? speaker.rating.toFixed(1) : t('speakerProfile.new')}
-                  </span>
-                  <span className="text-gray-300">
-                    ({speaker.reviewsCount || 0} {speaker.reviewsCount !== 1 ? t('speakerProfile.reviews') : t('speakerProfile.review')})
-                  </span>
+                {/* Rating and Stats */}
+                <div className="flex flex-wrap items-center gap-4 mb-6">
+                  <div className="flex items-center gap-2">
+                    <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+                    <span className="text-white font-semibold">
+                      {speaker.rating ? speaker.rating.toFixed(1) : t('speakerProfile.new')}
+                    </span>
+                    <span className="text-gray-400 text-sm">
+                      ({speaker.reviewsCount || 0} reviews)
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-300">
+                    <Calendar className="w-4 h-4 text-purple-400" />
+                    <span className="text-sm">{speaker.totalSessions || 0} sessions</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-300">
+                    <Users className="w-4 h-4 text-cyan-400" />
+                    <span className="text-sm">{speaker.completedSessions || 0} completed</span>
+                  </div>
+                  {/* Cost Badge */}
+                  {speaker.cost && (
+                    <div className="flex items-center gap-2 px-3 py-1 bg-purple-500/20 border border-purple-500/30 rounded-full">
+                      <span className="text-purple-300 text-sm font-medium">Cost:</span>
+                      <span className="text-white text-sm font-semibold">${speaker.cost}</span>
+                    </div>
+                  )}
                 </div>
 
-                {/* Stats */}
-                <div className="flex flex-wrap gap-4 justify-center md:justify-start">
-                  <div className="flex items-center gap-2 text-gray-300">
-                    <Calendar className="w-5 h-5 text-purple-400" />
-                    <span className="text-sm">{speaker.totalSessions || 0} {t('speakerProfile.sessions')}</span>
+                {/* Interests */}
+                {speaker.interests && speaker.interests.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-6">
+                    {speaker.interests.map((interest: string, idx: number) => (
+                      <Badge
+                        key={idx}
+                        variant="outline"
+                        className="bg-transparent text-white border-white/30 hover:border-purple-400"
+                      >
+                        {interest}
+                      </Badge>
+                    ))}
                   </div>
-                  <div className="flex items-center gap-2 text-gray-300">
-                    <Users className="w-5 h-5 text-purple-400" />
-                    <span className="text-sm">{speaker.completedSessions || 0} {t('speakerProfile.completed')}</span>
+                )}
+
+                {/* Bio */}
+                {speaker.bio && (
+                  <div className="mb-6">
+                    <h3 className="text-white font-semibold mb-2">About</h3>
+                    <p className="text-gray-300 leading-relaxed">{speaker.bio}</p>
                   </div>
-                </div>
+                )}
 
                 {/* Book Session Button */}
                 {/* {isAuthenticated && user && user.role === 'learner' && ( */}
                   <Dialog open={isBookingDialogOpen} onOpenChange={setIsBookingDialogOpen}>
                     <DialogTrigger asChild>
-                      <Button className="mt-4 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer">
-                        <Calendar className="w-4 h-4 mr-2 text-white" />
+                      <Button className="bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white cursor-pointer px-8 py-3 text-lg">
+                        <Calendar className="w-5 h-5 mr-2" />
                         Book a Session
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="bg-[#1A1A33] border-white/20 text-white">
-                      <DialogHeader>
-                        <DialogTitle className="text-white text-2xl">{t('speakerProfile.bookSession.title')}</DialogTitle>
+                    <DialogContent className="bg-[#1A1A33] border-white/20 text-white max-h-[95vh] overflow-y-auto">
+                      <DialogHeader className="pb-1">
+                        <DialogTitle className="text-white text-xl">{t('speakerProfile.bookSession.title')}</DialogTitle>
                       </DialogHeader>
-                      <div className="space-y-4">
+                      <div className="space-y-2">
                         {bookingSuccess ? (
-                          <div className="text-center py-8">
-                            <CheckCircle2 className="w-16 h-16 mx-auto text-green-400 mb-4" />
-                            <h3 className="text-xl font-semibold text-white mb-2">{t('speakerProfile.bookSession.success.title')}</h3>
-                            <p className="text-gray-300">
+                          <div className="text-center py-3">
+                            <CheckCircle2 className="w-12 h-12 mx-auto text-green-400 mb-2" />
+                            <h3 className="text-lg font-semibold text-white mb-2">{t('speakerProfile.bookSession.success.title')}</h3>
+                            <p className="text-gray-300 text-sm">
                               {t('speakerProfile.bookSession.success.message')}
                             </p>
                           </div>
@@ -314,9 +374,9 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
                           <>
                             {/* Speaker Availability Schedule */}
                             {speaker?.availability && (
-                              <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                                <Label className="text-white font-semibold mb-3 block confirmed">{t('speakerProfile.bookSession.availability')}</Label>
-                                <div className="space-y-2 max-h-48 overflow-y-auto">
+                              <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                                <Label className="text-white font-semibold mb-2 block text-sm">{t('speakerProfile.bookSession.availability')}</Label>
+                                <div className="space-y-1.5 max-h-32 overflow-y-auto">
                                   {daysOfWeek.map((day) => {
                                     const dayAvailability = speaker.availability.find(
                                       (avail: any) => avail.day === day.key
@@ -325,7 +385,7 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
                                     return (
                                       <div
                                         key={day.key}
-                                        className={`flex items-center justify-between text-sm p-2 rounded ${
+                                        className={`flex items-center justify-between text-xs p-1.5 rounded ${
                                           isAvailable
                                             ? "bg-green-500/10 border border-green-500/20"
                                             : "bg-gray-500/10 border border-gray-500/20 opacity-50"
@@ -426,19 +486,63 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
                             </div>
 
                             <div>
-                              <Label className="text-white">{t('speakerProfile.bookSession.topics')}</Label>
-                              <Input
-                                placeholder={t('speakerProfile.bookSession.topic1')}
-                                value={formData.topic1}
-                                onChange={(e) => setFormData({ ...formData, topic1: e.target.value })}
-                                className="bg-white/10 border-white/20 text-white mt-2 mb-2"
-                              />
-                              <Input
-                                placeholder={t('speakerProfile.bookSession.topic2')}
-                                value={formData.topic2}
-                                onChange={(e) => setFormData({ ...formData, topic2: e.target.value })}
-                                className="bg-white/10 border-white/20 text-white"
-                              />
+                              <Label className="text-white mb-2 block">{t('speakerProfile.bookSession.topics')}</Label>
+                              <div className="flex flex-wrap gap-2 mb-3">
+                                {availableTopics.map((topic) => {
+                                  const isSelected = formData.topic1 === topic || formData.topic2 === topic
+                                  const canSelect = !formData.topic1 || !formData.topic2
+                                  
+                                  return (
+                                    <button
+                                      key={topic}
+                                      type="button"
+                                      onClick={() => {
+                                        if (isSelected) {
+                                          // Deselect
+                                          if (formData.topic1 === topic) {
+                                            setFormData({ ...formData, topic1: "" })
+                                          } else {
+                                            setFormData({ ...formData, topic2: "" })
+                                          }
+                                        } else if (canSelect) {
+                                          // Select
+                                          if (!formData.topic1) {
+                                            setFormData({ ...formData, topic1: topic })
+                                          } else {
+                                            setFormData({ ...formData, topic2: topic })
+                                          }
+                                        }
+                                      }}
+                                      disabled={!isSelected && !canSelect}
+                                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                                        isSelected
+                                          ? "bg-gradient-to-r from-purple-600 to-purple-500 text-white border-2 border-purple-400"
+                                          : "bg-white/10 border border-white/20 text-gray-300 hover:border-purple-400/50"
+                                      } ${!isSelected && !canSelect ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                                    >
+                                      {topic}
+                                    </button>
+                                  )
+                                })}
+                              </div>
+                              <p className="text-xs text-gray-400 mb-2">
+                                Selected: {(formData.topic1 ? 1 : 0) + (formData.topic2 ? 1 : 0)}/2
+                              </p>
+                              {/* Show selected topics as pills */}
+                              {(formData.topic1 || formData.topic2) && (
+                                <div className="flex flex-wrap gap-2">
+                                  {formData.topic1 && (
+                                    <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30">
+                                      {formData.topic1}
+                                    </Badge>
+                                  )}
+                                  {formData.topic2 && (
+                                    <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30">
+                                      {formData.topic2}
+                                    </Badge>
+                                  )}
+                                </div>
+                              )}
                             </div>
 
                             {bookingError && (
@@ -467,31 +571,6 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
                 {/* )} */}
               </div>
             </div>
-
-            {/* Bio */}
-            {speaker.bio && (
-              <div className="mt-6 pt-6 border-t border-white/10">
-                <h3 className="text-white font-semibold mb-3">{t('speakerProfile.about')}</h3>
-                <p className="text-gray-300 leading-relaxed">{speaker.bio}</p>
-              </div>
-            )}
-
-            {/* Interests */}
-            {speaker.interests && speaker.interests.length > 0 && (
-              <div className="mt-6 pt-6 border-t border-white/10">
-                <h3 className="text-white font-semibold mb-3">{t('speakerProfile.topicsInterests')}</h3>
-                <div className="flex flex-wrap gap-2">
-                  {speaker.interests.map((interest: string, idx: number) => (
-                    <Badge
-                      key={idx}
-                      className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-sm py-1.5 px-3"
-                    >
-                      {interest}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
           </CardContent>
         </Card>
 

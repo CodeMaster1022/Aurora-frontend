@@ -50,6 +50,8 @@ export interface SpeakerAvailability {
 export interface SpeakerProfile {
   _id: string;
   bio?: string;
+  age?: number;
+  cost?: number;
   availability: SpeakerAvailability[];
   totalSessions: number;
   completedSessions: number;
@@ -124,6 +126,14 @@ class SpeakerService {
       body: JSON.stringify(profileData),
     });
     return response.data.profile;
+  }
+
+  // Update interests
+  async updateInterests(interests: string[]): Promise<{ success: boolean }> {
+    return this.makeRequest<{ success: boolean }>('/speaker/interests', {
+      method: 'PUT',
+      body: JSON.stringify({ interests }),
+    });
   }
 
   // Update availability

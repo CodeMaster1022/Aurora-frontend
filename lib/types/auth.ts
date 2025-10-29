@@ -13,6 +13,8 @@ export interface User {
   meetingPreference?: string;
   avatar?: string;
   bio?: string;
+  age?: number;
+  cost?: number;
   availability?: Array<{
     day: string;
     startTime: string;
@@ -57,6 +59,8 @@ export interface SpeakerRegisterCredentials {
   confirmPassword: string;
   interests?: string[];
   meetingPreference?: string;
+  age?: number;
+  cost?: number;
   avatar?: File;
   termsAccepted?: boolean;
   privacyAccepted?: boolean;

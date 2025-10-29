@@ -93,136 +93,137 @@ export default function SpeakersPage() {
     <div className="min-h-screen bg-[#1A1A33] pt-24 pb-12 px-4 sm:px-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8 text-center">
-          <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
+        <div className="mb-4 text-center">
+          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4">
             {t('speakers.title')}
           </h1>
-          <p className="text-gray-300 text-lg">
+          {/* <p className="text-gray-300 text-lg">
             {t('speakers.subtitle')}
-          </p>
+          </p> */}
         </div>
 
         {/* Search and Filter Section */}
-        <Card className="bg-white/10 backdrop-blur-lg border-white/20 mb-8">
-          <CardContent className="p-6">
-            {/* Search Bar */}
-            <div className="relative mb-6">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <Input
-                placeholder={t('speakers.search.placeholder')}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-gray-400 h-12 text-lg"
-              />
-            </div>
-
-            {/* Topic Filter */}
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Filter className="w-5 h-5 text-purple-400" />
-                <h3 className="text-white font-semibold">{t('speakers.filter.title')}</h3>
+        <div className="bg-white/10 backdrop-blur-lg border-white/20 mb-6 rounded-xl">
+          <CardContent className="p-4">
+            <div className="flex flex-col md:flex-row md:items-center gap-3">
+              {/* Search Bar */}
+              <div className="relative flex-1">
+                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder={t('speakers.search.placeholder')}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-8 bg-white/10 border-white/20 text-white placeholder:text-gray-400 h-9 text-sm"
+                />
               </div>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  onClick={clearFilters}
-                  variant={!selectedTopic ? "default" : "outline"}
-                  className="bg-purple-600 hover:bg-purple-700 text-white"
-                  size="sm"
-                >
-                  {t('speakers.filter.allTopics')}
-                </Button>
-                {topics.map((topic) => (
-                  <Button
-                    key={topic.key}
-                    onClick={() => setSelectedTopic(topic.key)}
-                    variant={selectedTopic === topic.key ? "default" : "outline"}
-                    className={
-                      selectedTopic === topic.key
-                        ? "bg-purple-600 hover:bg-purple-700 text-white"
-                        : "bg-white/10 border-white/20 text-gray-300 hover:bg-white/20"
-                    }
-                    size="sm"
-                  >
-                    {t(topic.translationKey as any)}
-                  </Button>
-                ))}
+
+              {/* Topic Filter */}
+              <div className="flex items-center gap-2 md:border-l md:pl-3 md:border-white/20">
+                <Filter className="w-4 h-4 text-purple-400" />
+                <div className="flex flex-wrap gap-1.5">
+                  {topics.slice(0, 6).map((topic) => (
+                    <Button
+                      key={topic.key}
+                      onClick={() => setSelectedTopic(topic.key === selectedTopic ? "" : topic.key)}
+                      variant={selectedTopic === topic.key ? "default" : "outline"}
+                      className={`h-8 px-2 text-xs ${
+                        selectedTopic === topic.key
+                          ? "bg-purple-600 hover:bg-purple-700 text-white"
+                          : "bg-white/10 border-white/20 text-gray-300 hover:bg-white/20"
+                      }`}
+                    >
+                      {t(topic.translationKey as any)}
+                    </Button>
+                  ))}
+                </div>
               </div>
             </div>
 
             {/* Results Count */}
-            <div className="mt-4 text-gray-300 text-sm">
+            <div className="mt-2 text-gray-400 text-xs">
               {filteredSpeakers.length} {filteredSpeakers.length !== 1 ? t('speakers.results.countPlural') : t('speakers.results.count')}
             </div>
           </CardContent>
-        </Card>
+        </div>
 
         {/* Speakers Grid */}
         {filteredSpeakers.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {filteredSpeakers.map((speaker) => (
               <Link href={`/speakers/${speaker._id}`} key={speaker._id}>
-                <Card className="bg-white/10 backdrop-blur-lg border-white/20 hover:bg-white/15 transition-all cursor-pointer h-full">
-                  <CardContent className="p-6">
-                    {/* Avatar and Basic Info */}
-                    <div className="flex flex-col items-center mb-4">
-                      {speaker.avatar ? (
-                        <Image
-                          src={speaker.avatar}
-                          alt={`${speaker.firstname} ${speaker.lastname}`}
-                          width={100}
-                          height={100}
-                          className="rounded-full border-4 border-purple-500 mb-3"
-                        />
-                      ) : (
-                        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center mb-3">
-                          <span className="text-white text-2xl font-bold">
-                            {speaker.firstname?.[0]}{speaker.lastname?.[0]}
-                          </span>
-                        </div>
-                      )}
-                      <h3 className="text-xl font-semibold text-white text-center mb-1">
-                        {speaker.firstname} {speaker.lastname}
-                      </h3>
-                      <div className="flex items-center gap-1 mb-2">
-                        <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                        <span className="text-gray-300 text-sm">
-                          {speaker.rating ? speaker.rating.toFixed(1) : t('speakers.card.new')}
-                        </span>
-                        <span className="text-gray-500 text-sm">
-                          ({speaker.reviewsCount || 0} {t('speakers.card.reviews')})
+                <Card className="bg-[#1A1A33] border-white/20 hover:shadow-lg hover:shadow-purple-500/20 transition-all cursor-pointer h-full flex flex-col overflow-hidden rounded-2xl">
+                  {/* Top Half - Full Width Image */}
+                  <div className="relative w-full h-[180px] overflow-hidden">
+                    {speaker.avatar ? (
+                      <Image
+                        src={speaker.avatar}
+                        alt={`${speaker.firstname} ${speaker.lastname}`}
+                        fill
+                        className="object-cover object-center"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center">
+                        <span className="text-white text-6xl font-bold">
+                          {speaker.firstname?.[0]}{speaker.lastname?.[0]}
                         </span>
                       </div>
-                    </div>
+                    )}
+                  </div>
+
+                  {/* Bottom Half - Content */}
+                  <CardContent className="p-4 flex-1 flex flex-col">
+                    {/* Age */}
+                    {speaker.age && (
+                      <p className="text-gray-400 text-xs mb-1">{speaker.age} years</p>
+                    )}
+                    
+                    {/* Name */}
+                    <h3 className="text-lg font-bold text-white mb-2">
+                      {speaker.firstname} {speaker.lastname}
+                    </h3>
 
                     {/* Bio */}
                     {speaker.bio && (
-                      <p className="text-gray-300 text-sm mb-4 line-clamp-3">
+                      <p className="text-gray-300 text-xs mb-3 line-clamp-2 flex-grow min-h-[2.5rem]">
                         {speaker.bio}
                       </p>
                     )}
 
                     {/* Interests */}
                     {speaker.interests && speaker.interests.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {speaker.interests.slice(0, 3).map((interest: string, idx: number) => (
+                      <div className="flex flex-wrap gap-1.5 mb-3">
+                        {speaker.interests.slice(0, 2).map((interest: string, idx: number) => (
                           <Badge
                             key={idx}
-                            className="bg-purple-500/20 text-purple-300 border-purple-500/30"
+                            variant="outline"
+                            className="bg-transparent text-white border-white/30 hover:border-purple-400 text-xs py-0 px-2 h-6"
                           >
                             {interest}
                           </Badge>
                         ))}
-                        {speaker.interests.length > 3 && (
-                          <Badge className="bg-gray-500/20 text-gray-300 border-gray-500/30">
-                            +{speaker.interests.length - 3}
+                        {speaker.interests.length > 2 && (
+                          <Badge variant="outline" className="bg-transparent text-gray-400 border-gray-600/30 text-xs py-0 px-2 h-6">
+                            +{speaker.interests.length - 2}
                           </Badge>
                         )}
                       </div>
                     )}
 
-                    {/* Session Stats */}
-                    <div className="mt-4 pt-4 border-t border-white/10 text-center text-sm text-gray-400">
-                      {speaker.totalSessions || 0} {t('speakers.card.sessions')}
+                    {/* Bottom Row - Cost and Button - Always at bottom */}
+                    <div className="flex items-center justify-between pt-3 border-t border-white/10 mt-auto">
+                      <div className="flex items-center gap-2">
+                        <span className="text-purple-400 font-bold text-sm">
+                          {speaker.cost ? `$${speaker.cost}` : 'Free'}
+                        </span>
+                        {speaker.cost && speaker.cost > 0 && (
+                          <span className="text-gray-500 text-xs line-through">$300</span>
+                        )}
+                      </div>
+                      <Button
+                        className="bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white rounded-lg px-4 py-1.5 text-sm h-8"
+                      >
+                        Schedule
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
