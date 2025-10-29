@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { 
@@ -24,7 +24,9 @@ import {
   User,
   Link as LinkIcon,
   Unlink,
-  CheckCircle2
+  CheckCircle2,
+  Trash2,
+  AlertTriangle
 } from "lucide-react"
 import { speakerService, Session, Review, SpeakerAvailability } from "@/lib/services/speakerService"
 import { useAppSelector, useAppDispatch } from "@/lib/hooks/redux"
@@ -56,6 +58,12 @@ export default function SpeakerDashboardPage() {
   // Rating modal states
   const [ratingModalOpen, setRatingModalOpen] = useState(false)
   const [selectedSessionForRating, setSelectedSessionForRating] = useState<Session | null>(null)
+
+  // Cancellation modal states
+  const [cancelModalOpen, setCancelModalOpen] = useState(false)
+  const [selectedSessionForCancellation, setSelectedSessionForCancellation] = useState<Session | null>(null)
+  const [cancellationReason, setCancellationReason] = useState("")
+  const [isCancelling, setIsCancelling] = useState(false)
 
   // Google Calendar states
   const [isCalendarConnected, setIsCalendarConnected] = useState(false)
@@ -329,6 +337,48 @@ export default function SpeakerDashboardPage() {
   const handleRatingSuccess = () => {
     // Refresh dashboard data
     fetchDashboardData()
+  }
+
+  const handleCancelSession = (session: Session) => {
+    setSelectedSessionForCancellation(session)
+    setCancellationReason("")
+    setCancelModalOpen(true)
+  }
+
+  const handleConfirmCancellation = async () => {
+    if (!selectedSessionForCancellation) return
+
+    try {
+      setIsCancelling(true)
+      setError("")
+      
+      await speakerService.cancelSession(
+        selectedSessionForCancellation._id,
+        cancellationReason.trim() || undefined
+      )
+
+      // Close modal and refresh data
+      setCancelModalOpen(false)
+      setSelectedSessionForCancellation(null)
+      setCancellationReason("")
+      fetchDashboardData()
+    } catch (err: any) {
+      console.error("Error cancelling session:", err)
+      setError(err.message || "Failed to cancel session")
+    } finally {
+      setIsCancelling(false)
+    }
+  }
+
+  // Calculate hours until session for cancellation rules
+  const getHoursUntilSession = (session: Session): number => {
+    const sessionDate = new Date(session.date)
+    const sessionTime = session.time.split(':')
+    sessionDate.setHours(parseInt(sessionTime[0]), parseInt(sessionTime[1]), 0, 0)
+    
+    const now = new Date()
+    const hoursUntil = (sessionDate.getTime() - now.getTime()) / (1000 * 60 * 60)
+    return hoursUntil
   }
 
   const handleConnectCalendar = async () => {
@@ -705,9 +755,19 @@ export default function SpeakerDashboardPage() {
                               </div>
                             </div>
                           </div>
-                          <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30">
-                            {session.status}
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30">
+                              {session.status}
+                            </Badge>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleCancelSession(session)}
+                              className="bg-red-500/20 hover:bg-red-500/30 text-red-300 border-red-500/30"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -726,7 +786,7 @@ export default function SpeakerDashboardPage() {
                   Past Sessions
                 </CardTitle>
                 <CardDescription className="text-gray-300">
-                  {pastSessions.length} completed sessions
+                  {pastSessions.length} completed and cancelled sessions
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -757,9 +817,18 @@ export default function SpeakerDashboardPage() {
                                 {session.time}
                               </div>
                             </div>
+                            {(session as any).cancellationReason && (
+                              <p className="text-xs text-red-300 mt-1 italic">
+                                Reason: {(session as any).cancellationReason}
+                              </p>
+                            )}
                           </div>
                           <div className="flex flex-col items-end gap-2">
-                            <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
+                            <Badge className={
+                              session.status === 'cancelled'
+                                ? "bg-red-500/20 text-red-300 border-red-500/30"
+                                : "bg-green-500/20 text-green-300 border-green-500/30"
+                            }>
                               {session.status}
                             </Badge>
                             {session.status === 'completed' && !hasBeenReviewed(session._id) && (
@@ -889,6 +958,112 @@ export default function SpeakerDashboardPage() {
           onSuccess={handleRatingSuccess}
         />
       )}
+
+      {/* Cancellation Modal */}
+      <Dialog open={cancelModalOpen} onOpenChange={setCancelModalOpen}>
+        <DialogContent className="bg-gray-900 border-gray-700 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-yellow-500" />
+              Cancel Session
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              {selectedSessionForCancellation && (
+                <>
+                  Are you sure you want to cancel this session?
+                  <div className="mt-4 space-y-2 text-sm">
+                    <div className="bg-white/5 p-3 rounded-lg">
+                      <p className="font-semibold text-white mb-1">
+                        {selectedSessionForCancellation.title}
+                      </p>
+                      <p className="text-gray-300 mb-2">
+                        with{' '}
+                        <span className="font-medium">
+                          {typeof selectedSessionForCancellation.learner === 'object'
+                            ? `${selectedSessionForCancellation.learner.firstname} ${selectedSessionForCancellation.learner.lastname}`
+                            : selectedSessionForCancellation.learner}
+                        </span>
+                      </p>
+                      <div className="flex items-center gap-4 text-xs text-gray-400">
+                        <span>
+                          {formatDate(selectedSessionForCancellation.date)} at{' '}
+                          {selectedSessionForCancellation.time}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="bg-yellow-500/10 border border-yellow-500/20 p-3 rounded-lg">
+                      <p className="text-yellow-400 text-xs font-semibold mb-1">Cancellation Policy:</p>
+                      <ul className="text-xs text-yellow-300/80 space-y-1 list-disc list-inside">
+                        <li>Sessions must be cancelled at least 24 hours before the scheduled time</li>
+                        <li>The learner will be automatically notified</li>
+                        <li>This time slot will become available again for booking</li>
+                        {getHoursUntilSession(selectedSessionForCancellation) < 24 && (
+                          <li className="text-red-400 font-semibold">
+                            Warning: This session is less than 24 hours away. Cancellation may still be allowed but the learner may not have adequate notice.
+                          </li>
+                        )}
+                      </ul>
+                    </div>
+                  </div>
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="cancellation-reason" className="text-white mb-2 block">
+                Cancellation Reason <span className="text-gray-500 text-xs">(optional)</span>
+              </Label>
+              <textarea
+                id="cancellation-reason"
+                value={cancellationReason}
+                onChange={(e) => setCancellationReason(e.target.value)}
+                placeholder="Please provide a reason for cancellation (optional)..."
+                rows={4}
+                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-md text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              />
+            </div>
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/30 text-red-300 p-3 rounded-md text-sm">
+                {error}
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setCancelModalOpen(false)
+                setCancellationReason("")
+                setSelectedSessionForCancellation(null)
+                setError("")
+              }}
+              disabled={isCancelling}
+              className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+            >
+              Keep Session
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmCancellation}
+              disabled={isCancelling}
+              className="bg-red-500 hover:bg-red-600 text-white"
+            >
+              {isCancelling ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Cancelling...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Cancel Session
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
