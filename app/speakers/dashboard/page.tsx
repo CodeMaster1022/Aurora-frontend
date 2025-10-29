@@ -808,45 +808,45 @@ export default function SpeakerDashboardPage() {
 
             {/* Availability Card */}
             <Card className="bg-white/10 backdrop-blur-lg border-white/20">
-              <CardHeader>
+              <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Settings className="text-[#7C3AED] w-5 h-5" />
-                    <CardTitle className="text-white">{t('dashboard.availability.title')}</CardTitle>
+                    <Settings className="text-[#7C3AED] w-4 h-4" />
+                    <CardTitle className="text-white text-base">{t('dashboard.availability.title')}</CardTitle>
                   </div>
-                  <Badge variant="secondary" className="bg-purple-500/20 text-purple-300">
+                  <Badge variant="secondary" className="bg-purple-500/20 text-purple-300 text-xs">
                     {availability.filter(a => a.isAvailable).length} {t('dashboard.availability.daysActive')}
                   </Badge>
                 </div>
-                <CardDescription className="text-gray-300">{t('dashboard.availability.description')}</CardDescription>
+                <CardDescription className="text-gray-300 text-xs mt-1">{t('dashboard.availability.description')}</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-1.5 pt-0">
                 {availability.map((day, index) => {
                   const dayData = daysOfWeek.find(d => d.key === day.day)
                   const dayLabel = dayData ? t(dayData.translationKey as any) : day.day
                   return (
-                    <div key={day.day} className="space-y-2 p-3 bg-white/5 rounded-lg">
+                    <div key={day.day} className="space-y-1.5 p-2 bg-white/5 rounded-md">
                       <div className="flex items-center justify-between">
-                        <span className="text-white font-medium">{dayLabel}</span>
+                        <span className="text-white font-medium text-sm">{dayLabel}</span>
                         <Switch
                           checked={day.isAvailable || false}
                           onCheckedChange={() => handleAvailabilityToggle(index)}
                         />
                       </div>
                       {day.isAvailable && (
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5 pt-1">
                           <Input
                             type="time"
                             value={day.startTime || "09:00"}
                             onChange={(e) => handleTimeChange(index, "startTime", e.target.value)}
-                            className="bg-white/10 border-white/20 text-white"
+                            className="bg-white/10 border-white/20 text-white h-8 text-xs"
                           />
-                          <span className="text-gray-400">{t('dashboard.availability.to')}</span>
+                          <span className="text-gray-400 text-xs">{t('dashboard.availability.to')}</span>
                           <Input
                             type="time"
                             value={day.endTime || "17:00"}
                             onChange={(e) => handleTimeChange(index, "endTime", e.target.value)}
-                            className="bg-white/10 border-white/20 text-white"
+                            className="bg-white/10 border-white/20 text-white h-8 text-xs"
                           />
                         </div>
                       )}
@@ -856,16 +856,16 @@ export default function SpeakerDashboardPage() {
                 <Button
                   onClick={handleSaveAvailability}
                   disabled={isSavingAvailability}
-                  className="w-full bg-gradient-to-r from-purple-600 cursor-pointer to-purple-500 hover:from-purple-700 hover:to-purple-600 mt-4"
+                  className="w-full bg-gradient-to-r from-purple-600 cursor-pointer to-purple-500 hover:from-purple-700 hover:to-purple-600 mt-2 h-9 text-sm"
                 >
                   {isSavingAvailability ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="mr-2 h-3 w-3 animate-spin" />
                       {t('dashboard.availability.saving')}
                     </>
                   ) : (
                     <>
-                      <Save className="mr-2 h-4 w-4" />
+                      <Save className="mr-2 h-3 w-3" />
                       {t('dashboard.availability.save')}
                     </>
                   )}
@@ -875,7 +875,7 @@ export default function SpeakerDashboardPage() {
           </div>
 
           {/* Right Column - Sessions & Reviews */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-3">
             {/* Upcoming Sessions */}
             <Card className="bg-white/10 backdrop-blur-lg border-white/20">
               <CardHeader>
