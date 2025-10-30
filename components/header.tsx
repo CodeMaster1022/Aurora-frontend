@@ -109,7 +109,7 @@ export function Header() {
                       <Link href="/" className="text-gray-300  hover:text-orange-400 transition-colors text-lg font-medium">
                         {t('header.home')}
                       </Link>
-                      <Link href="#" className="text-gray-300  hover:text-orange-400 transition-colors text-lg font-medium">
+                      <Link href="/about" className="text-gray-300  hover:text-orange-400 transition-colors text-lg font-medium">
                         {t('header.nosotros')}
                       </Link>
                 </>
@@ -273,7 +273,7 @@ export function Header() {
                     <Link href="/" className="block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-colors text-lg font-medium">
                       {t('header.home')}
                     </Link>
-                    <Link href="#" className="block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-colors text-lg font-medium">
+                    <Link href="/about" className="block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-colors text-lg font-medium">
                       {t('header.nosotros')}
                     </Link>
                   </>
