@@ -343,6 +343,45 @@ export type TranslationKey =
   | 'speakerProfile.bookSession.anonymous'
   | 'speakerProfile.bookSession.noReviews'
 
+  // About Page
+  | 'about.hero.badge'
+  | 'about.hero.title'
+  | 'about.hero.subtitle'
+  | 'about.story.title'
+  | 'about.story.p1'
+  | 'about.story.p2'
+  | 'about.mission.title'
+  | 'about.mission.p1'
+  | 'about.mission.point1'
+  | 'about.mission.point2'
+  | 'about.mission.point3'
+  | 'about.community.badge'
+  | 'about.community.title'
+  | 'about.community.subtitle'
+  | 'about.community.card1.title'
+  | 'about.community.card1.subtitle'
+  | 'about.community.card2.title'
+  | 'about.community.card2.subtitle'
+  | 'about.community.card3.title'
+  | 'about.community.card3.subtitle'
+  | 'about.community.card4.title'
+  | 'about.community.card4.subtitle'
+  | 'about.faq.title'
+  | 'about.faq.q1'
+  | 'about.faq.a1'
+  | 'about.faq.q2'
+  | 'about.faq.a2'
+  | 'about.faq.q3'
+  | 'about.faq.a3'
+  | 'about.faq.q4'
+  | 'about.faq.a4'
+  | 'about.faq.q5'
+  | 'about.faq.a5'
+  | 'about.faq.more'
+  | 'about.cta.title'
+  | 'about.cta.subtitle'
+  | 'about.cta.button'
+
 export type Translations = Record<TranslationKey, string>;
 
 export const translations: Record<Language, Translations> = {
@@ -688,6 +727,45 @@ export const translations: Record<Language, Translations> = {
     'speakerProfile.bookSession.timeNotInRange': 'Speaker is only available between',
     'speakerProfile.bookSession.anonymous': 'Anonymous',
     'speakerProfile.bookSession.noReviews': 'No reviews yet',
+
+    // About Page
+    'about.hero.badge': 'Our Story',
+    'about.hero.title': 'Aurora: Bringing English to Life',
+    'about.hero.subtitle': 'We believe language unlocks opportunity. Aurora connects learners with kind, inspiring speakers for warm, human conversations that build confidence—one meaningful session at a time.',
+    'about.story.title': 'The Story of Aurora',
+    'about.story.p1': 'Aurora started with a simple idea: if we make practice feel safe, kind, and real, people will finally speak. No tests. No judgment. Just genuine conversations with people who care.',
+    'about.story.p2': 'From living rooms to laptops, from nerves to smiles—Aurora is where learners show up as themselves and leave a little braver every time.',
+    'about.mission.title': 'Our Mission',
+    'about.mission.p1': 'To make English practice accessible, human, and joyful—by matching learners with thoughtful speakers and giving them everything they need to connect, grow, and belong.',
+    'about.mission.point1': 'Warm, one‑to‑one sessions that build confidence',
+    'about.mission.point2': 'Diverse speakers with real‑world experience',
+    'about.mission.point3': 'Flexible scheduling that fits real life',
+    'about.community.badge': 'Our Community',
+    'about.community.title': 'Join Thousands of Learners',
+    'about.community.subtitle': 'Connect with passionate speakers and embark on your English learning journey',
+    'about.community.card1.title': 'Students',
+    'about.community.card1.subtitle': 'Building confidence',
+    'about.community.card2.title': 'Instructors',
+    'about.community.card2.subtitle': 'Inspiring conversations',
+    'about.community.card3.title': 'Practice',
+    'about.community.card3.subtitle': 'Real conversations',
+    'about.community.card4.title': 'Community',
+    'about.community.card4.subtitle': 'Grow together',
+    'about.faq.title': 'Frequently Asked Questions',
+    'about.faq.q1': 'How do donations work?',
+    'about.faq.a1': 'Donations help us support free or reduced‑cost sessions for learners who need it, and sustain our platform. You can add a donation at checkout or through your account settings anytime.',
+    'about.faq.q2': 'What English level do I need?',
+    'about.faq.a2': 'Any level. From first words to near‑fluency, your speaker meets you where you are and adapts the conversation to your goals.',
+    'about.faq.q3': 'How long is a session?',
+    'about.faq.a3': 'Most sessions are 30–60 minutes. Choose what fits your schedule—short, focused practice or a full conversation.',
+    'about.faq.q4': 'What is the cancellation policy?',
+    'about.faq.a4': 'You can reschedule or cancel up to 12 hours before your session with no fee. Inside 12 hours, the session may be charged to protect speakers’ time.',
+    'about.faq.q5': 'What do I need for the session?',
+    'about.faq.a5': 'A stable internet connection, a device with a microphone, and a quiet space. A webcam is recommended but optional.',
+    'about.faq.more': 'Have another question? We’re here for you.',
+    'about.cta.title': 'Ready to Start Your Journey?',
+    'about.cta.subtitle': 'Find a speaker who inspires you and book your first session today. Confidence is just a conversation away.',
+    'about.cta.button': 'Find a Speaker',
   },
   es: {
     // Header
@@ -1031,5 +1109,44 @@ export const translations: Record<Language, Translations> = {
     'speakerProfile.bookSession.timeNotInRange': 'El speaker solo está disponible entre',
     'speakerProfile.bookSession.anonymous': 'Anónimo',
     'speakerProfile.bookSession.noReviews': 'Aún no hay reseñas',
+
+    // About Page
+    'about.hero.badge': 'Nuestra Historia',
+    'about.hero.title': 'Aurora: Traer la Inglés a la Vida',
+    'about.hero.subtitle': 'Creemos que el idioma desbloquea la oportunidad. Aurora conecta a los aprendices con hablantes amables e inspiradores para conversaciones cálidas y humanas que construyen confianza, una sesión significativa a la vez.',
+    'about.story.title': 'La Historia de Aurora',
+    'about.story.p1': 'Aurora comenzó con una idea simple: si hacemos que la práctica se sienta segura, amable y real, la gente finalmente hablará. Sin pruebas. Sin juicio. Solo conversaciones genuinas con personas que se preocupan.',
+    'about.story.p2': 'Desde las salas de estar hasta los laptops, desde nervios a sonrisas—Aurora es donde los aprendices se muestran como ellos mismos y se sienten un poco más valientes cada vez.',
+    'about.mission.title': 'Nuestra Misión',
+    'about.mission.p1': 'Para hacer que la práctica de inglés sea accesible, humana y alegre—al hacer coincidir a los aprendices con hablantes reflexivos y dándoles todo lo que necesitan para conectarse, crecer y pertenecer.',
+    'about.mission.point1': 'Sesiones cálidas de uno a uno que construyen confianza',
+    'about.mission.point2': 'Hablantes diversos con experiencia en el mundo real',
+    'about.mission.point3': 'Programación flexible que se adapta a la vida real',
+    'about.community.badge': 'Nuestra Comunidad',
+    'about.community.title': 'Únete a Miles de Aprendices',
+    'about.community.subtitle': 'Conéctate con hablantes apasionados y comienza tu viaje de aprendizaje de inglés',
+    'about.community.card1.title': 'Estudiantes',
+    'about.community.card1.subtitle': 'Construyendo confianza',
+    'about.community.card2.title': 'Instructores',
+    'about.community.card2.subtitle': 'Conversaciones inspiradoras',
+    'about.community.card3.title': 'Práctica',
+    'about.community.card3.subtitle': 'Conversaciones reales',
+    'about.community.card4.title': 'Comunidad',
+    'about.community.card4.subtitle': 'Crecer juntos',
+    'about.faq.title': 'Preguntas Frecuentes',
+    'about.faq.q1': '¿Cómo funcionan las donaciones?',
+    'about.faq.a1': 'Las donaciones nos ayudan a apoyar sesiones gratuitas o con costo reducido para los aprendices que lo necesitan, y a mantener nuestra plataforma. Puedes agregar una donación en el pago o a través de la configuración de tu cuenta en cualquier momento.',
+    'about.faq.q2': '¿Qué nivel de inglés necesito?',
+    'about.faq.a2': 'Cualquier nivel. Desde las primeras palabras hasta la fluidez cercana, tu speaker se adapta a tu nivel y a tus objetivos.',
+    'about.faq.q3': '¿Cuánto dura una sesión?',
+    'about.faq.a3': 'La mayoría de las sesiones duran 30-60 minutos. Elige lo que se adapte a tu horario—práctica enfocada o conversación completa.',
+    'about.faq.q4': '¿Cuál es la política de cancelación?',
+    'about.faq.a4': 'Puedes reprogramar o cancelar con al menos 12 horas de antelación a tu sesión sin cargo. Dentro de 12 horas, la sesión puede ser cargada para proteger el tiempo de los speakers.',
+    'about.faq.q5': '¿Qué necesito para la sesión?',
+    'about.faq.a5': 'Una conexión estable a internet, un dispositivo con micrófono y un espacio tranquilo. Una webcam es recomendada pero opcional.',
+    'about.faq.more': '¿Tienes otra pregunta? Estamos aquí para ti.',
+    'about.cta.title': '¿Listo para comenzar tu viaje de idiomas?',
+    'about.cta.subtitle': 'Encuentra un speaker que te inspire y reserva tu primera sesión hoy. La confianza está solo a un paso de una conversación.',
+    'about.cta.button': 'Encuentra un Speaker',
   },
 };

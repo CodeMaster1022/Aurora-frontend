@@ -8,8 +8,10 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { useTranslation } from "@/lib/hooks/useTranslation"
 
 export default function AboutPage() {
+  const { t } = useTranslation()
   return (
     <main className="min-h-screen bg-gradient-to-b from-[#0b1420] via-[#0b1420] to-[#0f1c2b] text-white">
       {/* Hero */}
@@ -31,12 +33,12 @@ export default function AboutPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
           >
-            <Badge className="bg-white/10 text-white border border-white/20 px-3 py-1 rounded-full">Our Story</Badge>
+            <Badge className="bg-white/10 text-white border border-white/20 px-3 py-1 rounded-full">{t('about.hero.badge')}</Badge>
             <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight">
-              Aurora: Bringing English to Life
+              {t('about.hero.title')}
             </h1>
             <p className="max-w-3xl text-lg md:text-xl text-white/80 leading-relaxed">
-              We believe language unlocks opportunity. Aurora connects learners with kind, inspiring speakers for warm, human conversations that build confidence—one meaningful session at a time.
+              {t('about.hero.subtitle')}
             </p>
           </motion.div>
         </div>
@@ -53,12 +55,12 @@ export default function AboutPage() {
           >
             <Card className="bg-white/5 border-white/10 backdrop-blur-md h-full">
               <CardContent className="p-6 md:p-8 flex flex-col gap-4">
-                <h2 className="text-2xl md:text-3xl font-bold text-orange-400">The Story of Aurora</h2>
+                <h2 className="text-2xl md:text-3xl font-bold text-orange-400">{t('about.story.title')}</h2>
                 <p className="text-white/80 leading-relaxed">
-                  Aurora started with a simple idea: if we make practice feel safe, kind, and real, people will finally speak. No tests. No judgment. Just genuine conversations with people who care.
+                  {t('about.story.p1')}
                 </p>
                 <p className="text-white/80 leading-relaxed">
-                  From living rooms to laptops, from nerves to smiles—Aurora is where learners show up as themselves and leave a little braver every time.
+                  {t('about.story.p2')}
                 </p>
               </CardContent>
             </Card>
@@ -72,22 +74,22 @@ export default function AboutPage() {
           >
             <Card className="bg-white/5 border-white/10 backdrop-blur-md h-full">
               <CardContent className="p-6 md:p-8 flex flex-col gap-4">
-                <h2 className="text-2xl md:text-3xl font-bold text-[#49BBBD]">Our Mission</h2>
+                <h2 className="text-2xl md:text-3xl font-bold text-[#49BBBD]">{t('about.mission.title')}</h2>
                 <p className="text-white/80 leading-relaxed">
-                  To make English practice accessible, human, and joyful—by matching learners with thoughtful speakers and giving them everything they need to connect, grow, and belong.
+                  {t('about.mission.p1')}
                 </p>
                 <ul className="space-y-4 text-white/90">
                   <li className="flex items-start gap-3">
                     <HeartHandshake className="w-6 h-6 mt-1 text-[#49BBBD]" />
-                    <span><strong className="font-semibold">Warm, one‑to‑one sessions</strong> that build confidence</span>
+                    <span>{t('about.mission.point1')}</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <Users className="w-6 h-6 mt-1 text-[#49BBBD]" />
-                    <span><strong className="font-semibold">Diverse speakers</strong> with real‑world experience</span>
+                    <span>{t('about.mission.point2')}</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <CalendarCheck className="w-6 h-6 mt-1 text-[#49BBBD]" />
-                    <span><strong className="font-semibold">Flexible scheduling</strong> that fits real life</span>
+                    <span>{t('about.mission.point3')}</span>
                   </li>
                 </ul>
               </CardContent>
@@ -110,11 +112,9 @@ export default function AboutPage() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <Badge className="bg-[#49BBBD]/20 text-[#49BBBD] border border-[#49BBBD]/30 px-4 py-1.5 mb-4">Our Community</Badge>
-            <h2 className="text-3xl md:text-4xl font-bold mb-3">Join Thousands of Learners</h2>
-            <p className="text-white/70 max-w-2xl mx-auto">
-              Connect with passionate speakers and embark on your English learning journey
-            </p>
+            <Badge className="bg-[#49BBBD]/20 text-[#49BBBD] border border-[#49BBBD]/30 px-4 py-1.5 mb-4">{t('about.community.badge')}</Badge>
+            <h2 className="text-3xl md:text-4xl font-bold mb-3">{t('about.community.title')}</h2>
+            <p className="text-white/70 max-w-2xl mx-auto">{t('about.community.subtitle')}</p>
           </motion.div>
 
           {/* Image grid */}
@@ -141,8 +141,8 @@ export default function AboutPage() {
                 className="object-cover transition-transform duration-500 group-hover:scale-110" 
               />
               <div className="absolute bottom-4 left-4 right-4 z-20 text-white">
-                <p className="font-semibold text-sm md:text-base">Students</p>
-                <p className="text-xs md:text-sm text-white/80">Building confidence</p>
+                <p className="font-semibold text-sm md:text-base">{t('about.community.card1.title')}</p>
+                <p className="text-xs md:text-sm text-white/80">{t('about.community.card1.subtitle')}</p>
               </div>
             </motion.div>
             
@@ -162,8 +162,8 @@ export default function AboutPage() {
                 className="object-cover transition-transform duration-500 group-hover:scale-110" 
               />
               <div className="absolute bottom-4 left-4 right-4 z-20 text-white">
-                <p className="font-semibold text-sm md:text-base">Instructors</p>
-                <p className="text-xs md:text-sm text-white/80">Inspiring conversations</p>
+                <p className="font-semibold text-sm md:text-base">{t('about.community.card2.title')}</p>
+                <p className="text-xs md:text-sm text-white/80">{t('about.community.card2.subtitle')}</p>
               </div>
             </motion.div>
             
@@ -183,8 +183,8 @@ export default function AboutPage() {
                 className="object-cover transition-transform duration-500 group-hover:scale-110" 
               />
               <div className="absolute bottom-4 left-4 right-4 z-20 text-white">
-                <p className="font-semibold text-sm md:text-base">Practice</p>
-                <p className="text-xs md:text-sm text-white/80">Real conversations</p>
+                <p className="font-semibold text-sm md:text-base">{t('about.community.card3.title')}</p>
+                <p className="text-xs md:text-sm text-white/80">{t('about.community.card3.subtitle')}</p>
               </div>
             </motion.div>
             
@@ -204,8 +204,8 @@ export default function AboutPage() {
                 className="object-cover transition-transform duration-500 group-hover:scale-110" 
               />
               <div className="absolute bottom-4 left-4 right-4 z-20 text-white">
-                <p className="font-semibold text-sm md:text-base">Community</p>
-                <p className="text-xs md:text-sm text-white/80">Grow together</p>
+                <p className="font-semibold text-sm md:text-base">{t('about.community.card4.title')}</p>
+                <p className="text-xs md:text-sm text-white/80">{t('about.community.card4.subtitle')}</p>
               </div>
             </motion.div>
           </motion.div>
@@ -221,40 +221,40 @@ export default function AboutPage() {
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-center">Frequently Asked Questions</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-center">{t('about.faq.title')}</h2>
           <Accordion type="single" collapsible className="bg-white/5 border border-white/10 rounded-xl divide-y divide-white/10">
             <AccordionItem value="donations">
-              <AccordionTrigger className="px-4 md:px-6 text-left hover:text-orange-400 transition-colors">How do donations work?</AccordionTrigger>
+              <AccordionTrigger className="px-4 md:px-6 text-left hover:text-orange-400 transition-colors">{t('about.faq.q1')}</AccordionTrigger>
               <AccordionContent className="px-4 md:px-6 text-white/80">
-                Donations help us support free or reduced‑cost sessions for learners who need it, and sustain our platform. You can add a donation at checkout or through your account settings anytime.
+                {t('about.faq.a1')}
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="level">
-              <AccordionTrigger className="px-4 md:px-6 text-left hover:text-orange-400 transition-colors">What English level do I need?</AccordionTrigger>
+              <AccordionTrigger className="px-4 md:px-6 text-left hover:text-orange-400 transition-colors">{t('about.faq.q2')}</AccordionTrigger>
               <AccordionContent className="px-4 md:px-6 text-white/80">
-                Any level. From first words to near‑fluency, your speaker meets you where you are and adapts the conversation to your goals.
+                {t('about.faq.a2')}
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="duration">
-              <AccordionTrigger className="px-4 md:px-6 text-left hover:text-orange-400 transition-colors">How long is a session?</AccordionTrigger>
+              <AccordionTrigger className="px-4 md:px-6 text-left hover:text-orange-400 transition-colors">{t('about.faq.q3')}</AccordionTrigger>
               <AccordionContent className="px-4 md:px-6 text-white/80">
-                Most sessions are 30–60 minutes. Choose what fits your schedule—short, focused practice or a full conversation.
+                {t('about.faq.a3')}
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="cancellations">
-              <AccordionTrigger className="px-4 md:px-6 text-left hover:text-orange-400 transition-colors">What is the cancellation policy?</AccordionTrigger>
+              <AccordionTrigger className="px-4 md:px-6 text-left hover:text-orange-400 transition-colors">{t('about.faq.q4')}</AccordionTrigger>
               <AccordionContent className="px-4 md:px-6 text-white/80">
-                You can reschedule or cancel up to 12 hours before your session with no fee. Inside 12 hours, the session may be charged to protect speakers’ time.
+                {t('about.faq.a4')}
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="tech">
-              <AccordionTrigger className="px-4 md:px-6 text-left hover:text-orange-400 transition-colors">What do I need for the session?</AccordionTrigger>
+              <AccordionTrigger className="px-4 md:px-6 text-left hover:text-orange-400 transition-colors">{t('about.faq.q5')}</AccordionTrigger>
               <AccordionContent className="px-4 md:px-6 text-white/80">
-                A stable internet connection, a device with a microphone, and a quiet space. A webcam is recommended but optional.
+                {t('about.faq.a5')}
               </AccordionContent>
             </AccordionItem>
           </Accordion>
-          <p className="mt-8 text-center text-white/70">Have another question? We’re here for you.</p>
+          <p className="mt-8 text-center text-white/70">{t('about.faq.more')}</p>
         </motion.div>
       </section>
 
@@ -267,13 +267,13 @@ export default function AboutPage() {
           viewport={{ once: true, amount: 0.5 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Start Your Journey?</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">{t('about.cta.title')}</h2>
           <p className="max-w-2xl mx-auto text-white/80 mb-8">
-            Find a speaker who inspires you and book your first session today. Confidence is just a conversation away.
+            {t('about.cta.subtitle')}
           </p>
           <Link href="/speakers">
             <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white font-bold text-lg px-8 py-6 rounded-full group">
-              Find a Speaker
+              {t('about.cta.button')}
               <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
             </Button>
           </Link>
