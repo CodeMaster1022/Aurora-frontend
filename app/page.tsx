@@ -11,8 +11,10 @@ import grandmother3 from "@/public/image/3.jpeg"
 
 import grandfatherImage from "@/public/image/grandfather.png"
 import { useTranslation } from "@/lib/hooks/useTranslation"
+import { useRouter } from "next/navigation"
 
 export default function HomePage() {
+  const router = useRouter()
   const { t } = useTranslation()
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -468,7 +470,9 @@ export default function HomePage() {
 
                 {/* CTA Button */}
                 <div className="flex justify-center lg:justify-start">
-                  <button className="bg-white text-[#7357F5] font-semibold hover:bg-[#24B86D] px-8 py-4 text-base rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 uppercase tracking-wide">
+                  <button 
+                    onClick={() => router.push('/auth/speaker/signup')}
+                    className="bg-white cursor-pointer text-[#7357F5] font-semibold hover:bg-[#24B86D] px-8 py-4 text-base rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 uppercase tracking-wide">
                     {t('home.becomeSpeaker.cta')}
                   </button>
                 </div>
