@@ -165,7 +165,7 @@ export default function SignUpPage() {
   }
 
   const handleNext = () => {
-    if (currentStep < 5) {
+    if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1)
     }
   }
