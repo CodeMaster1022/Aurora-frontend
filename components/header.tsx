@@ -72,7 +72,7 @@ export function Header() {
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2 cursor-pointer">
             <Image 
               src="/image/logo.png" 
               alt="Aurora Logo" 
@@ -80,7 +80,7 @@ export function Header() {
               height={140}
               className="rounded-lg"
             />
-          </div>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center justify-end flex-1 px-8">
@@ -89,12 +89,18 @@ export function Header() {
                 <>
                   {user?.role === 'speaker' ? (
                     <>
+                      <Link href="/" className="text-gray-300  hover:text-orange-400 transition-colors text-lg font-medium">
+                        {t('header.home')}
+                      </Link>
                       <Link href="/speakers/dashboard" className="text-gray-300 px-2 py-2 rounded-xl hover:text-orange-400 transition-colors text-lg font-medium">
                         {t('header.speakerDashboard')}
                       </Link>
                     </>
                   ) : (
                     <>
+                      <Link href="/learners/dashboard" className="text-gray-300  hover:text-orange-400 transition-colors text-lg font-medium">
+                        {t('header.home')}
+                      </Link>
                       <Link href="/learners/dashboard" className="text-gray-300  hover:text-orange-400 transition-colors text-lg font-medium">
                         {t('header.dashboard')}
                       </Link>
@@ -215,7 +221,7 @@ export function Header() {
           <div className="fixed right-0 top-0 h-full w-[280px] bg-gradient-to-br from-[#49BBBD] to-[#3FA9AB] shadow-2xl transform transition-transform duration-300 ease-in-out">
             {/* Menu Header */}
             <div className="flex items-center justify-between p-4 border-b border-white/20">
-              <div className="flex items-center gap-2">
+              <Link href="/" className="flex items-center gap-2 cursor-pointer" onClick={() => setIsMenuOpen(false)}>
                 <Image 
                   src="/image/logo.png" 
                   alt="Aurora Logo" 
@@ -224,7 +230,7 @@ export function Header() {
                   className="rounded-lg"
                 />
                 <span className="text-xl font-bold text-white">Aurora</span>
-              </div>
+              </Link>
               <button
                 onClick={() => setIsMenuOpen(false)}
                 className="w-8 h-8 flex items-center justify-center text-white hover:bg-white/20 rounded-lg transition-colors"
@@ -254,11 +260,17 @@ export function Header() {
                     {user?.role === 'speaker' ? (
                       <>
                         <Link href="/speakers/dashboard" className="block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-colors text-lg font-medium shadow-lg">
+                          {t('header.home')}
+                        </Link>
+                        <Link href="/speakers/dashboard" className="block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-colors text-lg font-medium shadow-lg">
                           {t('header.speakerDashboard')}
                         </Link>
                       </>
                     ) : (
                       <>
+                        <Link href="/speakers/dashboard" className="block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-colors text-lg font-medium shadow-lg">
+                          {t('header.home')}
+                        </Link>
                         <Link href="/dashboard" className="block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-colors text-lg font-medium">
                           {t('header.dashboard')}
                         </Link>
