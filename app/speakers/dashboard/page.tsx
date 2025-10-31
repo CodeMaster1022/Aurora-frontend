@@ -194,8 +194,8 @@ export default function SpeakerDashboardPage() {
     // Check past sessions first (completed sessions)
     const completedSessions = pastSessions.filter(s => s.status === 'completed')
     for (const session of completedSessions) {
-      if (!hasBeenReviewed(session._id)) {
-        // Found a completed session that hasn't been reviewed - open modal
+      if (!hasReceivedReviews(session._id)) {
+        // Found a completed session that hasn't received any reviews yet - open modal
         setSelectedSessionForRating(session)
         setRatingModalOpen(true)
         return // Only open for one session at a time
@@ -203,9 +203,9 @@ export default function SpeakerDashboardPage() {
     }
     
     // Also check upcoming sessions that have actually ended but still marked as scheduled
-    const endedSessions = upcomingSessions.filter(s => hasSessionEnded(s) && !hasBeenReviewed(s._id))
+    const endedSessions = upcomingSessions.filter(s => hasSessionEnded(s) && !hasReceivedReviews(s._id))
     if (endedSessions.length > 0) {
-      // Found an ended session that hasn't been reviewed - open modal
+      // Found an ended session that hasn't received any reviews yet - open modal
       setSelectedSessionForRating(endedSessions[0])
       setRatingModalOpen(true)
     }
@@ -395,6 +395,11 @@ export default function SpeakerDashboardPage() {
   // Check if a session has been reviewed by this speaker
   const hasBeenReviewed = (sessionId: string) => {
     return givenReviews.some(review => review.session === sessionId)
+  }
+
+  // Check if a session has received any reviews (from anyone)
+  const hasReceivedReviews = (sessionId: string) => {
+    return reviews.some(review => review.session === sessionId)
   }
 
   // Check if a session has ended (date + time + duration has passed)
@@ -1011,7 +1016,7 @@ export default function SpeakerDashboardPage() {
                             }>
                               {session.status}
                             </Badge>
-                            {session.status === 'completed' && !hasBeenReviewed(session._id) && (
+                            {session.status === 'completed' && !hasReceivedReviews(session._id) && (
                               <Button
                                 size="sm"
                                 onClick={() => handleRateSession(session)}
