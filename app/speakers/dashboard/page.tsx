@@ -60,12 +60,8 @@ export default function SpeakerDashboardPage() {
   const [isUploading, setIsUploading] = useState(false)
   const [isSavingAvailability, setIsSavingAvailability] = useState(false)
   
-  // Available topic options
-  const availableTopics = [
-    "Technology", "Business", "Science", "Art", "Music", 
-    "Sports", "Travel", "Food", "Health", "Education",
-    "Fashion", "Literature", "History", "Languages", "Gaming"
-  ]
+  // Available topic options - loaded from backend
+  const [availableTopics, setAvailableTopics] = useState<string[]>([])
 
   // Rating modal states
   const [ratingModalOpen, setRatingModalOpen] = useState(false)
@@ -174,6 +170,22 @@ export default function SpeakerDashboardPage() {
       console.error('Error checking calendar status:', error)
     }
   }
+
+  // Load topics from backend on mount
+  useEffect(() => {
+    const loadTopics = async () => {
+      try {
+        const response = await speakerService.getTopics()
+        if (response.success && response.data.topics) {
+          setAvailableTopics(response.data.topics)
+        }
+      } catch (error) {
+        console.error('Error loading topics:', error)
+        // Keep default topics if backend fails
+      }
+    }
+    loadTopics()
+  }, [])
 
   // Initialize availability if empty after data load
   useEffect(() => {

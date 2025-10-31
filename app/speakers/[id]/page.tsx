@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Star, Loader2, ArrowLeft, Calendar, Users, MessageSquare, CheckCircle2 } from "lucide-react"
 import { learnerService } from "@/lib/services/learnerService"
+import { speakerService } from "@/lib/services/speakerService"
 import { useAppSelector } from "@/lib/hooks/redux"
 import { useTranslation } from "@/lib/hooks/useTranslation"
 import Image from "next/image"
@@ -36,17 +37,25 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
     topic2: ""
   })
 
-  // Available topics for selection
-  const availableTopics = [
-    "Technology", "Business", "Science", "Art", "Music", 
-    "Sports", "Travel", "Food", "Health", "Education",
-    "Fashion", "Literature", "History", "Languages", "Gaming",
-    "Photography", "Fitness", "Cooking", "Finance", "Psychology"
-  ]
+  // Available topics for selection - loaded from backend
+  const [availableTopics, setAvailableTopics] = useState<string[]>([])
 
   useEffect(() => {
     fetchSpeakerProfile()
+    loadTopics()
   }, [params.id])
+
+  const loadTopics = async () => {
+    try {
+      const response = await speakerService.getTopics()
+      if (response.success && response.data.topics) {
+        setAvailableTopics(response.data.topics)
+      }
+    } catch (error) {
+      console.error('Error loading topics:', error)
+      // Keep default topics if backend fails
+    }
+  }
 
   const fetchSpeakerProfile = async () => {
     try {

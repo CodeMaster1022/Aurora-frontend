@@ -267,6 +267,13 @@ class SpeakerService {
       }
     );
   }
+
+  // Get available topics (public endpoint)
+  async getTopics(): Promise<{ success: boolean; data: { topics: string[] } }> {
+    return this.makeRequest<{ success: boolean; data: { topics: string[] } }>(
+      '/speakers/topics'
+    );
+  }
 }
 
 export const speakerService = new SpeakerService();

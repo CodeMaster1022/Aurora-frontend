@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { authService } from "@/lib/services/authService"
+import { speakerService } from "@/lib/services/speakerService"
 import { useAppDispatch } from "@/lib/hooks/redux"
 import { setUser } from "@/lib/store/authSlice"
 import { useTranslation } from "@/lib/hooks/useTranslation"
@@ -48,6 +49,25 @@ export default function SignUpPage() {
     cost: "",
     termsAccepted: ""
   })
+
+  // Available topics - loaded from backend
+  const [availableTopics, setAvailableTopics] = useState<string[]>([])
+
+  // Load topics from backend on mount
+  useEffect(() => {
+    const loadTopics = async () => {
+      try {
+        const response = await speakerService.getTopics()
+        if (response.success && response.data.topics) {
+          setAvailableTopics(response.data.topics)
+        }
+      } catch (error) {
+        console.error('Error loading topics:', error)
+        // Keep default topics if backend fails
+      }
+    }
+    loadTopics()
+  }, [])
 
   // Validation functions
   const validateFirstName = (name: string) => {
@@ -371,11 +391,7 @@ export default function SignUpPage() {
                 <p className="text-gray-600 mb-8">{t('speakerSignup.step2.description')}</p>
                 
                 <div className="flex flex-wrap gap-3">
-                  {[
-                    "Technology", "Business", "Science", "Art", "Music", 
-                    "Sports", "Travel", "Food", "Health", "Education",
-                    "Fashion", "Literature", "History", "Languages", "Gaming"
-                  ].map((topic) => (
+                  {availableTopics.map((topic) => (
                     <button
                       key={topic}
                       type="button"
