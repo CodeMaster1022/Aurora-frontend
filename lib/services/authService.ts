@@ -144,6 +144,28 @@ class AuthService {
     });
   }
 
+  async googleAuth(credential: string, role?: 'learner' | 'speaker'): Promise<AuthResponse> {
+    return this.makeRequest<AuthResponse>('/auth/google', {
+      method: 'POST',
+      body: JSON.stringify({ credential, role }),
+    });
+  }
+
+  async googleAuthSpeaker(
+    credential: string,
+    additionalData?: {
+      interests?: string[];
+      meetingPreference?: string;
+      age?: number;
+      cost?: number;
+    }
+  ): Promise<AuthResponse> {
+    return this.makeRequest<AuthResponse>('/auth/google/speaker', {
+      method: 'POST',
+      body: JSON.stringify({ credential, ...additionalData }),
+    });
+  }
+
   // Token management
   setToken(token: string): void {
     if (typeof window !== 'undefined') {
