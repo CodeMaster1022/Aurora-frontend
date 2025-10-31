@@ -119,14 +119,14 @@ export default function AboutPage() {
 
           {/* Image grid */}
           <motion.div 
-            className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6"
+            className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6"
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
           >
             <motion.div 
-              className="relative h-48 md:h-64 rounded-2xl overflow-hidden group cursor-pointer"
+              className="relative h-64 md:h-96 rounded-2xl overflow-hidden group cursor-pointer"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -147,7 +147,7 @@ export default function AboutPage() {
             </motion.div>
             
             <motion.div 
-              className="relative h-48 md:h-64 rounded-2xl overflow-hidden group cursor-pointer"
+              className="relative h-64 md:h-96 rounded-2xl overflow-hidden group cursor-pointer"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -168,7 +168,7 @@ export default function AboutPage() {
             </motion.div>
             
             <motion.div 
-              className="relative h-48 md:h-64 rounded-2xl overflow-hidden group cursor-pointer"
+              className="relative h-64 md:h-96 rounded-2xl overflow-hidden group cursor-pointer"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -185,27 +185,6 @@ export default function AboutPage() {
               <div className="absolute bottom-4 left-4 right-4 z-20 text-white">
                 <p className="font-semibold text-sm md:text-base">{t('about.community.card3.title')}</p>
                 <p className="text-xs md:text-sm text-white/80">{t('about.community.card3.subtitle')}</p>
-              </div>
-            </motion.div>
-            
-            <motion.div 
-              className="relative h-48 md:h-64 rounded-2xl overflow-hidden group cursor-pointer"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              whileHover={{ scale: 1.05, y: -5 }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10" />
-              <Image 
-                src="/image/4.jpg" 
-                alt="Community" 
-                fill 
-                className="object-cover transition-transform duration-500 group-hover:scale-110" 
-              />
-              <div className="absolute bottom-4 left-4 right-4 z-20 text-white">
-                <p className="font-semibold text-sm md:text-base">{t('about.community.card4.title')}</p>
-                <p className="text-xs md:text-sm text-white/80">{t('about.community.card4.subtitle')}</p>
               </div>
             </motion.div>
           </motion.div>
