@@ -76,7 +76,7 @@ export default function HomePage() {
     <div className="min-h-screen relative overflow-hidden">
       <Header />
       <main className="relative overflow-hidden"> 
-        <div className="bg-gradient-to-b from-[#7196FF] to-[#29CC7A] relative overflow-hidden min-h-screen flex items-center">
+        <div className="bg-gradient-to-b from-[#7196FF] to-[#22B569] relative overflow-hidden min-h-screen flex items-center">
           <div className="max-w-7xl mx-auto px-4 sm:px-3 py-4 sm:py-8 lg:py-12 relative z-10 w-full">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
               <div className="space-y-6 sm:space-y-8 order-2 lg:order-1 text-center lg:text-left">
@@ -289,7 +289,7 @@ export default function HomePage() {
                           unoptimized
                         />
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-[#524FD5] to-[#29CC7A] flex items-center justify-center">
+                        <div className="w-full h-full bg-gradient-to-br from-[#524FD5] to-[#22B569] flex items-center justify-center">
                           <span className="text-white text-4xl font-bold">
                             {speaker.firstname?.[0] || ''}{speaker.lastname?.[0] || ''}
                           </span>
@@ -297,7 +297,7 @@ export default function HomePage() {
                       )}
                     </div>
                     {/* Content */}
-                    <div className="p-4 flex-1 flex flex-col">
+                    <div className="p-4 flesx-1 flex flex-col">
                       {speaker.age && (
                         <p className="text-gray-400 text-sm mb-2">
                           {speaker.age} {t('home.speakerCard.age')}
@@ -490,7 +490,7 @@ export default function HomePage() {
         </section>
         {/* Become a Speaker Section */}
         <section className="py-4 px-4 sm:px-6 lg:px-8 sm:py-8 lg:pt-12 lg:pb-48">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#7357F5] to-[#29CC7A] rounded-lg">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#7357F5] to-[#22B569] rounded-lg">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
               {/* Left Content - Text */}
               <div className="space-y-8 text-center lg:text-left order-2 lg:order-1">
