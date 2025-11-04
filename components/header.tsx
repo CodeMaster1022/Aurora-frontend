@@ -146,7 +146,7 @@ export function Header() {
                 
                 {showUserMenu && (
                   <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border overflow-hidden z-50">
-                    {user?.role === 'speaker' && (
+                    {/* {user?.role === 'speaker' && (
                       <button
                         onClick={() => {
                           router.push('/dashboard/speaker')
@@ -157,8 +157,8 @@ export function Header() {
                         <Settings className="w-4 h-4" />
                         {t('header.dashboard')}
                       </button>
-                    )}
-                    <button
+                    )} */}
+                    {/* <button
                       onClick={() => {
                         router.push('/profile')
                         setShowUserMenu(false)
@@ -167,7 +167,7 @@ export function Header() {
                     >
                       <Settings className="w-4 h-4" />
                       {t('header.profile')}
-                    </button>
+                    </button> */}
                     <button
                       onClick={handleLogout}
                       className="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
@@ -276,9 +276,9 @@ export function Header() {
                         </Link>
                       </>
                     )}
-                    <Link href="/discover" className="block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-colors text-lg font-medium">
+                    {/* <Link href="/discover" className="block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-colors text-lg font-medium">
                       {t('header.discover')}
-                    </Link>
+                    </Link> */}
                   </>
                 ) : (
                   <>
@@ -299,7 +299,7 @@ export function Header() {
                     <div className="px-4 py-3 bg-white/20 rounded-lg text-center">
                       <p className="text-white font-medium">Welcome, {user?.firstname} {user?.lastname}!</p>
                     </div>
-                    <button 
+                    {/* <button 
                       className="w-full px-6 py-3 rounded-full text-white border-2 border-white/30 hover:border-white hover:bg-white hover:text-[#49BBBD] font-semibold transition-all duration-300 flex items-center justify-center gap-2" 
                       onClick={() => {
                         router.push('/profile')
@@ -308,7 +308,7 @@ export function Header() {
                     >
                       <Settings className="w-4 h-4" />
                       {t('header.profile')}
-                    </button>
+                    </button> */}
                     <button 
                       className="w-full px-6 py-3 rounded-full bg-red-500 text-white hover:bg-red-600 font-semibold transition-all duration-300 shadow-lg flex items-center justify-center gap-2" 
                       onClick={() => {

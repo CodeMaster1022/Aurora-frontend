@@ -1,8 +1,9 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Header } from "@/components/header"
 import { FloatingCards } from "@/components/floating-cards"
-import { Play, ArrowRight, BookOpen, Users, Award, FileText, Calendar, UserCheck, Grid3X3, Square, Eye, CheckCircle, X, Send, Star, Download, Volume2, MessageCircle, CalendarDays, FastForward } from "lucide-react"
+import { Play, ArrowRight, BookOpen, Users, Award, FileText, Calendar, UserCheck, Grid3X3, Square, Eye, CheckCircle, X, Send, Star, Download, Volume2, MessageCircle, CalendarDays, FastForward, Loader2 } from "lucide-react"
 import Image from "next/image"
 import studentImage from "@/public/image/student.png"
 import grandmother1 from "@/public/image/1.jpeg"
@@ -12,10 +13,65 @@ import grandmother3 from "@/public/image/3.jpeg"
 import grandfatherImage from "@/public/image/grandfather.png"
 import { useTranslation } from "@/lib/hooks/useTranslation"
 import { useRouter } from "next/navigation"
+import { learnerService } from "@/lib/services/learnerService"
+import Link from "next/link"
 
 export default function HomePage() {
   const router = useRouter()
   const { t } = useTranslation()
+  const [speakers, setSpeakers] = useState<any[]>([])
+  const [filteredSpeakers, setFilteredSpeakers] = useState<any[]>([])
+  const [selectedFilter, setSelectedFilter] = useState<string>("all")
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Map filter keys to topic names
+  const filterMap: Record<string, string> = {
+    "all": "",
+    "literature": "Literature",
+    "architecture": "Architecture",
+    "engineering": "Engineering",
+    "business": "Business",
+    "cooking": "Food"
+  }
+
+  useEffect(() => {
+    fetchSpeakers()
+  }, [])
+
+  useEffect(() => {
+    filterSpeakers()
+  }, [selectedFilter, speakers])
+
+  const fetchSpeakers = async () => {
+    try {
+      setIsLoading(true)
+      const response = await learnerService.getSpeakers()
+      if (response.success) {
+        setSpeakers(response.data.speakers)
+      }
+    } catch (error) {
+      console.error("Error fetching speakers:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const filterSpeakers = () => {
+    let filtered = [...speakers]
+
+    // Apply topic filter
+    if (selectedFilter && selectedFilter !== "all") {
+      const topic = filterMap[selectedFilter]
+      if (topic) {
+        filtered = filtered.filter(speaker => 
+          speaker.interests?.includes(topic)
+        )
+      }
+    }
+
+    // Limit to 4 speakers for homepage
+    setFilteredSpeakers(filtered.slice(0, 4))
+  }
   return (
     <div className="min-h-screen relative overflow-hidden">
       <Header />
@@ -151,183 +207,163 @@ export default function HomePage() {
 
             {/* Filter Buttons */}
             <div className="flex flex-wrap justify-center gap-3 mb-12">
-              <button className="px-4 py-2 rounded-lg bg-[#524FD5] text-white font-medium transition-colors">
+              <button 
+                onClick={() => setSelectedFilter("all")}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  selectedFilter === "all"
+                    ? "bg-[#524FD5] text-white"
+                    : "bg-transparent text-white border border-white hover:bg-white/10"
+                }`}
+              >
                 {t('home.filter.all')}
               </button>
-              <button className="px-4 py-2 rounded-lg bg-transparent text-white border border-white font-medium hover:bg-white/10 transition-colors">
+              <button 
+                onClick={() => setSelectedFilter("literature")}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  selectedFilter === "literature"
+                    ? "bg-[#524FD5] text-white"
+                    : "bg-transparent text-white border border-white hover:bg-white/10"
+                }`}
+              >
                 {t('home.filter.literature')}
               </button>
-              <button className="px-4 py-2 rounded-lg bg-transparent text-white border border-white font-medium hover:bg-white/10 transition-colors">
+              <button 
+                onClick={() => setSelectedFilter("architecture")}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  selectedFilter === "architecture"
+                    ? "bg-[#524FD5] text-white"
+                    : "bg-transparent text-white border border-white hover:bg-white/10"
+                }`}
+              >
                 {t('home.filter.architecture')}
               </button>
-              <button className="px-4 py-2 rounded-lg bg-transparent text-white border border-white font-medium hover:bg-white/10 transition-colors">
+              <button 
+                onClick={() => setSelectedFilter("engineering")}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  selectedFilter === "engineering"
+                    ? "bg-[#524FD5] text-white"
+                    : "bg-transparent text-white border border-white hover:bg-white/10"
+                }`}
+              >
                 {t('home.filter.engineering')}
               </button>
-              <button className="px-4 py-2 rounded-lg bg-transparent text-white border border-white font-medium hover:bg-white/10 transition-colors">
+              <button 
+                onClick={() => setSelectedFilter("business")}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  selectedFilter === "business"
+                    ? "bg-[#524FD5] text-white"
+                    : "bg-transparent text-white border border-white hover:bg-white/10"
+                }`}
+              >
                 {t('home.filter.business')}
               </button>
-              <button className="px-4 py-2 rounded-lg bg-transparent text-white border border-white font-medium hover:bg-white/10 transition-colors">
+              <button 
+                onClick={() => setSelectedFilter("cooking")}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  selectedFilter === "cooking"
+                    ? "bg-[#524FD5] text-white"
+                    : "bg-transparent text-white border border-white hover:bg-white/10"
+                }`}
+              >
                 {t('home.filter.cooking')}
               </button>
             </div>
 
             {/* Speaker Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-              {/* Card 1 - John Damon */}
-              <div className="bg-[#1B2335] rounded-2xl overflow-hidden flex flex-col h-full">
-                {/* Image */}
-                <div className="relative w-full h-48 bg-gray-200">
-                  <Image
-                    src={grandmother1}
-                    alt="John Damon"
-                    width={200}
-                    height={192}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                {/* Content */}
-                <div className="p-4 flex-1 flex flex-col">
-                  <p className="text-gray-400 text-sm mb-2">79 {t('home.speakerCard.age')}</p>
-                  <h3 className="text-white font-bold text-lg mb-3">John Damon</h3>
-                  <p className="text-gray-400 text-sm mb-4 flex-1">
-                    Product Management Masterclass, you will learn with Sarah Johnson - Head of Product Customer Platform Gojek Indonesia.
-                  </p>
-                  {/* Tags */}
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="text-white text-xs border border-white px-2 py-1 rounded">Literatura</span>
-                    <span className="text-white text-xs border border-white px-2 py-1 rounded">Arquitectura</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="">
-                      <span className="text-white font-bold mr-2">{t('home.speakerCard.free')}</span>
-                      <span className="text-gray-500 text-sm line-through">$ 300</span>
-                    </div>
-                    {/* Button */}
-                    <button className="px-3 cursor-pointer bg-[#524FD5] text-white py-2 rounded-md font-medium hover:bg-[#4240C5] transition-colors">
-                      {t('home.speakerCard.book')}
-                    </button>
-                  </div>
-                </div>
+            {isLoading ? (
+              <div className="flex justify-center items-center py-20">
+                <Loader2 className="h-8 w-8 animate-spin text-[#524FD5]" />
               </div>
-
-              {/* Card 2 - Martha Stuart */}
-              <div className="bg-[#1B2335] rounded-2xl overflow-hidden flex flex-col h-full">
-                {/* Image */}
-                <div className="relative w-full h-48 bg-gray-200">
-                  <Image
-                    src={grandmother2}
-                    alt="Martha Stuart"
-                    width={200}
-                    height={192}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                {/* Content */}
-                <div className="p-4 flex-1 flex flex-col">
-                  <p className="text-gray-400 text-sm mb-2">81 {t('home.speakerCard.age')}</p>
-                  <h3 className="text-white font-bold text-lg mb-3">Martha Stuart</h3>
-                  <p className="text-gray-400 text-sm mb-4 flex-1">
-                    Product Management Masterclass, you will learn with Sarah Johnson - Head of Product Customer Platform Gojek Indonesia.
-                  </p>
-                  {/* Tags */}
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="text-white text-xs border border-white px-2 py-1 rounded">Literatura</span>
-                    <span className="text-white text-xs border border-white px-2 py-1 rounded">Arquitectura</span>
-                  </div>
-                  <div className="flex items-center justify-between ">
-                    <div className="">
-                      <span className="text-white font-bold mr-2">{t('home.speakerCard.free')}</span>
-                      <span className="text-gray-500 text-sm line-through">$300</span>
+            ) : filteredSpeakers.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                {filteredSpeakers.map((speaker) => (
+                  <div key={speaker._id} className="bg-[#1B2335] rounded-2xl overflow-hidden flex flex-col h-full">
+                    {/* Image */}
+                    <div className="relative w-full h-48 bg-gray-200 overflow-hidden">
+                      {speaker.avatar ? (
+                        <Image
+                          src={speaker.avatar}
+                          alt={`${speaker.firstname || ''} ${speaker.lastname || ''}`}
+                          fill
+                          className="object-cover"
+                          unoptimized
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-[#524FD5] to-[#29CC7A] flex items-center justify-center">
+                          <span className="text-white text-4xl font-bold">
+                            {speaker.firstname?.[0] || ''}{speaker.lastname?.[0] || ''}
+                          </span>
+                        </div>
+                      )}
                     </div>
-                    {/* Button */}
-                    <button className="px-3 cursor-pointer bg-[#524FD5] text-white py-2 rounded-md font-medium hover:bg-[#4240C5] transition-colors">
-                      {t('home.speakerCard.book')}
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 3 - Leonard Washington */}
-              <div className="bg-[#1B2335] rounded-2xl overflow-hidden flex flex-col h-full">
-                {/* Image */}
-                <div className="relative w-full h-48 bg-gray-200">
-                  <Image
-                    src={grandmother3}
-                    alt="Leonard Washington"
-                    width={200}
-                    height={192}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                {/* Content */}
-                <div className="p-4 flex-1 flex flex-col">
-                  <p className="text-gray-400 text-sm mb-2">68 {t('home.speakerCard.age')}</p>
-                  <h3 className="text-white font-bold text-lg mb-3">Leonard Washington</h3>
-                  <p className="text-gray-400 text-sm mb-4 flex-1">
-                    Product Management Masterclass, you will learn with Sarah Johnson - Head of Product Customer Platform Gojek Indonesia.
-                  </p>
-                  {/* Tags */}
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="text-white text-xs border border-white px-2 py-1 rounded">Literatura</span>
-                    <span className="text-white text-xs border border-white px-2 py-1 rounded">Arquitectura</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="">
-                      <span className="text-white font-bold mr-2">{t('home.speakerCard.free')}</span>
-                      <span className="text-gray-500 text-sm line-through">$300</span>
+                    {/* Content */}
+                    <div className="p-4 flex-1 flex flex-col">
+                      {speaker.age && (
+                        <p className="text-gray-400 text-sm mb-2">
+                          {speaker.age} {t('home.speakerCard.age')}
+                        </p>
+                      )}
+                      <h3 className="text-white font-bold text-lg mb-3">
+                        {speaker.firstname} {speaker.lastname}
+                      </h3>
+                      <p className="text-gray-400 text-sm mb-4 flex-1 line-clamp-3">
+                        {speaker.bio || 'No description available'}
+                      </p>
+                      {/* Tags */}
+                      {speaker.interests && speaker.interests.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {speaker.interests.slice(0, 2).map((interest: string, idx: number) => (
+                            <span 
+                              key={idx}
+                              className="text-white text-xs border border-white px-2 py-1 rounded"
+                            >
+                              {interest}
+                            </span>
+                          ))}
+                          {speaker.interests.length > 2 && (
+                            <span className="text-gray-400 text-xs border border-gray-500 px-2 py-1 rounded">
+                              +{speaker.interests.length - 2}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between">
+                        <div className="">
+                          <span className="text-white font-bold mr-2">
+                            {speaker.cost && speaker.cost > 0 ? `$${speaker.cost}` : t('home.speakerCard.free')}
+                          </span>
+                          {speaker.cost && speaker.cost > 0 && (
+                            <span className="text-gray-500 text-sm line-through">$300</span>
+                          )}
+                        </div>
+                        {/* Button */}
+                        <Link href={`/speakers/${speaker._id}`}>
+                          <button className="px-3 cursor-pointer bg-[#524FD5] text-white py-2 rounded-md font-medium hover:bg-[#4240C5] transition-colors">
+                            {t('home.speakerCard.book')}
+                          </button>
+                        </Link>
+                      </div>
                     </div>
-                    {/* Button */}
-                    <button className="px-3 cursor-pointer bg-[#524FD5] text-white py-2 rounded-md font-medium hover:bg-[#4240C5] transition-colors">
-                      {t('home.speakerCard.book')}
-                    </button>
                   </div>
-                </div>
+                ))}
               </div>
-
-              {/* Card 4 - Clara Berman */}
-              <div className="bg-[#1B2335] rounded-2xl overflow-hidden flex flex-col h-full">
-                {/* Image */}
-                <div className="relative w-full h-48 bg-gray-200">
-                  <Image
-                    src="https://i.pravatar.cc/150?img=9"
-                    alt="Clara Berman"
-                    width={200}
-                    height={192}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                {/* Content */}
-                <div className="p-4 flex-1 flex flex-col">
-                  <p className="text-gray-400 text-sm mb-2">83 {t('home.speakerCard.age')}</p>
-                  <h3 className="text-white font-bold text-lg mb-3">Clara Berman</h3>
-                  <p className="text-gray-400 text-sm mb-4 flex-1">
-                    Product Management Masterclass, you will learn with Sarah Johnson - Head of Product Customer Platform Gojek Indonesia.
-                  </p>
-                  {/* Tags */}
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="text-white text-xs border border-white px-2 py-1 rounded">Literatura</span>
-                    <span className="text-white text-xs border border-white px-2 py-1 rounded">Arquitectura</span>
-                  </div>
-                  {/* Pricing */}
-                  <div className="flex items-center justify-between ">
-                    <div className="">
-                      <span className="text-white font-bold mr-2">{t('home.speakerCard.free')}</span>
-                      <span className="text-gray-500 text-sm line-through">$300</span>
-                    </div>
-                    {/* Button */}
-                    <button className="px-3 cursor-pointer bg-[#524FD5] text-white py-2 rounded-md font-medium hover:bg-[#4240C5] transition-colors">
-                      {t('home.speakerCard.book')}
-                    </button>
-                  </div>
-                </div>
+            ) : (
+              <div className="text-center py-20">
+                <p className="text-gray-400 text-lg">
+                  {selectedFilter && selectedFilter !== "all" 
+                    ? "No speakers found for this filter."
+                    : "No speakers available at the moment."}
+                </p>
               </div>
-            </div>
+            )}
 
             {/* Ver todos Button */}
             <div className="text-center">
-              <button className="bg-white text-[#524FD5] px-8 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors cursor-pointer">
-                {t('home.viewAll')}
-              </button>
+              <Link href="/speakers">
+                <button className="bg-white text-[#524FD5] px-8 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors cursor-pointer">
+                  {t('home.viewAll')}
+                </button>
+              </Link>
             </div>
           </div>
         </section>
@@ -339,7 +375,7 @@ export default function HomePage() {
               {/* Left Column - How It Works */}
               <div>
                 {/* Header Badge */}
-                <div className="inline-block bg-white text-[#0F172A] px-4 py-2 rounded-full text-sm font-medium mb-6">
+                <div className="inline-block bg-[#F5F5F5] text-[#7357F5] px-4 py-2 rounded-xl text-sm font-medium mb-6">
                   {t('home.howItWorks.badge')}
                 </div>
                 {/* Title */}
@@ -361,7 +397,7 @@ export default function HomePage() {
                   </div>
                   {/* Step 2 */}
                   <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-14 h-14 bg-white rounded-full flex items-center justify-center">
+                    <div className="flex-shrink-0 w-14 h-14 bg-[#F5F5F5] rounded-full flex items-center justify-center">
                       <span className="text-[#0F172A] font-bold text-lg">2</span>
                     </div>
                     <div className="flex-1">
@@ -376,8 +412,19 @@ export default function HomePage() {
                       <span className="text-[#0F172A] font-bold text-lg">3</span>
                     </div>
                     <div className="flex-1">
-                      <p className="text-white text-lg">
+                      <p className="text-white text-lg pt-3">
                         {t('home.howItWorks.step3')}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4">
+                    <div className="flex-shrink-0 w-14 h-14 bg-white rounded-full flex items-center justify-center">
+                      <span className="text-[#0F172A] font-bold text-lg">4</span>
+                    </div>
+                    <div className="flex-1 items-center">
+                      <p className="text-white text-lg pt-3">
+                        {t('home.howItWorks.step4')}
                       </p>
                     </div>
                   </div>
@@ -394,7 +441,7 @@ export default function HomePage() {
               <div></div>
               <div>
                 {/* Header Badge */}
-                <div className="inline-block bg-white text-[#0F172A] px-4 py-2 rounded-full text-sm font-medium mb-6">
+                <div className="inline-block bg-white text-[#7357F5] px-4 py-2 rounded-xl text-sm font-medium mb-6">
                   {t('home.whyDifferent.badge')}
                 </div>
                 {/* Title */}
