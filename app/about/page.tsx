@@ -59,9 +59,9 @@ export default function AboutPage() {
                 <p className="text-white/80 leading-relaxed">
                   {t('about.story.p1')}
                 </p>
-                <p className="text-white/80 leading-relaxed">
+                {/* <p className="text-white/80 leading-relaxed">
                   {t('about.story.p2')}
-                </p>
+                </p> */}
               </CardContent>
             </Card>
           </motion.div>
@@ -94,6 +94,28 @@ export default function AboutPage() {
                 </ul>
               </CardContent>
             </Card>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Photo card */}
+      <section className="py-8 md:py-12">
+        <div className="max-w-xl mx-auto px-4">
+          <motion.div 
+            className="relative aspect-square w-full rounded-2xl overflow-hidden group cursor-pointer"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            whileHover={{ scale: 1.02, y: -5 }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10" />
+            <Image 
+              src="/image/3.jpeg" 
+              alt="Community" 
+              fill 
+              className="object-cover transition-transform duration-500 group-hover:scale-110" 
+            />
           </motion.div>
         </div>
       </section>
