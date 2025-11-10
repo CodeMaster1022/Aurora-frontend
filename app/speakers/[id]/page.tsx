@@ -41,7 +41,7 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
   const [availableTopics, setAvailableTopics] = useState<string[]>([])
 
   const isCalendarConnected = useMemo(() => {
-    if (!speaker) return false
+    if (!speaker) return true
 
     const calendarStatusValue = typeof speaker.calendarStatus === "string"
       ? speaker.calendarStatus.toLowerCase()
@@ -50,13 +50,23 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
     if (calendarStatusValue === "connected") return true
     if (calendarStatusValue === "disconnected") return false
 
-    return Boolean(
-      speaker.calendar?.connected ??
-      speaker.calendar?.isConnected ??
-      speaker.calendarConnected ??
-      speaker.isCalendarConnected ??
+    const explicitFlags = [
+      speaker.calendar?.connected,
+      speaker.calendar?.isConnected,
+      speaker.calendarConnected,
+      speaker.isCalendarConnected,
       speaker.googleCalendarConnected
-    )
+    ]
+
+    if (explicitFlags.some((flag) => flag === true)) {
+      return true
+    }
+
+    if (explicitFlags.some((flag) => flag === false)) {
+      return false
+    }
+
+    return true
   }, [speaker])
 
   const canBookSession = isCalendarConnected
