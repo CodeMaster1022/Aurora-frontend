@@ -153,7 +153,7 @@ export default function SignUpPage() {
         dispatch(setUser(response.data.user))
         
         // Redirect to dashboard
-        router.push("/dashboard")
+        router.push("/learners/dashboard")
       }
     } catch (err) {
       console.error("Registration error:", err)
