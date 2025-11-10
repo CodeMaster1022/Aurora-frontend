@@ -621,10 +621,10 @@ export default function SignUpPage() {
                       />
                       <label
                         htmlFor="terms-speaker"
-                        className="text-sm text-gray-700 leading-relaxed cursor-pointer"
+                        className="text-sm text-gray-700 leading-relaxed cursor-pointer border-b-2 border-gray-300"
                       >
                         {t('auth.signup.termsText')}{" "}
-                        <a
+                        <Link
                           href="/terms-and-conditions"
                           target="_blank"
                           rel="noopener noreferrer"
@@ -632,7 +632,7 @@ export default function SignUpPage() {
                           onClick={(e) => e.stopPropagation()}
                         >
                           {t('auth.signup.termsLink')}
-                        </a>
+                        </Link>
                         {" "}{t('auth.signup.termsAnd')}{" "}
                         <a
                           href="/privacy-policy"

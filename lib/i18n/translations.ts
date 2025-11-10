@@ -334,6 +334,8 @@ export type TranslationKey =
   | 'speakerProfile.bookSession.topic1'
   | 'speakerProfile.bookSession.topic2'
   | 'speakerProfile.bookSession.topicsMax'
+  | 'speakerProfile.bookSession.calendarNotConnected'
+  | 'speakerProfile.bookSession.speakerCalendarNotConnected'
   | 'speakerProfile.bookSession.allFieldsRequired'
   | 'speakerProfile.bookSession.maxTopics'
   | 'speakerProfile.bookSession.confirmBooking'
@@ -720,6 +722,7 @@ export const translations: Record<Language, Translations> = {
     'speakerProfile.bookSession.topic1': 'Topic 1',
     'speakerProfile.bookSession.topic2': 'Topic 2',
     'speakerProfile.bookSession.topicsMax': '(30 min session)',
+    'speakerProfile.bookSession.speakerCalendarNotConnected': 'This speaker has not connected their calendar yet. Booking is unavailable.',
     'speakerProfile.bookSession.allFieldsRequired': 'Please fill in all required fields',
     'speakerProfile.bookSession.maxTopics': 'Maximum 2 topics allowed',
     'speakerProfile.bookSession.confirmBooking': 'Confirm Booking',
@@ -729,6 +732,7 @@ export const translations: Record<Language, Translations> = {
     'speakerProfile.bookSession.timeNotInRange': 'Speaker is only available between',
     'speakerProfile.bookSession.anonymous': 'Anonymous',
     'speakerProfile.bookSession.noReviews': 'No reviews yet',
+    'speakerProfile.bookSession.calendarNotConnected': 'Your calendar is not connected. Please connect it to book sessions.',
 
     // About Page
     'about.hero.badge': 'Our Story',
@@ -843,7 +847,7 @@ export const translations: Record<Language, Translations> = {
     'auth.signup.validate.firstNameInvalid': 'El nombre solo puede contener letras, espacios, guiones y apóstrofes',
     'auth.signup.validate.lastNameRequired': 'El apellido es obligatorio',
     'auth.signup.validate.lastNameMin': 'El apellido debe tener al menos 2 caracteres',
-    'auth.signup.validate.lastNameInvalid': 'El apellido solo puede contener letras, espacios, guiones y apóstrofes',
+    'auth.signup.validate.lastNameInvalid': 'El apellido solo puede contener letras',
     'auth.signup.validate.emailRequired': 'El correo electrónico es obligatorio',
     'auth.signup.validate.emailInvalid': 'Por favor ingresa un correo electrónico válido',
     'auth.signup.validate.passwordRequired': 'La contraseña es obligatoria',
@@ -1103,6 +1107,7 @@ export const translations: Record<Language, Translations> = {
     'speakerProfile.bookSession.topic1': 'Tema 1',
     'speakerProfile.bookSession.topic2': 'Tema 2',
     'speakerProfile.bookSession.topicsMax': '(sesión de 30 min)',
+    'speakerProfile.bookSession.speakerCalendarNotConnected': 'Este speaker aún no ha conectado su calendario. Las reservas no están disponibles.',
     'speakerProfile.bookSession.allFieldsRequired': 'Por favor completa todos los campos requeridos',
     'speakerProfile.bookSession.maxTopics': 'Máximo 2 temas permitidos',
     'speakerProfile.bookSession.confirmBooking': 'Confirmar Reserva',
@@ -1112,6 +1117,7 @@ export const translations: Record<Language, Translations> = {
     'speakerProfile.bookSession.timeNotInRange': 'El speaker solo está disponible entre',
     'speakerProfile.bookSession.anonymous': 'Anónimo',
     'speakerProfile.bookSession.noReviews': 'Aún no hay reseñas',
+    'speakerProfile.bookSession.calendarNotConnected': 'Tu calendario no está conectado. Por favor conéctalo para reservar sesiones.',
 
     // About Page
     'about.hero.badge': 'Nuestra Historia',

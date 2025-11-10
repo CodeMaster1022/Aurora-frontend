@@ -391,20 +391,10 @@ export default function SignUpPage() {
                 />
                 <label
                   htmlFor="terms"
-                  className="text-sm text-gray-700 leading-relaxed cursor-pointer"
+                  className="text-sm text-gray-700 leading-relaxed cursor-pointer border-b-2 border-gray-300"
                 >
                   {t('auth.signup.termsText')}{" "}
-                  <a
-                    href="/terms-and-conditions"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-purple-600 hover:text-purple-700 underline"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {t('auth.signup.termsLink')}
-                  </a>
-                  {" "}{t('auth.signup.termsAnd')}{" "}
-                  <a
+                  <Link
                     href="/privacy-policy"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -412,7 +402,7 @@ export default function SignUpPage() {
                     onClick={(e) => e.stopPropagation()}
                   >
                     {t('auth.signup.privacyLink')}
-                  </a>.
+                  </Link>.
                 </label>
               </div>
               {validationErrors.termsAccepted && (

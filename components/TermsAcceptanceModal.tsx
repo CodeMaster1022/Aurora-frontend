@@ -77,7 +77,7 @@ export function TermsAcceptanceModal({ open, onAccept }: TermsAcceptanceModalPro
               />
               <label
                 htmlFor="terms-modal"
-                className="text-sm text-gray-700 leading-relaxed cursor-pointer"
+                className="text-sm text-gray-700 leading-relaxed cursor-pointer border-b-2 border-gray-300"
               >
                 {t('auth.signup.termsText')}{" "}
                 <a
