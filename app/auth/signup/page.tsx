@@ -387,7 +387,7 @@ export default function SignUpPage() {
                       setValidationErrors(prev => ({ ...prev, termsAccepted: "" }))
                     }
                   }}
-                  className="mt-0.5"
+                  className="mt-0.5 border-2 border-gray-800"
                 />
                 <label
                   htmlFor="terms"
