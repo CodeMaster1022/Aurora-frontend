@@ -660,7 +660,7 @@ export default function SignUpPage() {
               <Button
                 type="button"
                 variant="ghost"
-                onClick={() => router.push("/dashboard")}
+                onClick={() => router.push("/speakers/dashboard")}
                 className="text-gray-600 hover:text-gray-900 cursor-pointer"
               >
                 {t('speakerSignup.skip')}
