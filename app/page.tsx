@@ -3,12 +3,8 @@
 import { useState, useEffect } from "react"
 import { Header } from "@/components/header"
 import { FloatingCards } from "@/components/floating-cards"
-import { Play, ArrowRight, BookOpen, Users, Award, FileText, Calendar, UserCheck, Grid3X3, Square, Eye, CheckCircle, X, Send, Star, Download, Volume2, MessageCircle, CalendarDays, FastForward, Loader2 } from "lucide-react"
+import { Play, ArrowRight, BookOpen, Users, Award, FileText, Calendar, UserCheck, Grid3X3, Square, Eye, CheckCircle, X, Send, Star, Download, Volume2, MessageCircle, CalendarDays, FastForward, Loader2, Search, Heart, UserPlus, Share2 } from "lucide-react"
 import Image from "next/image"
-import studentImage from "@/public/image/student.png"
-import grandmother1 from "@/public/image/1.jpeg"
-import grandmother2 from "@/public/image/2.jpeg"
-import grandmother3 from "@/public/image/3.jpeg"
 
 import grandfatherImage from "@/public/image/grandfather.png"
 import { useTranslation } from "@/lib/hooks/useTranslation"
@@ -21,26 +17,11 @@ export default function HomePage() {
   const { t } = useTranslation()
   const [speakers, setSpeakers] = useState<any[]>([])
   const [filteredSpeakers, setFilteredSpeakers] = useState<any[]>([])
-  const [selectedFilter, setSelectedFilter] = useState<string>("all")
   const [isLoading, setIsLoading] = useState(true)
-
-  // Map filter keys to topic names
-  const filterMap: Record<string, string> = {
-    "all": "",
-    "literature": "Literature",
-    "architecture": "Architecture",
-    "engineering": "Engineering",
-    "business": "Business",
-    "cooking": "Food"
-  }
 
   useEffect(() => {
     fetchSpeakers()
   }, [])
-
-  useEffect(() => {
-    filterSpeakers()
-  }, [selectedFilter, speakers])
 
   const fetchSpeakers = async () => {
     try {
@@ -48,6 +29,7 @@ export default function HomePage() {
       const response = await learnerService.getSpeakers()
       if (response.success) {
         setSpeakers(response.data.speakers)
+        setFilteredSpeakers(response.data.speakers.slice(0, 3))
       }
     } catch (error) {
       console.error("Error fetching speakers:", error)
@@ -56,217 +38,80 @@ export default function HomePage() {
     }
   }
 
-  const filterSpeakers = () => {
-    let filtered = [...speakers]
+  const heroSubtitleText = "Connect with inspiring speakers and mentors who ignite your language journey."
+  const heroSecondaryCtaText = "Watch intro"
 
-    // Apply topic filter
-    if (selectedFilter && selectedFilter !== "all") {
-      const topic = filterMap[selectedFilter]
-      if (topic) {
-        filtered = filtered.filter(speaker => 
-          speaker.interests?.includes(topic)
-        )
-      }
-    }
-
-    // Limit to 4 speakers for homepage
-    setFilteredSpeakers(filtered.slice(0, 4))
-  }
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
       <Header />
-      <main className="relative overflow-hidden"> 
-        <div className="bg-gradient-to-b from-[#7196FF] to-[#22B569] relative overflow-hidden min-h-screen flex items-center">
+      <main className="relative"> 
+        <section className="relative overflow-hidden flex items-center justify-center min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh]">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#F7F2FF] via-[#EEE8FF] to-[#FBF6FF] dark:from-[#080A18] dark:via-[#161B2D] dark:to-[#3B82F6] transition-colors duration-700" />
+          <div
+            className="absolute inset-0 opacity-60 dark:opacity-20"
+            style={{
+              backgroundImage:
+                "linear-gradient(120deg, rgba(124, 101, 255, 0.12), rgba(124, 101, 255, 0))",
+            }}
+          />
+          <div
+            className="absolute inset-0 opacity-25 dark:opacity-10"
+            style={{
+              backgroundImage:
+                "linear-gradient(0deg, rgba(255,255,255,0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.35) 1px, transparent 1px)",
+              backgroundSize: "120px 120px",
+            }}
+          />
+          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle,rgba(255,255,255,0.08)_0,rgba(255,255,255,0)_60%)] mix-blend-soft-light opacity-50" />
+          <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[520px] h-[520px] bg-[radial-gradient(circle,rgba(228,223,255,0.55),transparent_65%)] blur-[140px]" />
           <div className="max-w-7xl mx-auto px-4 sm:px-3 py-4 sm:py-8 lg:py-12 relative z-10 w-full">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-              <div className="space-y-6 sm:space-y-8 order-2 lg:order-1 text-center lg:text-left">
+            <div className="flex flex-col items-center justify-center">
+              <div className="space-y-6 sm:space-y-8 order-2  text-center">
                 <div className="space-y-4">
                   {/* "Never stop learning" badge */}
-                  <div className="inline-block bg-white text-[#7357F5] px-4 py-2 rounded-md text-sm font-medium">
+                  <div className="inline-block text-[#7357F5] px-4 py-2 text-5xl font-bold">
                     {t('home.badge')}
                   </div>
                   
                   {/* Main headline - 3 lines */}
-                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight">
-                    <span className="text-[#524FD5] block">{t('home.title.line1')}</span>
-                    <span className="text-[#524FD5] block">{t('home.title.line2')}</span>
-                    <span className="text-[#524FD5] block">{t('home.title.line3')}</span>
+                  <h1 className="text-lg sm:text-lg lg:text-xl font-bold text-foreground leading-tight transition-colors duration-300">
+                    <span className="text-[#524FD5] dark:text-[#A393FF] block transition-colors">{t('home.title.line1')} {t('home.title.line2')} {t('home.title.line3')}</span>
                   </h1>
-                </div>
 
-                {/* CTA Section with Reviews */}
-                <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-                  <div className="flex items-center gap-0 rounded-2xl pr-6 py-4">
-                    <button className="group bg-[#524FD5] text-white font-semibold hover:bg-[#4240C5] px-6 py-5 text-base rounded-xl rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 uppercase tracking-wide">
-                      {t('home.cta.explore')}
+                  <p className="mt-4 text-sm sm:text-base text-slate-700 dark:text-slate-300 max-w-2xl mx-auto">
+                    {heroSubtitleText}
+                  </p>
+
+                  <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <button className="group relative inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white transition-transform duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 focus-visible:ring-purple-300" style={{ background: "linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #0EA5E9 100%)" }}>
+                      <span>{t('home.cta.explore')}</span>
+                      <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+                      <span className="absolute -inset-px rounded-full border border-white/20" aria-hidden="true" />
                     </button>
-                    
-                    {/* Profile Pictures */}
-                    <div className="flex items-center -ml-4">
-                      <div className="w-14 h-14 rounded-full border-2 border-white overflow-hidden relative z-10">
-                        <Image
-                          src="https://i.pravatar.cc/150?img=5"
-                          alt="User avatar"
-                          width={56}
-                          height={56}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="w-14 h-14 rounded-full border-2 border-white overflow-hidden -ml-2">
-                        <Image
-                          src="https://i.pravatar.cc/150?img=8"
-                          alt="User avatar"
-                          width={56}
-                          height={56}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="w-14 h-14 rounded-full border-2 border-white overflow-hidden -ml-2">
-                        <Image
-                          src="https://i.pravatar.cc/150?img=12"
-                          alt="User avatar"
-                          width={56}
-                          height={56}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <div className="flex items-center gap-1 ml-3">
-                        {[...Array(4)].map((_, i) => (
-                          <Star key={i} className="w-5 h-5 fill-black text-black" />
-                        ))}
-                        <Star className="w-5 h-5 fill-black text-black" style={{ clipPath: 'inset(0 50% 0 0)' }} />
-                      </div>
-                      <p className="text-sm text-black font-medium whitespace-nowrap px-3">{t('home.reviews')}</p>
-                    </div>
+
+                    <button className="inline-flex items-center gap-2 rounded-full bg-white/80 dark:bg-slate-900/50 px-6 py-3 text-sm font-medium text-slate-900 dark:text-slate-100 shadow-sm ring-1 ring-black/5 dark:ring-white/10 transition-colors">
+                      <Play className="w-4 h-4 fill-current text-purple-500" />
+                      {heroSecondaryCtaText}
+                    </button>
                   </div>
                 </div>
-         
-              </div>
-
-              {/* Right Content - Image Section */}
-              <div className="relative order-1 lg:order-2 flex items-center justify-center">
-                <div className="relative w-full max-w-[400px] sm:max-w-[500px] md:max-w-[650px] lg:max-w-[750px] xl:max-w-[850px] 2xl:max-w-[950px] mx-auto h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px] xl:h-[800px]">
-                  <div className="relative z-10 w-full h-full flex items-end">
-                  <Image
-                    src={studentImage}
-                      alt="Graduate student in cap and gown"
-                      className="w-full h-[80vh] drop-shadow-2xl"
-                      width={600}
-                      height={700}
-                    priority
-                      sizes="(max-width: 640px) 400px, (max-width: 768px) 500px, (max-width: 1024px) 650px, (max-width: 1280px) 750px, (max-width: 1536px) 850px, 950px"
-                      style={{
-                        maxHeight: '80vh',
-                        objectFit: 'cover',
-                        objectPosition: 'center bottom',
-                        width: '100%',
-                        height: '100%',
-                        maskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
-                        WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)'
-                      }}
-                    />
-                  </div>
-
-                  {/* Decorative Elements - Hidden on Small Mobile */}
-                  <div className="hidden sm:block">
-                    {/* Top Right Decoration */}
-                    <div className="absolute -top-4 -right-4 w-20 h-20 bg-orange-400/20 rounded-full blur-2xl animate-pulse"></div>
-                    
-                    {/* Bottom Left Decoration */}
-                    <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-white/20 rounded-full blur-xl animate-pulse delay-700"></div>
-                    
-                    {/* Small Dots */}
-                    <div className="absolute top-10 right-10 w-3 h-3 bg-orange-400 rounded-full animate-bounce"></div>
-                    <div className="absolute bottom-20 left-10 w-2 h-2 bg-white rounded-full animate-bounce delay-300"></div>
-                  </div>
-                </div>
-
-                {/* Floating UI Cards - Responsive Positioning */}
-                <FloatingCards />
               </div>
             </div>
           </div>
-        </div>   
+        </section>   
 
 
         {/* Popular Speakers Section */}
-        <section className="bg-[#0F172A] py-16 sm:py-20 lg:py-24 -mt-1">
+        <section className="bg-background py-16 sm:py-20 lg:py-24 -mt-1 transition-colors duration-300">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Header */}
             <div className="text-center mb-12 sm:mb-16">
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-6 transition-colors duration-300">
                 {t('home.popularSpeakers')}
               </h2>
-              <p className="text-lg sm:text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
+              <p className="text-lg sm:text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed transition-colors duration-300">
                 {t('home.popularSpeakersDesc')}
               </p>
-            </div>
-
-            {/* Filter Buttons */}
-            <div className="flex flex-wrap justify-center gap-3 mb-12">
-              <button 
-                onClick={() => setSelectedFilter("all")}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  selectedFilter === "all"
-                    ? "bg-[#524FD5] text-white"
-                    : "bg-transparent text-white border border-white hover:bg-white/10"
-                }`}
-              >
-                {t('home.filter.all')}
-              </button>
-              <button 
-                onClick={() => setSelectedFilter("literature")}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  selectedFilter === "literature"
-                    ? "bg-[#524FD5] text-white"
-                    : "bg-transparent text-white border border-white hover:bg-white/10"
-                }`}
-              >
-                {t('home.filter.literature')}
-              </button>
-              <button 
-                onClick={() => setSelectedFilter("architecture")}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  selectedFilter === "architecture"
-                    ? "bg-[#524FD5] text-white"
-                    : "bg-transparent text-white border border-white hover:bg-white/10"
-                }`}
-              >
-                {t('home.filter.architecture')}
-              </button>
-              <button 
-                onClick={() => setSelectedFilter("engineering")}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  selectedFilter === "engineering"
-                    ? "bg-[#524FD5] text-white"
-                    : "bg-transparent text-white border border-white hover:bg-white/10"
-                }`}
-              >
-                {t('home.filter.engineering')}
-              </button>
-              <button 
-                onClick={() => setSelectedFilter("business")}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  selectedFilter === "business"
-                    ? "bg-[#524FD5] text-white"
-                    : "bg-transparent text-white border border-white hover:bg-white/10"
-                }`}
-              >
-                {t('home.filter.business')}
-              </button>
-              <button 
-                onClick={() => setSelectedFilter("cooking")}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  selectedFilter === "cooking"
-                    ? "bg-[#524FD5] text-white"
-                    : "bg-transparent text-white border border-white hover:bg-white/10"
-                }`}
-              >
-                {t('home.filter.cooking')}
-              </button>
             </div>
 
             {/* Speaker Cards Grid */}
@@ -275,74 +120,99 @@ export default function HomePage() {
                 <Loader2 className="h-8 w-8 animate-spin text-[#524FD5]" />
               </div>
             ) : filteredSpeakers.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
                 {filteredSpeakers.map((speaker) => (
-                  <div key={speaker._id} className="bg-[#1B2335] rounded-2xl overflow-hidden flex flex-col h-full">
-                    {/* Image */}
-                    <div className="relative w-full h-48 bg-gray-200 overflow-hidden">
-                      {speaker.avatar ? (
-                        <Image
-                          src={speaker.avatar}
-                          alt={`${speaker.firstname || ''} ${speaker.lastname || ''}`}
-                          fill
-                          className="object-cover"
-                          unoptimized
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-[#524FD5] to-[#22B569] flex items-center justify-center">
-                          <span className="text-white text-4xl font-bold">
-                            {speaker.firstname?.[0] || ''}{speaker.lastname?.[0] || ''}
+                  <div
+                    key={speaker._id}
+                    className="bg-card text-card-foreground backdrop-blur-sm border border-border/60 rounded-3xl shadow-lg p-6 flex flex-col gap-5 h-full transition-colors duration-300"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="relative h-16 w-16 rounded-full border-4 border-indigo-100 bg-gradient-to-br from-indigo-100 to-cyan-100 overflow-hidden flex items-center justify-center text-indigo-600 font-semibold text-xl">
+                        {speaker.avatar ? (
+                          <Image
+                            src={speaker.avatar}
+                            alt={`${speaker.firstname || ''} ${speaker.lastname || ''}`}
+                            fill
+                            className="object-cover"
+                            sizes="64px"
+                            unoptimized
+                          />
+                        ) : (
+                          <span>
+                            {speaker.firstname?.[0] || ''}
+                            {speaker.lastname?.[0] || ''}
                           </span>
-                        </div>
-                      )}
-                    </div>
-                    {/* Content */}
-                    <div className="p-4 flesx-1 flex flex-col">
-                      {speaker.age && (
-                        <p className="text-gray-400 text-sm mb-2">
-                          {speaker.age} {t('home.speakerCard.age')}
-                        </p>
-                      )}
-                      <h3 className="text-white font-bold text-lg mb-3">
-                        {speaker.firstname} {speaker.lastname}
-                      </h3>
-                      <p className="text-gray-400 text-sm mb-4 flex-1 line-clamp-3">
-                        {speaker.bio || 'No description available'}
-                      </p>
-                      {/* Tags */}
-                      {speaker.interests && speaker.interests.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {speaker.interests.slice(0, 2).map((interest: string, idx: number) => (
-                            <span 
-                              key={idx}
-                              className="text-white text-xs border border-white px-2 py-1 rounded"
-                            >
-                              {interest}
-                            </span>
-                          ))}
-                          {speaker.interests.length > 2 && (
-                            <span className="text-gray-400 text-xs border border-gray-500 px-2 py-1 rounded">
-                              +{speaker.interests.length - 2}
-                            </span>
-                          )}
-                        </div>
-                      )}
-                      <div className="flex items-center justify-between">
-                        <div className="">
-                          <span className="text-white font-bold mr-2">
-                            {speaker.cost && speaker.cost > 0 ? `$${speaker.cost}` : t('home.speakerCard.free')}
-                          </span>
-                          {speaker.cost && speaker.cost > 0 && (
-                            <span className="text-gray-500 text-sm line-through">$300</span>
-                          )}
-                        </div>
-                        {/* Button */}
-                        <Link href={`/speakers/${speaker._id}`}>
-                          <button className="px-3 cursor-pointer bg-[#524FD5] text-white py-2 rounded-md font-medium hover:bg-[#4240C5] transition-colors">
-                            {t('home.speakerCard.book')}
-                          </button>
-                        </Link>
+                        )}
                       </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-foreground transition-colors duration-300">
+                          {speaker.firstname} {speaker.lastname}
+                        </h3>
+                        {(speaker.age || speaker.location) && (
+                          <p className="text-sm text-muted-foreground transition-colors duration-300">
+                            {[speaker.age ? `${speaker.age} ${t('home.speakerCard.age')}` : null, speaker.location]
+                              .filter(Boolean)
+                              .join(" • ")}
+                          </p>
+                        )}
+                        {(() => {
+                          const ratingValue =
+                            typeof speaker.rating === 'number'
+                              ? speaker.rating
+                              : typeof speaker.averageRating === 'number'
+                                ? speaker.averageRating
+                                : undefined
+                          const reviewCount =
+                            speaker.reviewsCount ??
+                            speaker.reviewCount ??
+                            speaker.totalReviews ??
+                            (Array.isArray(speaker.reviews) ? speaker.reviews.length : undefined)
+                          if (!ratingValue && !reviewCount) {
+                            return null
+                          }
+                          return (
+                            <div className="mt-2 flex items-center gap-1 text-indigo-500 dark:text-indigo-300 text-sm font-medium transition-colors duration-300">
+                              <Star className="w-4 h-4 fill-current stroke-0" />
+                              <span>{ratingValue ? ratingValue.toFixed(1) : 'New'}</span>
+                              {reviewCount ? (
+                                <span className="text-slate-400 dark:text-slate-500 font-normal">({reviewCount})</span>
+                              ) : null}
+                            </div>
+                          )
+                        })()}
+                      </div>
+                    </div>
+
+                    {speaker.bio && (
+                      <p className="text-sm leading-relaxed text-muted-foreground transition-colors duration-300">
+                        {speaker.bio}
+                      </p>
+                    )}
+
+                    {speaker.interests && speaker.interests.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {speaker.interests.slice(0, 4).map((interest: string, idx: number) => (
+                          <span
+                            key={idx}
+                            className="rounded-full bg-[#7357F5] text-white text-xs font-medium px-3 py-1"
+                          >
+                            {interest}
+                          </span>
+                        ))}
+                        {speaker.interests.length > 4 && (
+                          <span className="rounded-full border border-border/60 text-muted-foreground text-xs font-medium px-3 py-1 transition-colors duration-300">
+                            +{speaker.interests.length - 4}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="mt-auto">
+                      <Link href={`/speakers/${speaker._id}`}>
+                        <button className="w-full cursor-pointer rounded-xl border border-border bg-transparent py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted/20">
+                          {t('home.speakerCard.book')}
+                        </button>
+                      </Link>
                     </div>
                   </div>
                 ))}
@@ -350,18 +220,18 @@ export default function HomePage() {
             ) : (
               <div className="text-center py-20">
                 <p className="text-gray-400 text-lg">
-                  {selectedFilter && selectedFilter !== "all" 
-                    ? "No speakers found for this filter."
-                    : "No speakers available at the moment."}
+                  {speakers.length === 0
+                    ? "No speakers available at the moment."
+                    : "No speakers to display right now."}
                 </p>
               </div>
             )}
 
             {/* Ver todos Button */}
-            <div className="text-center">
+            <div className="text-center flex justify-center">
               <Link href="/speakers">
-                <button className="bg-white text-[#524FD5] px-8 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors cursor-pointer">
-                  {t('home.viewAll')}
+                <button className="flex cursor-pointer bg-card text-primary px-4 py-2 rounded-lg font-medium border border-border/50 hover:bg-muted/20 transition-colors cursor-pointer">
+                  View All Speakers <ArrowRight className="w-4 h-4 mt-1" />
                 </button>
               </Link>
             </div>
@@ -369,235 +239,177 @@ export default function HomePage() {
         </section>
 
         {/* How It Works Section */}
-        <section className="bg-[#0F172A] py-16 sm:py-20 lg:py-8">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-              {/* Left Column - How It Works */}
-              <div>
-                {/* Header Badge */}
-                <div className="inline-block bg-[#F5F5F5] text-[#7357F5] px-4 py-2 rounded-xl text-sm font-medium mb-6">
-                  {t('home.howItWorks.badge')}
-                </div>
-                {/* Title */}
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#524FD5] mb-12">
-                  {t('home.howItWorks.title')}
-                </h2>
-                {/* Steps */}
-                <div className="space-y-8">
-                  {/* Step 1 */}
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-14 h-14 bg-white rounded-full flex items-center justify-center">
-                      <span className="text-[#0F172A] font-bold text-lg">1</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-white text-lg">
-                        {t('home.howItWorks.step1')}
-                      </p>
-                    </div>
-                  </div>
-                  {/* Step 2 */}
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-14 h-14 bg-[#F5F5F5] rounded-full flex items-center justify-center">
-                      <span className="text-[#0F172A] font-bold text-lg">2</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-white text-lg">
-                        {t('home.howItWorks.step2')}
-                      </p>
-                    </div>
-                  </div>
-                  {/* Step 3 */}
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-14 h-14 bg-white rounded-full flex items-center justify-center">
-                      <span className="text-[#0F172A] font-bold text-lg">3</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-white text-lg pt-3">
-                        {t('home.howItWorks.step3')}
-                      </p>
-                    </div>
-                  </div>
+        <section className="bg-background dark:bg-slate-950 pb-16 sm:pb-20 lg:pb-24 transition-colors duration-300">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            {/* <p className="text-sm font-semibold tracking-[0.2em] text-[#7357F5] uppercase mb-4">
+              {t('home.howItWorks.badge')}
+            </p> */}
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-6 transition-colors duration-300">
+              {t('home.howItWorks.title')}
+            </h2>
+            <p className="text-base sm:text-lg text-muted-foreground mb-12 transition-colors duration-300">
+              {t('home.howItWorks.subtitle')}
+            </p>
 
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-14 h-14 bg-white rounded-full flex items-center justify-center">
-                      <span className="text-[#0F172A] font-bold text-lg">4</span>
-                    </div>
-                    <div className="flex-1 items-center">
-                      <p className="text-white text-lg pt-3">
-                        {t('home.howItWorks.step4')}
-                      </p>
-                    </div>
+            <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 xl:grid-cols-4">
+              {[
+                {
+                  icon: Search,
+                  title: t('home.howItWorks.step1Title'),
+                  description: t('home.howItWorks.step1'),
+                },
+                {
+                  icon: CalendarDays,
+                  title: t('home.howItWorks.step2Title'),
+                  description: t('home.howItWorks.step2'),
+                },
+                {
+                  icon: MessageCircle,
+                  title: t('home.howItWorks.step3Title'),
+                  description: t('home.howItWorks.step3'),
+                },
+                {
+                  icon: Heart,
+                  title: t('home.howItWorks.step4Title'),
+                  description: t('home.howItWorks.step4'),
+                },
+              ].map(({ icon: Icon, title, description }, idx) => (
+                <div
+                  key={idx}
+                  className="group flex flex-col items-center text-center gap-4 rounded-2xl cursor-pointer transition-all px-6 py-8 duration-300 hover:-translate-y-1 hover:shadow-lg"
+                >
+                  <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-[#F1ECFF] to-[#E7F8FF] dark:from-[#2A1B5C] dark:to-[#1A1F3F] text-[#7357F5] dark:text-[#B9A6FF] shadow-inner transition-colors duration-300">
+                    <div className="absolute inset-[6px] rounded-full bg-white/80 dark:bg-slate-900/90" />
+                    <Icon className="relative z-[1] h-7 w-7" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground transition-colors duration-300">{title}</h3>
+                    <p className="mt-2 text-sm text-muted-foreground leading-relaxed transition-colors duration-300">
+                      {description}
+                    </p>
                   </div>
                 </div>
-              </div>
-
-              {/* Right Column - Why Aurora is Different */}
+              ))}
             </div>
           </div>
         </section>
-        <section className="bg-[#0F172A] py-16 sm:py-20 lg:py-8">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-              <div></div>
-              <div>
-                {/* Header Badge */}
-                <div className="inline-block bg-white text-[#7357F5] px-4 py-2 rounded-xl text-sm font-medium mb-6">
-                  {t('home.whyDifferent.badge')}
+        <section className="bg-background dark:bg-slate-950 py-20 transition-colors duration-300">
+          <div className="max-w-6xl mx-auto px-4 text-center">
+            <h2 className="mt-6 text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground transition-colors duration-300">
+              {t('home.whyDifferent.title')}
+            </h2>
+            <p className="mt-3 text-base sm:text-lg text-muted-foreground transition-colors duration-300">
+              {t('home.whyDifferent.subtitle')}
+            </p>
+
+            <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
+              {[
+                {
+                  icon: Heart,
+                  title: t('home.whyDifferent.point1Title'),
+                  description: t('home.whyDifferent.point1'),
+                },
+                {
+                  icon: MessageCircle,
+                  title: t('home.whyDifferent.point2Title'),
+                  description: t('home.whyDifferent.point2'),
+                },
+                {
+                  icon: Users,
+                  title: t('home.whyDifferent.point3Title'),
+                  description: t('home.whyDifferent.point3'),
+                },
+              ].map(({ icon: Icon, title, description }, idx) => (
+                <div
+                  key={idx}
+                  className="group flex flex-col items-center text-center gap-4 rounded-2xl border border-border bg-card cursor-pointer transition-all px-6 py-8 duration-300 hover:-translate-y-1 hover:shadow-lg"
+                >
+                  <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-[#F1ECFF] to-[#E7F8FF] dark:from-[#2A1B5C] dark:to-[#1A1F3F] text-[#7357F5] dark:text-[#B9A6FF] shadow-inner transition-colors duration-300">
+                    <Icon className="h-6 w-6" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-foreground transition-colors duration-300">{title}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground leading-relaxed transition-colors duration-300">{description}</p>
                 </div>
-                {/* Title */}
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#524FD5] mb-12">
-                  {t('home.whyDifferent.title')}
-                </h2>
-                {/* Points */}
-                <div className="space-y-8">
-                  {/* Point 1 */}
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-14 h-14 bg-white rounded-full flex items-center justify-center">
-                      <span className="text-[#0F172A] font-bold text-lg">1</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-white text-lg">
-                        {t('home.whyDifferent.point1')}
-                      </p>
-                    </div>
-                  </div>
-                  {/* Point 2 */}
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-14 h-14 bg-white rounded-full flex items-center justify-center">
-                      <span className="text-[#0F172A] font-bold text-lg">2</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-white text-lg">
-                        {t('home.whyDifferent.point2')}
-                      </p>
-                    </div>
-                  </div>
-                  {/* Point 3 */}
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-14 h-14 bg-white rounded-full flex items-center justify-center">
-                      <span className="text-[#0F172A] font-bold text-lg">3</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-white text-lg">
-                        {t('home.whyDifferent.point3')}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </section>
         {/* Become a Speaker Section */}
-        <section className="py-4 px-4 sm:px-6 lg:px-8 sm:py-8 lg:pt-12 lg:pb-48">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#7357F5] to-[#22B569] rounded-lg">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-              {/* Left Content - Text */}
-              <div className="space-y-8 text-center lg:text-left order-2 lg:order-1">
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight">
-                  {t('home.becomeSpeaker.title')}<br />
-                  <span className="text-white">{t('home.becomeSpeaker.titleSpeaker')}</span>
-                </h2>
-                
-                {/* Bullet Points */}
-                <div className="space-y-4 text-white">
-                  <div className="flex items-start gap-3">
-                    <Star className="w-6 h-6 fill-white text-white flex-shrink-0 mt-1" />
-                    <p className="text-lg">{t('home.becomeSpeaker.point1')}</p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Star className="w-6 h-6 fill-white text-white flex-shrink-0 mt-1" />
-                    <p className="text-lg">{t('home.becomeSpeaker.point2')}</p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Star className="w-6 h-6 fill-white text-white flex-shrink-0 mt-1" />
-                    <p className="text-lg">{t('home.becomeSpeaker.point3')}</p>
-                  </div>
-                </div>
+        <section className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl rounded-[32px] bg-gradient-to-r from-[#5A32B5] via-[#6C3BDC] to-[#9446FF] dark:from-[#301868] dark:via-[#261356] dark:to-[#1A0D41] px-6 py-8 shadow-xl text-center text-white transition-colors duration-300">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">
+              {t('home.becomeSpeaker.title')}
+            </h2>
+            <p className="mt-4 text-base sm:text-lg text-white/80">
+              {t('home.becomeSpeaker.subtitle')}
+            </p>
 
-                {/* CTA Button */}
-                <div className="flex justify-center lg:justify-start">
-                  <button 
-                    onClick={() => router.push('/auth/speaker/signup')}
-                    className="bg-white cursor-pointer text-[#7357F5] font-semibold hover:bg-[#24B86D] px-8 py-4 text-base rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 uppercase tracking-wide">
-                    {t('home.becomeSpeaker.cta')}
-                  </button>
-                </div>
-              </div>
-
-              {/* Right Content - Image */}
-              <div className="relative order-1 lg:order-2 flex items-center justify-center">
-                <div className="relative w-full max-w-[300px] sm:max-w-[350px] md:max-w-[400px] lg:max-w-[450px] mx-auto h-[300px] sm:h-[350px] md:h-[400px] lg:h-[450px]">
-                  <div className="relative z-10 w-full h-full flex items-end">
-                    <Image
-                      src={grandfatherImage}
-                      alt="Speaker grandfather"
-                      className="w-full h-full object-cover rounded-2xl drop-shadow-2xl"
-                      width={450}
-                      height={450}
-                      priority
-                      sizes="(max-width: 640px) 300px, (max-width: 768px) 350px, (max-width: 1024px) 400px, 450px"
-                    />
+            <div className="mt-6 grid grid-cols-1 gap-8 sm:grid-cols-3">
+              {[
+                {
+                  icon: UserPlus,
+                  label: t('home.becomeSpeaker.step1.label'),
+                  title: t('home.becomeSpeaker.step1.title'),
+                  description: t('home.becomeSpeaker.step1.description'),
+                },
+                {
+                  icon: Calendar,
+                  label: t('home.becomeSpeaker.step2.label'),
+                  title: t('home.becomeSpeaker.step2.title'),
+                  description: t('home.becomeSpeaker.step2.description'),
+                },
+                {
+                  icon: Share2,
+                  label: t('home.becomeSpeaker.step3.label'),
+                  title: t('home.becomeSpeaker.step3.title'),
+                  description: t('home.becomeSpeaker.step3.description'),
+                },
+              ].map(({ icon: Icon, label, title, description }) => (
+                <div key={label} className="flex flex-col items-center gap-4">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full border border-white/30 bg-white/10 shadow-inner">
+                    <Icon className="h-7 w-7 text-white" />
                   </div>
-
-                  {/* Decorative Elements */}
-                  <div className="hidden sm:block">
-                    <div className="absolute -top-4 -right-4 w-20 h-20 bg-white/20 rounded-full blur-2xl animate-pulse"></div>
-                    <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-white/20 rounded-full blur-xl animate-pulse delay-700"></div>
-                  </div>
+                  <p className="text-sm uppercase tracking-[0.2em] text-white/70">
+                    {label}
+                  </p>
+                  <h3 className="text-lg font-semibold">{title}</h3>
+                  <p className="text-sm text-white/80">{description}</p>
                 </div>
-              </div>
+              ))}
+            </div>
+
+            <div className="mt-6 flex justify-center">
+              <button
+                onClick={() => router.push('/auth/speaker/signup')}
+                className="group inline-flex items-center gap-2 rounded-full bg-white text-[#5A32B5] dark:bg-[#D8CCFF] dark:text-[#2B1666] px-8 py-3 text-sm font-semibold shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
+              >
+                {t('home.becomeSpeaker.cta')}
+                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+              </button>
             </div>
           </div>
         </section>
-        <footer className="relative w-full">
-
-          {/* Main Gradient Section */}
-          <div 
-            className="w-full relative"
-            style={{
-              background: 'linear-gradient(to right, rgb(51, 204, 153), rgb(102, 178, 255))',
-              paddingTop: '2rem',
-              paddingBottom: '2rem'
-            }}
-          >
-            <div className="container mx-auto px-4 max-w-7xl">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
-                {/* Left Side - Links Section */}
-                <div className="space-y-2 py-24">
-                  <h3 className="text-lg font-bold text-[#4B0082] mb-3">{t('home.footer.links')}</h3>
-                  <div className="space-y-1">
-                    <a href="/terms-and-conditions" target="_blank" rel="noopener noreferrer" className="block text-[#4B0082] hover:underline text-base">
-                      {t('home.footer.terms')}
-                    </a>
-                    <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="block text-[#4B0082] hover:underline text-base">
-                      {t('home.footer.privacy')}
-                    </a>
-                  </div>
-                </div>
-              </div>
-              <div className="text-[#4B0082] text-base w-full mx-auto text-center">
-                <p>{t('home.footer.copyright')}</p>
+        <footer className="border-t border-border bg-background transition-colors duration-300">
+          <div className="mx-auto max-w-7xl px-4 pt-8 pb-24 md:pb-12 text-center text-muted-foreground">
+            <div className="flex flex-col items-center gap-3">
+              <span className="text-xl font-semibold tracking-wide text-primary transition-colors duration-300">Aurora</span>
+              <div className="flex items-center gap-6 text-sm">
+                <Link href="/terms-and-conditions" className="hover:text-primary transition-colors">
+                  {t('home.footer.terms')}
+                </Link>
+                <Link href="/privacy-policy" className="hover:text-primary transition-colors">
+                  {t('home.footer.privacy')}
+                </Link>
               </div>
             </div>
+            <p className="mt-6 text-sm">
+              {t('home.footer.tagline')}
+            </p>
+            <p className="mt-2 text-xs text-muted-foreground/80">
+              {t('home.footer.copyright')}
+            </p>
           </div>
-
-          {/* Bottom Dark Band */}
-          <div className="bg-[#1A1D21] w-full h-8"></div>
         </footer>
-        {/* <div className="absolute bottom-0 left-0 right-0 pointer-events-none">
-          <svg 
-            viewBox="0 0 1440 120" 
-            className="w-full h-auto"
-            preserveAspectRatio="none"
-          >
-            <path 
-              d="M0,40 C480,100 960,100 1440,40 L1440,120 L0,120 Z" 
-              fill="white" 
-              fillOpacity="0.1"
-            />
-          </svg>
-        </div> */}
       </main>
     </div>
   )

@@ -16,17 +16,20 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  auth,
 }: Readonly<{
   children: React.ReactNode
+  auth: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
+    <html lang="en" className="h-full">
+      <body className={`min-h-screen bg-background text-foreground font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
         <GoogleOAuthProvider>
           <ReduxProvider>
             <ClientLayout>
               {children}
             </ClientLayout>
+            {auth}
           </ReduxProvider>
         </GoogleOAuthProvider>
         <Toaster position="top-right" richColors />

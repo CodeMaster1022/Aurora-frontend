@@ -32,27 +32,42 @@ export type TranslationKey =
   | 'home.viewAll'
   | 'home.howItWorks.badge'
   | 'home.howItWorks.title'
+  | 'home.howItWorks.subtitle'
+  | 'home.howItWorks.step1Title'
+  | 'home.howItWorks.step2Title'
+  | 'home.howItWorks.step3Title'
+  | 'home.howItWorks.step4Title'
   | 'home.howItWorks.step1'
   | 'home.howItWorks.step2'
   | 'home.howItWorks.step3'
   | 'home.howItWorks.step4'
   | 'home.whyDifferent.badge'
   | 'home.whyDifferent.title'
+  | 'home.whyDifferent.subtitle'
+  | 'home.whyDifferent.point1Title'
   | 'home.whyDifferent.point1'
+  | 'home.whyDifferent.point2Title'
   | 'home.whyDifferent.point2'
+  | 'home.whyDifferent.point3Title'
   | 'home.whyDifferent.point3'
   | 'home.becomeSpeaker.title'
-  | 'home.becomeSpeaker.titleSpeaker'
-  | 'home.becomeSpeaker.point1'
-  | 'home.becomeSpeaker.point2'
-  | 'home.becomeSpeaker.point3'
+  | 'home.becomeSpeaker.subtitle'
+  | 'home.becomeSpeaker.step1.label'
+  | 'home.becomeSpeaker.step1.title'
+  | 'home.becomeSpeaker.step1.description'
+  | 'home.becomeSpeaker.step2.label'
+  | 'home.becomeSpeaker.step2.title'
+  | 'home.becomeSpeaker.step2.description'
+  | 'home.becomeSpeaker.step3.label'
+  | 'home.becomeSpeaker.step3.title'
+  | 'home.becomeSpeaker.step3.description'
   | 'home.becomeSpeaker.cta'
   | 'home.speakerCard.age'
   | 'home.speakerCard.book'
   | 'home.speakerCard.free'
-  | 'home.footer.links'
   | 'home.footer.terms'
   | 'home.footer.privacy'
+  | 'home.footer.tagline'
   | 'home.footer.copyright'
   
   // Auth
@@ -419,28 +434,43 @@ export const translations: Record<Language, Translations> = {
     'home.filter.cooking': 'Cooking',
     'home.viewAll': 'View All',
     'home.howItWorks.badge': 'Practice your speaking',
-    'home.howItWorks.title': 'How does it work?',
-    'home.howItWorks.step1': 'Choose your Speaker: Explore their profiles.',
-    'home.howItWorks.step2': 'Select date and time.',
-    'home.howItWorks.step3': 'Practice and Connect: Enjoy authentic conversation.',
-    'home.howItWorks.step4': 'The speakers have chosen their most favorite topics.',
-    'home.whyDifferent.badge': 'You contribute while learning',
-    'home.whyDifferent.title': 'Why Aurora is different',
-    'home.whyDifferent.point1': 'You learn with purpose: Your practice helps reduce loneliness in seniors and makes them feel useful.',
-    'home.whyDifferent.point2': 'Real conversations: No scripts, just people and genuine moments.',
-    'home.whyDifferent.point3': 'Mutual impact: They help you improve your English, you give them company and connection.',
-    'home.becomeSpeaker.title': 'Become a',
-    'home.becomeSpeaker.titleSpeaker': 'speaker',
-    'home.becomeSpeaker.point1': 'Register as a speaker.',
-    'home.becomeSpeaker.point2': 'Define your available schedules.',
-    'home.becomeSpeaker.point3': 'Start conversing and sharing stories.',
-    'home.becomeSpeaker.cta': 'BECOME A SPEAKER',
+    'home.howItWorks.title': 'Practice your speaking',
+    'home.howItWorks.subtitle': 'How does it work?',
+    'home.howItWorks.step1Title': 'Choose your speaker',
+    'home.howItWorks.step2Title': 'Select date and time',
+    'home.howItWorks.step3Title': 'Practice and connect',
+    'home.howItWorks.step4Title': 'Favorite topics',
+    'home.howItWorks.step1': 'Explore their profiles and find someone whose interests match yours.',
+    'home.howItWorks.step2': 'Pick a time that works for you from their available slots.',
+    'home.howItWorks.step3': 'Enjoy an authentic conversation about topics you both love.',
+    'home.howItWorks.step4': 'Speakers have chosen their favorite topics to guide the conversation.',
+    'home.whyDifferent.badge': 'You learn with purpose',
+    'home.whyDifferent.title': 'Why Aurora is Different',
+    'home.whyDifferent.subtitle': 'You learn with purpose: Your practice creates meaningful connections',
+    'home.whyDifferent.point1Title': 'You contribute while learning',
+    'home.whyDifferent.point1': 'Your practice helps reduce loneliness among seniors and makes them feel valued.',
+    'home.whyDifferent.point2Title': 'Real conversations',
+    'home.whyDifferent.point2': 'No scripts—just genuine people and real moments that build confidence.',
+    'home.whyDifferent.point3Title': 'Mutual impact',
+    'home.whyDifferent.point3': 'They help you improve your English; you give them connection and companionship.',
+    'home.becomeSpeaker.title': 'Become a Speaker',
+    'home.becomeSpeaker.subtitle': 'Share your stories, connect with eager learners, and make a meaningful impact.',
+    'home.becomeSpeaker.step1.label': 'Step 1',
+    'home.becomeSpeaker.step1.title': 'Register as a speaker',
+    'home.becomeSpeaker.step1.description': 'Create your profile and tell us about your experience.',
+    'home.becomeSpeaker.step2.label': 'Step 2',
+    'home.becomeSpeaker.step2.title': 'Set your availability',
+    'home.becomeSpeaker.step2.description': 'Choose the times that work best for you to host conversations.',
+    'home.becomeSpeaker.step3.label': 'Step 3',
+    'home.becomeSpeaker.step3.title': 'Start connecting and sharing stories',
+    'home.becomeSpeaker.step3.description': 'Meet learners, share your stories, and build meaningful conversations.',
+    'home.becomeSpeaker.cta': 'Become a Speaker',
     'home.speakerCard.age': 'years old',
     'home.speakerCard.book': 'Book',
     'home.speakerCard.free': 'Free',
-    'home.footer.links': 'Links',
     'home.footer.terms': 'Terms and Conditions',
     'home.footer.privacy': 'Privacy Policy',
+    'home.footer.tagline': 'Making connections that matter.',
     'home.footer.copyright': '© 2025 Aurora. All rights reserved',
     
     // Auth
@@ -804,28 +834,43 @@ export const translations: Record<Language, Translations> = {
     'home.filter.cooking': 'Cocina',
     'home.viewAll': 'Ver todos',
     'home.howItWorks.badge': 'Practica tu speaking',
-    'home.howItWorks.title': '¿Cómo funciona?',
-    'home.howItWorks.step1': 'Explora sus perfiles.',
-    'home.howItWorks.step2': 'Seleccione la fecha y la hora.',
-    'home.howItWorks.step3': 'Practica y Conecta: Disfruta de conversación auténtica.',
-    'home.howItWorks.step4': 'Las oradoras han elegido sus temas más favoritos.',
-    'home.whyDifferent.badge': 'Contribuyes mientras aprendes',
+    'home.howItWorks.title': 'Practica tu speaking',
+    'home.howItWorks.subtitle': '¿Cómo funciona?',
+    'home.howItWorks.step1Title': 'Elige tu speaker',
+    'home.howItWorks.step2Title': 'Selecciona fecha y hora',
+    'home.howItWorks.step3Title': 'Practica y conecta',
+    'home.howItWorks.step4Title': 'Temas favoritos',
+    'home.howItWorks.step1': 'Explora sus perfiles y encuentra a alguien cuyos intereses coincidan contigo.',
+    'home.howItWorks.step2': 'Elige un horario que funcione para ti entre sus espacios disponibles.',
+    'home.howItWorks.step3': 'Disfruta de una conversación auténtica sobre temas que ambos aman.',
+    'home.howItWorks.step4': 'Los speakers han elegido sus temas favoritos para guiar la conversación.',
+    'home.whyDifferent.badge': 'Aprendes con propósito',
     'home.whyDifferent.title': 'Por qué Aurora es diferente',
-    'home.whyDifferent.point1': 'Aprendes con un propósito: Tu práctica ayuda a reducir la soledad en las personas mayores y les hace sentir útiles.',
-    'home.whyDifferent.point2': 'Conversaciones reales: No hay guiones, solo personas y momentos genuinos.',
-    'home.whyDifferent.point3': 'Impacto mutuo: Ellos te ayudan a mejorar tu inglés, tú les das compañía y conexión.',
-    'home.becomeSpeaker.title': 'Conviértete en',
-    'home.becomeSpeaker.titleSpeaker': 'speaker',
-    'home.becomeSpeaker.point1': 'Registrate como speaker.',
-    'home.becomeSpeaker.point2': 'Define tus horarios disponibles.',
-    'home.becomeSpeaker.point3': 'Empieza a conversar y compartir historias.',
-    'home.becomeSpeaker.cta': 'CONVERTIRME EN SPEAKER',
+    'home.whyDifferent.subtitle': 'Aprendes con propósito: tu práctica crea conexiones significativas',
+    'home.whyDifferent.point1Title': 'Contribuyes mientras aprendes',
+    'home.whyDifferent.point1': 'Tu práctica ayuda a reducir la soledad en las personas mayores y las hace sentir valoradas.',
+    'home.whyDifferent.point2Title': 'Conversaciones reales',
+    'home.whyDifferent.point2': 'Sin guiones: solo personas genuinas y momentos reales que construyen confianza.',
+    'home.whyDifferent.point3Title': 'Impacto mutuo',
+    'home.whyDifferent.point3': 'Ellos te ayudan a mejorar tu inglés; tú les brindas conexión y compañía.',
+    'home.becomeSpeaker.title': 'Conviértete en Speaker',
+    'home.becomeSpeaker.subtitle': 'Comparte tus historias, conecta con aprendices motivados y genera un impacto significativo.',
+    'home.becomeSpeaker.step1.label': 'Paso 1',
+    'home.becomeSpeaker.step1.title': 'Regístrate como speaker',
+    'home.becomeSpeaker.step1.description': 'Crea tu perfil y cuéntanos sobre tu experiencia.',
+    'home.becomeSpeaker.step2.label': 'Paso 2',
+    'home.becomeSpeaker.step2.title': 'Configura tu disponibilidad',
+    'home.becomeSpeaker.step2.description': 'Elige los horarios que mejor se adapten a ti para conversar.',
+    'home.becomeSpeaker.step3.label': 'Paso 3',
+    'home.becomeSpeaker.step3.title': 'Comienza a conectar y compartir historias',
+    'home.becomeSpeaker.step3.description': 'Conoce aprendices, comparte tus historias y crea conversaciones significativas.',
+    'home.becomeSpeaker.cta': 'Convertirme en Speaker',
     'home.speakerCard.age': 'años',
     'home.speakerCard.book': 'Agenda',
     'home.speakerCard.free': 'Gratis',
-    'home.footer.links': 'Enlaces',
-    'home.footer.terms': 'Términos y condiciones',
-    'home.footer.privacy': 'Aviso de privacidad',
+    'home.footer.terms': 'Términos y Condiciones',
+    'home.footer.privacy': 'Aviso de Privacidad',
+    'home.footer.tagline': 'Creando conexiones que importan.',
     'home.footer.copyright': '© 2025 Aurora. Todos los derechos reservados',
     
     // Auth
