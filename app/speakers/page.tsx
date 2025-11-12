@@ -1,15 +1,15 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Search, Star, Loader2, Filter } from "lucide-react"
 import { learnerService } from "@/lib/services/learnerService"
 import { useTranslation } from "@/lib/hooks/useTranslation"
 import Image from "next/image"
 import Link from "next/link"
+import { Header } from "@/components/header"
 
 export default function SpeakersPage() {
   const { t } = useTranslation()
@@ -83,18 +83,28 @@ export default function SpeakersPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#1A1A33]">
-        <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+      <div className="flex items-center justify-center min-h-screen bg-background text-foreground transition-colors duration-300">
+        <Loader2 className="h-8 w-8 animate-spin text-[#524FD5]" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#1A1A33] pt-24 pb-12 px-4 sm:px-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300 sm:pb-0 pb-12">
+      <Header />
+      <main className="relative py-16 px-4 sm:px-6">
+        <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[#F7F2FF] via-[#EEE8FF] to-[#FBF6FF] dark:from-[#080A18] dark:via-[#161B2D] dark:to-[#3B82F6] opacity-60 dark:opacity-90 transition-colors duration-700" />
+        <div className="absolute inset-0 -z-10 opacity-40 dark:opacity-20"
+          style={{
+            backgroundImage:
+              "linear-gradient(0deg, rgba(255,255,255,0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.25) 1px, transparent 1px)",
+            backgroundSize: "120px 120px",
+          }}
+        />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-4 text-center">
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+        <div className="mb-4 text-left">
+          <h1 className="text-xl sm:text-xl font-bold text-foreground mb-4 transition-colors duration-300">
             {t('speakers.title')}
           </h1>
           {/* <p className="text-gray-300 text-lg">
@@ -103,33 +113,33 @@ export default function SpeakersPage() {
         </div>
 
         {/* Search and Filter Section */}
-        <div className="bg-white/10 backdrop-blur-lg border-white/20 mb-6 rounded-xl">
-          <CardContent className="p-4">
+        <div className="mb-8 transition-colors duration-300">
+          <div className="">
             <div className="flex flex-col md:flex-row md:items-center gap-3">
               {/* Search Bar */}
               <div className="relative flex-1">
-                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                 <Input
                   placeholder={t('speakers.search.placeholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-8 bg-white/10 border-white/20 text-white placeholder:text-gray-400 h-9 text-sm"
+                  className="pl-9 bg-transparent border border-border/60 text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-[#7357F5]/40 focus-visible:border-[#7357F5]/50 h-10 text-sm"
                 />
               </div>
 
               {/* Topic Filter */}
-              <div className="flex items-center gap-2 md:border-l md:pl-3 md:border-white/20">
-                <Filter className="w-4 h-4 text-purple-400" />
-                <div className="flex flex-wrap gap-1.5">
+              <div className="flex items-center gap-2 md:border-l md:pl-3 md:border-border/60">
+                <Filter className="w-4 h-4 text-[#7357F5]" />
+                <div className="flex flex-wrap gap-1.5 justify-end">
                   {topics.slice(0, 6).map((topic) => (
                     <Button
                       key={topic.key}
                       onClick={() => setSelectedTopic(topic.key === selectedTopic ? "" : topic.key)}
                       variant={selectedTopic === topic.key ? "default" : "outline"}
-                      className={`h-8 px-2 text-xs ${
+                      className={`h-8 px-3 text-xs rounded-full border ${
                         selectedTopic === topic.key
-                          ? "bg-purple-600 hover:bg-purple-700 text-white"
-                          : "bg-white/10 border-white/20 text-gray-300 hover:bg-white/20"
+                          ? "bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white border-transparent shadow-md hover:brightness-110"
+                          : "bg-transparent border-border/60 text-muted-foreground hover:bg-muted/20"
                       }`}
                     >
                       {t(topic.translationKey as any)}
@@ -140,113 +150,135 @@ export default function SpeakersPage() {
             </div>
 
             {/* Results Count */}
-            <div className="mt-2 text-gray-400 text-xs">
+            {/* <div className="mt-3 text-muted-foreground text-xs">
               {filteredSpeakers.length} {filteredSpeakers.length !== 1 ? t('speakers.results.countPlural') : t('speakers.results.count')}
-            </div>
-          </CardContent>
+            </div> */}
+          </div>
         </div>
 
         {/* Speakers Grid */}
         {filteredSpeakers.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredSpeakers.map((speaker) => (
-              <Link href={`/speakers/${speaker._id}`} key={speaker._id}>
-                <Card className="bg-[#1A1A33] border-white/20 hover:shadow-lg hover:shadow-purple-500/20 transition-all cursor-pointer h-full flex flex-col overflow-hidden rounded-2xl">
-                  {/* Top Half - Full Width Image */}
-                  <div className="relative w-full h-[180px] overflow-hidden">
-                    {speaker.avatar ? (
-                      <Image
-                        src={speaker.avatar}
-                        alt={`${speaker.firstname} ${speaker.lastname}`}
-                        fill
-                        className="object-cover object-center"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center">
-                        <span className="text-white text-6xl font-bold">
-                          {speaker.firstname?.[0]}{speaker.lastname?.[0]}
+              <Link
+                href={`/speakers/${speaker._id}`}
+                key={speaker._id}
+                className="h-full"
+              >
+                <div className="bg-card text-card-foreground backdrop-blur-sm border border-border/60 rounded-3xl shadow-lg p-6 flex flex-col gap-5 h-full transition-colors duration-300 hover:shadow-xl hover:border-[#7357F5]/60 cursor-pointer">
+                  <div className="flex items-start gap-4">
+                    <div className="relative h-16 w-16 rounded-full border-4 border-indigo-100 bg-gradient-to-br from-indigo-100 to-cyan-100 overflow-hidden flex items-center justify-center text-indigo-600 font-semibold text-xl">
+                      {speaker.avatar ? (
+                        <Image
+                          src={speaker.avatar}
+                          alt={`${speaker.firstname || ""} ${speaker.lastname || ""}`}
+                          fill
+                          className="object-cover"
+                          sizes="64px"
+                          unoptimized
+                        />
+                      ) : (
+                        <span>
+                          {speaker.firstname?.[0] || ""}
+                          {speaker.lastname?.[0] || ""}
                         </span>
-                      </div>
-                    )}
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-foreground transition-colors duration-300">
+                        {speaker.firstname} {speaker.lastname}
+                      </h3>
+                      {(speaker.age || speaker.location) && (
+                        <p className="text-sm text-muted-foreground transition-colors duration-300">
+                          {[
+                            speaker.age ? `${speaker.age} ${t('home.speakerCard.age')}` : null,
+                            speaker.location,
+                          ]
+                            .filter(Boolean)
+                            .join(" • ")}
+                        </p>
+                      )}
+                      {(() => {
+                        const ratingValue =
+                          typeof speaker.rating === "number"
+                            ? speaker.rating
+                            : typeof speaker.averageRating === "number"
+                              ? speaker.averageRating
+                              : undefined
+                        const reviewCount =
+                          speaker.reviewsCount ??
+                          speaker.reviewCount ??
+                          speaker.totalReviews ??
+                          (Array.isArray(speaker.reviews) ? speaker.reviews.length : undefined)
+                        if (!ratingValue && !reviewCount) {
+                          return null
+                        }
+                        return (
+                          <div className="mt-2 flex items-center gap-1 text-indigo-500 dark:text-indigo-300 text-sm font-medium transition-colors duration-300">
+                            <Star className="w-4 h-4 fill-current stroke-0" />
+                            <span>{ratingValue ? ratingValue.toFixed(1) : "New"}</span>
+                            {reviewCount ? (
+                              <span className="text-slate-400 dark:text-slate-500 font-normal">
+                                ({reviewCount})
+                              </span>
+                            ) : null}
+                          </div>
+                        )
+                      })()}
+                    </div>
                   </div>
 
-                  {/* Bottom Half - Content */}
-                  <CardContent className="p-4 flex-1 flex flex-col">
-                    {/* Age */}
-                    {speaker.age && (
-                      <p className="text-gray-400 text-xs mb-1">{speaker.age} years</p>
-                    )}
-                    
-                    {/* Name */}
-                    <h3 className="text-lg font-bold text-white mb-2">
-                      {speaker.firstname} {speaker.lastname}
-                    </h3>
+                  {speaker.bio && (
+                    <p className="text-sm leading-relaxed text-muted-foreground transition-colors duration-300">
+                      {speaker.bio}
+                    </p>
+                  )}
 
-                    {/* Bio */}
-                    {speaker.bio && (
-                      <p className="text-gray-300 text-xs mb-3 line-clamp-2 flex-grow min-h-[2.5rem]">
-                        {speaker.bio}
-                      </p>
-                    )}
-
-                    {/* Interests */}
-                    {speaker.interests && speaker.interests.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mb-3">
-                        {speaker.interests.slice(0, 2).map((interest: string, idx: number) => (
-                          <Badge
-                            key={idx}
-                            variant="outline"
-                            className="bg-transparent text-white border-white/30 hover:border-purple-400 text-xs py-0 px-2 h-6"
-                          >
-                            {interest}
-                          </Badge>
-                        ))}
-                        {speaker.interests.length > 2 && (
-                          <Badge variant="outline" className="bg-transparent text-gray-400 border-gray-600/30 text-xs py-0 px-2 h-6">
-                            +{speaker.interests.length - 2}
-                          </Badge>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Bottom Row - Cost and Button - Always at bottom */}
-                    <div className="flex items-center justify-between pt-3 border-t border-white/10 mt-auto">
-                      <div className="flex items-center gap-2">
-                        <span className="text-purple-400 font-bold text-sm">
-                          {speaker.cost ? `$${speaker.cost}` : 'Free'}
+                  {speaker.interests && speaker.interests.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {speaker.interests.slice(0, 4).map((interest: string, idx: number) => (
+                        <span
+                          key={idx}
+                          className="rounded-full bg-[#7357F5] text-white text-xs font-medium px-3 py-1"
+                        >
+                          {interest}
                         </span>
-                        {speaker.cost && speaker.cost > 0 && (
-                          <span className="text-gray-500 text-xs line-through">$300</span>
-                        )}
-                      </div>
-                      <Button
-                        className="bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white rounded-lg px-4 py-1.5 text-sm h-8"
-                      >
-                        Schedule
-                      </Button>
+                      ))}
+                      {speaker.interests.length > 4 && (
+                        <span className="rounded-full border border-border/60 text-muted-foreground text-xs font-medium px-3 py-1 transition-colors duration-300">
+                          +{speaker.interests.length - 4}
+                        </span>
+                      )}
                     </div>
-                  </CardContent>
-                </Card>
+                  )}
+
+                  <div className="mt-auto">
+                    <button className="w-full cursor-pointer rounded-xl border border-border bg-transparent py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted/20">
+                      {t('home.speakerCard.book')}
+                    </button>
+                  </div>
+                </div>
               </Link>
             ))}
           </div>
         ) : (
-          <Card className="bg-white/10 backdrop-blur-lg border-white/20">
-            <CardContent className="p-12 text-center">
-              <p className="text-gray-300 text-lg">
+          <Card className="bg-card/80 dark:bg-slate-900/70 backdrop-blur-md border border-border/60 shadow-lg transition-colors duration-300">
+            <CardContent className="p-12 text-center space-y-4">
+              <p className="text-muted-foreground text-lg">
                 {t('speakers.noResults')}
               </p>
               <Button
                 onClick={clearFilters}
                 variant="outline"
-                className="mt-4 cursor-pointer"
+                className="cursor-pointer"
               >
                 {t('speakers.clearFilters')}
               </Button>
             </CardContent>
           </Card>
         )}
-      </div>
+        </div>
+      </main>
     </div>
   )
 }

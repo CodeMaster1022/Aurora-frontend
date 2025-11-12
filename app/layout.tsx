@@ -24,14 +24,14 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <body className={`min-h-screen bg-background text-foreground font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
-        <GoogleOAuthProvider>
+        {/* <GoogleOAuthProvider> */}
           <ReduxProvider>
             <ClientLayout>
               {children}
             </ClientLayout>
             {auth}
           </ReduxProvider>
-        </GoogleOAuthProvider>
+        {/* </GoogleOAuthProvider> */}
         <Toaster position="top-right" richColors />
         <Analytics />
       </body>

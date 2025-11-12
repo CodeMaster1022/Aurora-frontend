@@ -89,8 +89,8 @@ export default function HomePage() {
                       <span className="absolute -inset-px rounded-full border border-white/20" aria-hidden="true" />
                     </button>
 
-                    <button className="inline-flex items-center gap-2 rounded-full bg-white/80 dark:bg-slate-900/50 px-6 py-3 text-sm font-medium text-slate-900 dark:text-slate-100 shadow-sm ring-1 ring-black/5 dark:ring-white/10 transition-colors">
-                      <Play className="w-4 h-4 fill-current text-purple-500" />
+                    <button className="inline-flex cursor-pointer items-center text-[#6b3bbd] gap-2 rounded-full bg-white/80 dark:bg-slate-900/50 px-6 py-3 text-sm font-medium dark:text-slate-100 shadow-sm ring-1 ring-black/5 dark:ring-white/10 transition-colors" onClick={() => router.push('/about')}>
+                      <Play className="w-4 h-4 fill-current text-[#6b3bbd]" />
                       {heroSecondaryCtaText}
                     </button>
                   </div>

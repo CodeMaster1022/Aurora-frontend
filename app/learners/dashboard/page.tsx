@@ -1,137 +1,156 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { 
-  Calendar, 
-  Clock, 
-  Star, 
-  Edit, 
-  Save, 
-  X, 
-  Upload,
-  Loader2,
-  Camera,
-  User,
-  CheckCircle2,
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Textarea } from "@/components/ui/textarea"
+import {
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart"
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import {
+  Calendar,
+  Clock,
+  Star,
   MessageSquare,
+  Loader2,
+  CheckCircle2,
   Trash2,
-  AlertTriangle
+  AlertTriangle,
+  Users,
 } from "lucide-react"
 import { learnerService, Session, Speaker, Review } from "@/lib/services/learnerService"
 import { useAppSelector, useAppDispatch } from "@/lib/hooks/redux"
 import { getCurrentUser } from "@/lib/store/authSlice"
 import { LearnerRatingModal } from "@/components/LearnerRatingModal"
 import { useTranslation } from "@/lib/hooks/useTranslation"
-import Image from "next/image"
+import Link from "next/link"
+
+type ChartRange = "7d" | "30d"
+
+type ProcessedReview = Review & {
+  speaker?: Speaker | null
+}
+
+type TopSpeaker = {
+  id: string
+  name: string
+  sessions: number
+  lastSession: Date
+  avatar?: string
+  rating?: number
+}
 
 export default function LearnerDashboardPage() {
   const dispatch = useAppDispatch()
   const { t } = useTranslation()
   const { user, isAuthenticated, isLoading: authLoading } = useAppSelector((state) => state.auth)
+
   const [upcomingSessions, setUpcomingSessions] = useState<Session[]>([])
   const [pastSessions, setPastSessions] = useState<Session[]>([])
-  const [reviews, setReviews] = useState<any[]>([])
+  const [reviews, setReviews] = useState<ProcessedReview[]>([])
+  const [profileStats, setProfileStats] = useState<{
+    totalSessions: number
+    completedSessions: number
+    upcomingSessions: number
+  } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState("")
-  
-  // Profile editing states
-  const [isEditingProfile, setIsEditingProfile] = useState(false)
-  const [firstname, setFirstname] = useState("")
-  const [lastname, setLastname] = useState("")
-  const [bio, setBio] = useState("")
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
-  const [isUploading, setIsUploading] = useState(false)
+  const [cancelError, setCancelError] = useState("")
 
-  // Rating dialog states
+  const [analyticsRange, setAnalyticsRange] = useState<ChartRange>("7d")
+
   const [ratingModalOpen, setRatingModalOpen] = useState(false)
   const [selectedSessionForRating, setSelectedSessionForRating] = useState<Session | null>(null)
 
-  // Cancellation dialog states
   const [cancelModalOpen, setCancelModalOpen] = useState(false)
   const [selectedSessionForCancellation, setSelectedSessionForCancellation] = useState<Session | null>(null)
   const [cancellationReason, setCancellationReason] = useState("")
   const [isCancelling, setIsCancelling] = useState(false)
 
-  useEffect(() => {
-    console.log('=== Learner Dashboard First Render ===')
-    console.log('User:', user)
-    console.log('isAuthenticated:', isAuthenticated)
-    console.log('authLoading:', authLoading)
-    
-    // If authenticated but no user data, fetch it
-    if (isAuthenticated && !user) {
-      console.log('Fetching current user...')
-      dispatch(getCurrentUser())
+  const getSessionDateTime = (session: Session) => {
+    const date = new Date(session.date)
+    if (session.time) {
+      const [hours, minutes] = session.time.split(':')
+      const parsedHours = Number.parseInt(hours, 10)
+      const parsedMinutes = Number.parseInt(minutes ?? "0", 10)
+      if (!Number.isNaN(parsedHours)) {
+        date.setHours(parsedHours, Number.isNaN(parsedMinutes) ? 0 : parsedMinutes, 0, 0)
+      }
     }
-  }, [isAuthenticated, user, dispatch, authLoading])
+    return date
+  }
+
+  const getHoursUntilSession = (session: Session) => {
+    const now = new Date()
+    return (getSessionDateTime(session).getTime() - now.getTime()) / (1000 * 60 * 60)
+  }
+
+  const formatDateLong = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    })
+  }
+
+  const formatDateShort = (date: Date) => {
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+    })
+  }
+
+  const hasBeenReviewed = (sessionId: string) => {
+    return reviews.some((review) => {
+      const reviewSessionId = typeof review.session === 'string'
+        ? review.session
+        : (review.session as any)?._id || review.session
+      return String(reviewSessionId) === String(sessionId)
+    })
+  }
 
   useEffect(() => {
-    console.log('Dashboard fetch effect - user:', !!user, 'isAuthenticated:', isAuthenticated, 'authLoading:', authLoading)
-    
-    // Don't do anything while auth is loading
-    if (authLoading) {
-      console.log('Auth still loading, waiting...')
-      return
+    if (isAuthenticated && !user) {
+      dispatch(getCurrentUser())
     }
-    
-    // If user exists, fetch dashboard data
+  }, [dispatch, isAuthenticated, user])
+
+  useEffect(() => {
+    if (authLoading) return
+
     if (user) {
-      console.log('User exists, fetching dashboard data...')
       fetchDashboardData()
-    } 
-    // If not authenticated at all, show error
-    else if (!isAuthenticated) {
-      console.log('Not authenticated, showing error')
+    } else if (!isAuthenticated) {
       setIsLoading(false)
       setError(t('learnerDashboard.errors.loginRequired'))
     }
-    // If authenticated but no user yet, wait for getCurrentUser to complete
-    else if (isAuthenticated && !user) {
-      console.log('Authenticated but no user, waiting for getCurrentUser...')
-      // Keep loading state - getCurrentUser will be called by the first useEffect
-    }
-  }, [user, isAuthenticated, authLoading])
+  }, [authLoading, isAuthenticated, t, user])
 
-  // Auto-open rating modal for ended sessions that haven't been reviewed
   useEffect(() => {
-    // Only run if we have sessions and reviews loaded, and not currently loading
-    if (isLoading) return
-    if ((upcomingSessions.length === 0 && pastSessions.length === 0) || !user) return
-    
-    // Don't auto-open if any modal is already open
+    if (isLoading || !user) return
     if (ratingModalOpen || cancelModalOpen) return
-    
-    // Check past sessions first (completed sessions)
-    const completedSessions = pastSessions.filter(s => s.status === 'completed')
-    for (const session of completedSessions) {
-      if (!hasBeenReviewed(session._id)) {
-        // Found a completed session that hasn't been reviewed - open modal
-        setSelectedSessionForRating(session)
-        setRatingModalOpen(true)
-        return // Only open for one session at a time
-      }
-    }
-    
-    // Also check upcoming sessions that have actually ended but still marked as scheduled
-    const endedSessions = upcomingSessions.filter(s => hasSessionEnded(s) && !hasBeenReviewed(s._id))
-    if (endedSessions.length > 0) {
-      // Found an ended session that hasn't been reviewed - open modal
-      setSelectedSessionForRating(endedSessions[0])
+
+    const completedSessions = pastSessions.filter((session) => session.status === "completed")
+    const nextPendingReview = completedSessions.find((session) => !hasBeenReviewed(session._id))
+    if (nextPendingReview) {
+      setSelectedSessionForRating(nextPendingReview)
       setRatingModalOpen(true)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [upcomingSessions, pastSessions, reviews, isLoading, user])
+  }, [cancelModalOpen, isLoading, pastSessions, ratingModalOpen, upcomingSessions, user])
 
   const fetchDashboardData = async () => {
     if (!user) {
-      console.log('No user available, skipping dashboard fetch')
       setIsLoading(false)
       return
     }
@@ -139,69 +158,227 @@ export default function LearnerDashboardPage() {
     try {
       setIsLoading(true)
       setError("")
-      
-      // Fetch real data from backend
+
       const response = await learnerService.getDashboard()
-      
+
       if (response.success && response.data) {
-        const { upcomingSessions, pastSessions, reviews } = response.data
-        
-        // Update sessions
+        const { upcomingSessions, pastSessions, reviews, profile } = response.data
         setUpcomingSessions(upcomingSessions || [])
         setPastSessions(pastSessions || [])
-        setReviews(reviews || [])
-        
-        // Initialize profile data
-        setFirstname(user.firstname || "")
-        setLastname(user.lastname || "")
-        setBio(user.bio || "")
-      }
-      
-      // Set avatar if user has one
-      if (user?.avatar) {
-        setAvatarPreview(user.avatar)
+
+        const processedReviews: ProcessedReview[] = (reviews || []).map((review) => ({
+          ...review,
+          speaker: typeof review.to === "object" ? (review.to as Speaker) : null,
+        }))
+        setReviews(processedReviews)
+        setProfileStats(profile || null)
       }
     } catch (err) {
-      console.error("Error fetching dashboard data:", err)
+      console.error("Error fetching learner dashboard data:", err)
       setError(t('learnerDashboard.errors.loadFailed'))
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleSaveProfile = async () => {
-    try {
-      setIsUploading(true)
-      await learnerService.updateProfile({ firstname, lastname, bio })
-      setIsEditingProfile(false)
-      // Refresh user data
-      if (isAuthenticated && !user) {
-        dispatch(getCurrentUser())
-      }
-    } catch (err) {
-      console.error("Error saving profile:", err)
-      setError(t('learnerDashboard.errors.saveFailed'))
-    } finally {
-      setIsUploading(false)
-    }
-  }
+  const sortedUpcomingSessions = useMemo(
+    () => [...upcomingSessions].sort((a, b) => getSessionDateTime(a).getTime() - getSessionDateTime(b).getTime()),
+    [upcomingSessions]
+  )
 
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      try {
-        setIsUploading(true)
-        const avatarUrl = await learnerService.uploadAvatar(file)
-        setAvatarPreview(avatarUrl)
-        // Update user in Redux store if needed
-      } catch (err) {
-        console.error("Error uploading avatar:", err)
-        setError(t('learnerDashboard.errors.avatarFailed'))
-      } finally {
-        setIsUploading(false)
+  const sortedPastSessions = useMemo(
+    () => [...pastSessions].sort((a, b) => getSessionDateTime(b).getTime() - getSessionDateTime(a).getTime()),
+    [pastSessions]
+  )
+
+  const nextSession = sortedUpcomingSessions[0] || null
+
+  const sessionsNeedingReview = useMemo(
+    () => sortedPastSessions.filter((session) => session.status === "completed" && !hasBeenReviewed(session._id)),
+    [sortedPastSessions]
+  )
+
+  const startingSoonSessions = useMemo(() => {
+    return sortedUpcomingSessions.filter((session) => {
+      const hours = getHoursUntilSession(session)
+      return hours > 0 && hours <= 24
+    })
+  }, [sortedUpcomingSessions])
+
+  const topSpeakers: TopSpeaker[] = useMemo(() => {
+    const speakerMap = new Map<string, TopSpeaker>()
+
+    pastSessions.forEach((session) => {
+      if (typeof session.speaker === "object" && session.speaker) {
+        const speaker = session.speaker as Speaker
+        const existing = speakerMap.get(speaker._id)
+        const sessionDate = getSessionDateTime(session)
+
+        if (existing) {
+          existing.sessions += 1
+          if (sessionDate > existing.lastSession) {
+            existing.lastSession = sessionDate
+          }
+        } else {
+          speakerMap.set(speaker._id, {
+            id: speaker._id,
+            name: `${speaker.firstname} ${speaker.lastname}`.trim(),
+            sessions: 1,
+            lastSession: sessionDate,
+            avatar: speaker.avatar,
+            rating: (speaker as any)?.rating,
+          })
+        }
       }
+    })
+
+    return Array.from(speakerMap.values())
+      .sort((a, b) => {
+        if (b.sessions !== a.sessions) return b.sessions - a.sessions
+        return b.lastSession.getTime() - a.lastSession.getTime()
+      })
+      .slice(0, 6)
+  }, [pastSessions])
+
+  const analyticsDataBase = useMemo(() => {
+    const map = new Map<
+      string,
+      { label: string; date: Date; scheduled: number; completed: number; cancelled: number }
+    >()
+
+    const addEntry = (session: Session, field: "scheduled" | "completed" | "cancelled") => {
+      const date = getSessionDateTime(session)
+      const key = date.toISOString().split("T")[0]
+      const label = formatDateShort(date)
+
+      const existing = map.get(key) ?? {
+        date,
+        label,
+        scheduled: 0,
+        completed: 0,
+        cancelled: 0,
+      }
+
+      existing[field] += 1
+      map.set(key, existing)
     }
-  }
+
+    sortedUpcomingSessions.forEach((session) => addEntry(session, "scheduled"))
+    sortedPastSessions.forEach((session) => {
+      if (session.status === "completed") {
+        addEntry(session, "completed")
+      } else if (session.status === "cancelled") {
+        addEntry(session, "cancelled")
+      } else {
+        addEntry(session, "scheduled")
+      }
+    })
+
+    return Array.from(map.values()).sort((a, b) => a.date.getTime() - b.date.getTime())
+  }, [sortedPastSessions, sortedUpcomingSessions])
+
+  const analyticsData = useMemo(() => {
+    if (!analyticsDataBase.length) return []
+
+    const days = analyticsRange === "7d" ? 7 : 30
+    const cutoff = new Date()
+    cutoff.setHours(0, 0, 0, 0)
+    cutoff.setDate(cutoff.getDate() - (days - 1))
+
+    return analyticsDataBase.filter((entry) => entry.date >= cutoff).slice(-days)
+  }, [analyticsDataBase, analyticsRange])
+
+  const analyticsSummary = useMemo(() => {
+    const totals = analyticsData.reduce(
+      (acc, entry) => {
+        acc.scheduled += entry.scheduled
+        acc.completed += entry.completed
+        acc.cancelled += entry.cancelled
+        return acc
+      },
+      { scheduled: 0, completed: 0, cancelled: 0 }
+    )
+
+    const totalDecisive = totals.completed + totals.cancelled
+    const completionRate = totalDecisive > 0 ? Math.round((totals.completed / totalDecisive) * 100) : null
+
+    return {
+      ...totals,
+      total: totals.scheduled + totals.completed + totals.cancelled,
+      completionRate,
+    }
+  }, [analyticsData])
+
+  const analyticsRangeLabel = analyticsRange === "7d"
+    ? t('dashboard.analytics.range7dLabel')
+    : t('dashboard.analytics.range30dLabel')
+
+  const chartConfig = useMemo(
+    () => ({
+      scheduled: {
+        label: t('dashboard.analytics.scheduled'),
+        color: "hsl(266, 85%, 70%)",
+      },
+      completed: {
+        label: t('dashboard.analytics.completed'),
+        color: "hsl(152, 76%, 60%)",
+      },
+      cancelled: {
+        label: t('dashboard.analytics.cancelled'),
+        color: "hsl(0, 84%, 65%)",
+      },
+    }),
+    [t]
+  )
+
+  const averageRating = reviews.length
+    ? (
+        reviews.reduce((total, review) => total + (review.rating || 0), 0) /
+        reviews.length
+      ).toFixed(1)
+    : null
+
+  const summaryCards = useMemo(
+    () => [
+      {
+        label: t('learnerDashboard.summary.upcoming'),
+        value: upcomingSessions.length,
+        helper: nextSession
+          ? `${formatDateLong(nextSession.date)} · ${nextSession.time}`
+          : t('learnerDashboard.summary.upcomingHelper'),
+        icon: Calendar,
+      },
+      {
+        label: t('learnerDashboard.summary.completed'),
+        value: profileStats?.completedSessions ?? pastSessions.length,
+        helper: t('learnerDashboard.summary.completedHelper'),
+        icon: CheckCircle2,
+      },
+      {
+        label: t('learnerDashboard.summary.reviewed'),
+        value: reviews.length,
+        helper: averageRating
+          ? `${t('learnerDashboard.summary.reviewedAvg')} ${averageRating}`
+          : t('learnerDashboard.summary.reviewedHelper'),
+        icon: Star,
+      },
+      {
+        label: t('learnerDashboard.summary.speakers'),
+        value: topSpeakers.length,
+        helper: topSpeakers[0]
+          ? `${topSpeakers[0].name}`
+          : t('learnerDashboard.summary.speakersHelper'),
+        icon: Users,
+      },
+    ],
+    [averageRating, nextSession, pastSessions.length, profileStats, reviews.length, t, topSpeakers]
+  )
+
+  const sessionsSubtitle = `${t('learnerDashboard.sessionsTab.upcoming')} ${upcomingSessions.length} · ${t('learnerDashboard.sessionsTab.past')} ${pastSessions.length}`
+  const reviewsSubtitle =
+    reviews.length > 0
+      ? `${reviews.length} ${t('learnerDashboard.summary.reviewed')}`
+      : t('learnerDashboard.reviews.subtitle')
 
   const handleRateSession = (session: Session) => {
     setSelectedSessionForRating(session)
@@ -209,13 +386,14 @@ export default function LearnerDashboardPage() {
   }
 
   const handleRatingSuccess = () => {
-    // Refresh dashboard data
+    setRatingModalOpen(false)
     fetchDashboardData()
   }
 
   const handleCancelSession = (session: Session) => {
     setSelectedSessionForCancellation(session)
     setCancellationReason("")
+    setCancelError("")
     setCancelModalOpen(true)
   }
 
@@ -224,389 +402,564 @@ export default function LearnerDashboardPage() {
 
     try {
       setIsCancelling(true)
-      setError("")
-      
+      setCancelError("")
+
       await learnerService.cancelSession(
         selectedSessionForCancellation._id,
         cancellationReason.trim() || undefined
       )
 
-      // Close modal and refresh data
       setCancelModalOpen(false)
       setSelectedSessionForCancellation(null)
       setCancellationReason("")
       fetchDashboardData()
     } catch (err: any) {
       console.error("Error cancelling session:", err)
-      setError(err.message || t('learnerDashboard.errors.cancelFailed'))
+      setCancelError(err.message || t('learnerDashboard.errors.cancelFailed'))
     } finally {
       setIsCancelling(false)
     }
   }
 
-  // Calculate hours until session for cancellation rules
-  const getHoursUntilSession = (session: Session): number => {
-    const sessionDate = new Date(session.date)
-    const sessionTime = session.time.split(':')
-    sessionDate.setHours(parseInt(sessionTime[0]), parseInt(sessionTime[1]), 0, 0)
-    
-    const now = new Date()
-    const hoursUntil = (sessionDate.getTime() - now.getTime()) / (1000 * 60 * 60)
-    return hoursUntil
+  const handleCloseCancellationModal = () => {
+    setCancelModalOpen(false)
+    setSelectedSessionForCancellation(null)
+    setCancellationReason("")
+    setCancelError("")
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
+  const renderSessionCard = (session: Session, context: "upcoming" | "past") => {
+    const speakerName =
+      typeof session.speaker === "object"
+        ? `${session.speaker.firstname} ${session.speaker.lastname}`.trim()
+        : session.speaker
+    const topics = (session.topics as string[] | undefined) || (session.topic ? [session.topic] : [])
+    const hoursUntil = getHoursUntilSession(session)
+
+    return (
+      <div
+        key={session._id}
+        className="rounded-lg border border-white/10 bg-white/5 p-4 shadow-sm transition hover:border-white/20"
+      >
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex-1 space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <h4 className="text-lg font-semibold text-white">{session.title}</h4>
+              <Badge className="bg-purple-500/20 text-purple-200 border-purple-400/30">
+                {session.status}
+              </Badge>
+            </div>
+            <p className="text-sm text-gray-300">
+              {t('learnerDashboard.sessions.with')}{' '}
+              <span className="font-medium text-purple-200">{speakerName}</span>
+            </p>
+            <div className="flex flex-wrap items-center gap-3 text-xs text-gray-400 sm:text-sm">
+              <span className="flex items-center gap-1">
+                <Calendar className="h-4 w-4" />
+                {formatDateLong(session.date)}
+              </span>
+              <span className="flex items-center gap-1">
+                <Clock className="h-4 w-4" />
+                {session.time}
+                {session.duration ? ` (${session.duration} min)` : ''}
+              </span>
+              {context === "upcoming" && hoursUntil > 0 && (
+                <span className="flex items-center gap-1 text-purple-200">
+                  <Clock className="h-4 w-4" />
+                  {Math.max(Math.round(hoursUntil), 0)}h
+                </span>
+              )}
+            </div>
+            {topics.length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {topics.map((topic) => (
+                  <Badge key={topic} variant="secondary" className="bg-white/10 text-gray-200">
+                    {topic}
+                  </Badge>
+                ))}
+              </div>
+            )}
+            {session.icebreaker && (
+              <div className="rounded-md border border-yellow-400/30 bg-yellow-500/10 p-3 text-xs text-yellow-100">
+                <p className="mb-1 font-semibold text-yellow-300">{t('learnerDashboard.sessions.icebreaker')}</p>
+                <p>{session.icebreaker}</p>
+              </div>
+            )}
+            {session.meetingLink && context === "upcoming" && (
+              <Link
+                href={session.meetingLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm text-purple-300 hover:text-purple-200"
+              >
+                {t('learnerDashboard.sessions.join')}
+              </Link>
+            )}
+          </div>
+
+          {context === "upcoming" ? (
+            <div className="flex items-start gap-2">
+              <Button
+                onClick={() => handleCancelSession(session)}
+                variant="outline"
+                size="sm"
+                className="border-red-400/50 text-red-200 hover:bg-red-500/10 cursor-pointer"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                {t('learnerDashboard.sessions.cancel')}
+              </Button>
+            </div>
+          ) : session.status === "completed" ? (
+            <Button
+              onClick={() => handleRateSession(session)}
+              variant="outline"
+              size="sm"
+              className="border-purple-400/50 text-purple-200 hover:bg-purple-500/10 cursor-pointer"
+            >
+              <Star className="mr-2 h-4 w-4" />
+              {t('learnerDashboard.sessions.rate')}
+            </Button>
+          ) : session.status === "cancelled" && (session as any).cancellationReason ? (
+            <div className="rounded-md border border-red-500/30 bg-red-500/10 p-2 text-xs text-red-200">
+              <span className="font-semibold">{t('learnerDashboard.sessions.cancellationReason')} </span>
+              {(session as any).cancellationReason}
+            </div>
+          ) : null}
+        </div>
+      </div>
+    )
   }
 
-  const formatTime = (timeString: string) => {
-    return timeString
-  }
+  const renderReviewCard = (review: ProcessedReview) => {
+    const speakerName = review.speaker
+      ? `${review.speaker.firstname} ${review.speaker.lastname}`
+      : typeof review.to === "object" && review.to
+      ? `${(review.to as Speaker).firstname} ${(review.to as Speaker).lastname}`
+      : review.to
 
-  // Check if a session has been reviewed by this learner
-  const hasBeenReviewed = (sessionId: string) => {
-    return reviews.some(review => {
-      const reviewSessionId = typeof review.session === 'string' 
-        ? review.session 
-        : (review.session as any)?._id || review.session
-      return String(reviewSessionId) === String(sessionId)
-    })
-  }
+    const sessionLabel = (() => {
+      if (typeof review.session === "object" && review.session) {
+        const sessionObj = review.session as Session
+        return sessionObj.title || sessionObj._id
+      }
+      return review.session
+    })()
 
-  // Check if a session has ended (date + time + duration has passed)
-  const hasSessionEnded = (session: Session): boolean => {
-    const sessionDate = new Date(session.date)
-    const sessionTime = session.time.split(':')
-    sessionDate.setHours(parseInt(sessionTime[0]), parseInt(sessionTime[1]), 0, 0)
-    
-    // Add session duration (default to 30 minutes if not specified)
-    const duration = session.duration || 30
-    const sessionEndTime = new Date(sessionDate.getTime() + duration * 60 * 1000)
-    
-    const now = new Date()
-    return sessionEndTime <= now
+    return (
+      <div key={review._id} className="rounded-lg border border-white/10 bg-white/5 p-4">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold text-white">{speakerName}</p>
+            <p className="text-xs text-gray-400">
+              {new Date(review.createdAt).toLocaleDateString()}
+            </p>
+          </div>
+          <div className="flex items-center gap-1">
+            {[...Array(5)].map((_, index) => (
+              <Star
+                key={`${review._id}-${index}`}
+                className={`h-3.5 w-3.5 ${index < review.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-500"}`}
+              />
+            ))}
+          </div>
+        </div>
+        <p className="mt-3 text-sm text-gray-200">{review.comment || t('learnerDashboard.reviews.emptyComment')}</p>
+        <p className="text-xs text-gray-500">
+          {t('learnerDashboard.reviews.sessionLabel')} {sessionLabel}
+        </p>
+      </div>
+    )
   }
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#1A1A33] via-purple-900 to-[#1A1A33]">
+        <Loader2 className="h-10 w-10 animate-spin text-purple-400" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1A1A33] via-purple-900 to-[#1A1A33] pt-24 px-4 sm:px-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{t('learnerDashboard.title')}</h1>
-          <p className="text-gray-300 text-sm sm:text-base">{t('learnerDashboard.subtitle')}</p>
+    <div className="min-h-screen bg-gradient-to-br from-[#1A1A33] via-purple-900 to-[#1A1A33] py-24 px-4 sm:px-6">
+      <div className="mx-auto flex max-w-5xl flex-col gap-6">
+        <div className="space-y-2">
+          <h1 className="text-xl font-bold text-white sm:text-2xl lg:text-3xl xl:text-4xl">
+            {t('learnerDashboard.title')}
+          </h1>
+          <p className="text-sm text-gray-300">{t('learnerDashboard.subtitle')}</p>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-600">{error}</p>
+          <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">
+            {error}
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-          {/* Left Column - Profile */}
-          <div className="lg:col-span-1 space-y-4 sm:space-y-6">
-            {/* Profile Card */}
-            <Card className="bg-white/10 backdrop-blur-lg border-white/20">
-              <CardHeader>
-                <div className="flex items-start justify-between">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {summaryCards.map((card) => {
+            const Icon = card.icon
+            return (
+              <Card key={card.label} className="border-white/20 bg-white/10 backdrop-blur-md">
+                <CardContent className="flex items-center justify-between gap-2 p-3 sm:p-4">
                   <div>
-                    <CardTitle className="text-white mb-2">Profile</CardTitle>
-                    <CardDescription className="text-gray-300">Your personal information</CardDescription>
+                    <p className="text-xs text-gray-300 sm:text-sm">{card.label}</p>
+                    <p className="text-lg font-semibold text-white sm:text-2xl">{card.value}</p>
+                    <p className="text-[10px] text-gray-400 sm:text-xs">{card.helper}</p>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setIsEditingProfile(!isEditingProfile)}
-                    className="text-white hover:bg-white/20 cursor-pointer"
-                  >
-                    {isEditingProfile ? <X className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
-                  </Button>
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-purple-500/40 to-cyan-500/40 sm:h-12 sm:w-12">
+                    <Icon className="h-4 w-4 text-white sm:h-6 sm:w-6" />
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+          <div className="space-y-6 xl:col-span-2">
+            <Card className="border-white/20 bg-white/10 backdrop-blur-lg">
+              <CardHeader>
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <CardTitle className="text-white text-base sm:text-lg">
+                      {t('learnerDashboard.analytics.title')}
+                    </CardTitle>
+                    <CardDescription className="text-xs text-gray-300">
+                      {analyticsData.length > 0 ? analyticsRangeLabel : t('learnerDashboard.analytics.empty')}
+                    </CardDescription>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {( ['7d', '30d'] as ChartRange[] ).map((range) => (
+                      <Button
+                        key={range}
+                        size="sm"
+                        variant={analyticsRange === range ? "default" : "outline"}
+                        className={`h-7 px-3 text-xs ${
+                          analyticsRange === range
+                            ? "bg-purple-600 text-white hover:bg-purple-500 cursor-pointer"
+                            : "border-white/20 text-gray-800 hover:bg-white/10 cursor-pointer"
+                        }`}
+                        onClick={() => setAnalyticsRange(range)}
+                      >
+                        {range === "7d"
+                          ? t('dashboard.analytics.range7d')
+                          : t('dashboard.analytics.range30d')}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Avatar */}
-                <div className="flex flex-col items-center space-y-3">
-                  <div className="relative">
-                    {avatarPreview ? (
-                      <Image
-                        src={avatarPreview}
-                        alt="Avatar"
-                        width={96}
-                        height={96}
-                        className="rounded-full border-4 border-purple-500"
+              <CardContent className="space-y-3">
+                {analyticsSummary.total > 0 && (
+                  <div className="grid gap-2 text-xs text-gray-300 sm:grid-cols-2 lg:grid-cols-4">
+                    <div className="rounded-md border border-white/10 bg-white/5 p-2">
+                      <p className="mb-1 text-[0.65rem] uppercase tracking-wide text-gray-400">
+                        {t('dashboard.analytics.scheduled')}
+                      </p>
+                      <p className="text-base font-semibold text-white">
+                        {analyticsSummary.scheduled}
+                      </p>
+                    </div>
+                    <div className="rounded-md border border-white/10 bg-white/5 p-2">
+                      <p className="mb-1 text-[0.65rem] uppercase tracking-wide text-gray-400">
+                        {t('dashboard.analytics.completed')}
+                      </p>
+                      <p className="text-base font-semibold text-white">
+                        {analyticsSummary.completed}
+                      </p>
+                    </div>
+                    <div className="rounded-md border border-white/10 bg-white/5 p-2">
+                      <p className="mb-1 text-[0.65rem] uppercase tracking-wide text-gray-400">
+                        {t('dashboard.analytics.cancelled')}
+                      </p>
+                      <p className="text-base font-semibold text-white">
+                        {analyticsSummary.cancelled}
+                      </p>
+                    </div>
+                    <div className="rounded-md border border-white/10 bg-white/5 p-2">
+                      <p className="mb-1 text-[0.65rem] uppercase tracking-wide text-gray-400">
+                        {t('dashboard.analytics.completionRate')}
+                      </p>
+                      <p className="text-base font-semibold text-white">
+                        {analyticsSummary.completionRate !== null ? `${analyticsSummary.completionRate}%` : '—'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {analyticsData.length > 0 ? (
+                  <ChartContainer
+                    config={chartConfig}
+                    className="h-36 w-full sm:h-48"
+                  >
+                    <AreaChart data={analyticsData}>
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="rgba(255,255,255,0.08)"
+                        vertical={false}
                       />
-                    ) : (
-                      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center">
-                        <User className="w-12 h-12 text-white" />
-                      </div>
-                    )}
-                    {isEditingProfile && (
-                      <label className="absolute bottom-0 right-0 bg-purple-600 p-2 rounded-full cursor-pointer hover:bg-purple-700 transition-colors">
-                        <Camera className="w-4 h-4 text-white" />
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleAvatarUpload}
-                          className="hidden"
-                          disabled={isUploading}
-                        />
-                      </label>
+                      <XAxis
+                        dataKey="label"
+                        axisLine={false}
+                        tickLine={false}
+                        stroke="#9ca3af"
+                      />
+                      <YAxis hide domain={[0, "dataMax + 1"]} />
+                      <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
+                      <ChartLegend
+                        verticalAlign="top"
+                        wrapperStyle={{ paddingBottom: 12 }}
+                        content={
+                          <ChartLegendContent className="justify-start text-xs text-gray-300" />
+                        }
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="scheduled"
+                        stroke="var(--color-scheduled)"
+                        fill="var(--color-scheduled)"
+                        fillOpacity={0.12}
+                        strokeWidth={2}
+                        dot={false}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="completed"
+                        stroke="var(--color-completed)"
+                        fill="var(--color-completed)"
+                        fillOpacity={0.16}
+                        strokeWidth={2}
+                        dot={false}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="cancelled"
+                        stroke="var(--color-cancelled)"
+                        fill="var(--color-cancelled)"
+                        fillOpacity={0.08}
+                        strokeDasharray="6 4"
+                        strokeWidth={2}
+                        dot={false}
+                      />
+                    </AreaChart>
+                  </ChartContainer>
+                ) : (
+                  <p className="text-xs text-gray-400">{t('learnerDashboard.analytics.empty')}</p>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="flex flex-col border-white/20 bg-white/10 backdrop-blur-lg">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-white text-xl">
+                  {t('learnerDashboard.sessionsTab.title')}
+                </CardTitle>
+                <CardDescription className="text-gray-300">
+                  {sessionsSubtitle}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <Tabs defaultValue="upcoming" className="w-full">
+                  <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                    <TabsList className="bg-white/10 text-gray-300">
+                      <TabsTrigger
+                        value="upcoming"
+                        className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+                      >
+                        {t('learnerDashboard.sessionsTab.upcoming')} ({upcomingSessions.length})
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="past"
+                        className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+                      >
+                        {t('learnerDashboard.sessionsTab.past')} ({pastSessions.length})
+                      </TabsTrigger>
+                    </TabsList>
+                    {nextSession && (
+                      <p className="text-xs text-gray-400">
+                        {`${t('learnerDashboard.sessionsTab.next')} ${formatDateLong(nextSession.date)} · ${nextSession.time}`}
+                      </p>
                     )}
                   </div>
-                  {!isEditingProfile && (
-                    <div className="text-center">
-                      <h3 className="text-lg font-semibold text-white">
-                        {user?.firstname} {user?.lastname}
-                      </h3>
-                      <p className="text-sm text-gray-400">{user?.email}</p>
+
+                  <TabsContent value="upcoming" className="mt-0">
+                    {sortedUpcomingSessions.length > 0 ? (
+                      <ScrollArea className="h-[420px] pr-4">
+                        <div className="space-y-4">
+                          {sortedUpcomingSessions.map((session) => renderSessionCard(session, "upcoming"))}
+                        </div>
+                      </ScrollArea>
+                    ) : (
+                      <p className="py-4 text-center text-sm text-gray-400">
+                        {t('learnerDashboard.sessionsTab.noUpcoming')}
+                      </p>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="past" className="mt-0">
+                    {sortedPastSessions.length > 0 ? (
+                      <ScrollArea className="h-[420px] pr-4">
+                        <div className="space-y-6">
+                          {sortedPastSessions.map((session) => renderSessionCard(session, "past"))}
+                        </div>
+                      </ScrollArea>
+                    ) : (
+                      <p className="py-4 text-center text-sm text-gray-400">
+                        {t('learnerDashboard.sessionsTab.noPast')}
+                      </p>
+                    )}
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+
+            <Card className="border-white/20 bg-white/10 backdrop-blur-lg">
+              <CardHeader className="pb-2">
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5 text-purple-400" />
+                  <CardTitle className="text-white text-base sm:text-lg">
+                    {t('learnerDashboard.reviews.title')}
+                  </CardTitle>
+                </div>
+                <CardDescription className="text-xs text-gray-300">
+                  {reviewsSubtitle}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <ScrollArea className="h-[360px] pr-4">
+                  {reviews.length === 0 ? (
+                    <p className="py-4 text-center text-sm text-gray-400">
+                      {t('learnerDashboard.reviews.noReviews')}
+                    </p>
+                  ) : (
+                    <div className="space-y-4">
+                      {reviews.map((review) => renderReviewCard(review))}
                     </div>
                   )}
-                </div>
-
-                {/* Profile Fields */}
-                {isEditingProfile ? (
-                  <div className="space-y-3">
-                    <div>
-                      <Label className="text-white mb-2">First Name</Label>
-                      <Input
-                        value={firstname}
-                        onChange={(e) => setFirstname(e.target.value)}
-                        className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                        placeholder="First name"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-white mb-2">Last Name</Label>
-                      <Input
-                        value={lastname}
-                        onChange={(e) => setLastname(e.target.value)}
-                        className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                        placeholder="Last name"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-white mb-2">Bio</Label>
-                      <Textarea
-                        value={bio}
-                        onChange={(e) => setBio(e.target.value)}
-                        rows={3}
-                        className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                        placeholder="Tell us about yourself..."
-                      />
-                    </div>
-                    <Button
-                      onClick={handleSaveProfile}
-                      disabled={isUploading}
-                      className="w-full cursor-pointer bg-gradient-to-r from-purple-600 to-purple-500"
-                    >
-                      {isUploading ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Saving...
-                        </>
-                      ) : (
-                        <>
-                          <Save className="mr-2 h-4 w-4" />
-                          Save Changes
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                ) : (
-                  <>
-                    <p className="text-sm text-gray-300 text-center">{bio || "No bio available"}</p>
-                    <div className="grid grid-cols-2 gap-4 pt-2">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-purple-400">{upcomingSessions.length}</div>
-                        <div className="text-xs text-gray-400">Upcoming</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-green-400">{pastSessions.length}</div>
-                        <div className="text-xs text-gray-400">Completed</div>
-                      </div>
-                    </div>
-                  </>
-                )}
+                </ScrollArea>
               </CardContent>
             </Card>
           </div>
 
-          {/* Right Column - Sessions */}
-          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-            {/* Upcoming Sessions */}
-            <Card className="bg-white/10 backdrop-blur-lg border-white/20">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Calendar className="w-5 h-5" />
-                  Upcoming Sessions
+          <div className="space-y-6">
+            <Card className="border-white/20 bg-white/10 backdrop-blur-lg">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-white text-base sm:text-lg">
+                  {t('learnerDashboard.actionCenter.title')}
                 </CardTitle>
-                <CardDescription className="text-gray-300">
-                  {upcomingSessions.length} session{upcomingSessions.length !== 1 ? 's' : ''} scheduled
+                <CardDescription className="text-xs text-gray-300">
+                  {t('learnerDashboard.actionCenter.subtitle')}
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                {upcomingSessions.length > 0 ? (
-                  <div className="space-y-4">
-                    {upcomingSessions.map((session) => (
-                      <div
-                        key={session._id}
-                        className="p-4 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors"
-                      >
-                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                          <div className="flex-1">
-                            <h4 className="text-lg font-semibold text-white mb-1">{session.title}</h4>
-                            <p className="text-sm text-gray-300 mb-2">
-                              with <span className="font-medium text-purple-300">
-                                {typeof session.speaker === 'object' 
-                                  ? `${session.speaker.firstname} ${session.speaker.lastname}`
-                                  : session.speaker}
-                              </span>
+              <CardContent className="space-y-4">
+                <div>
+                  <p className="mb-2 text-xs uppercase tracking-wide text-gray-400">
+                    {t('learnerDashboard.actionCenter.pendingReviews')}
+                  </p>
+                  {sessionsNeedingReview.length > 0 ? (
+                    <div className="space-y-2">
+                      {sessionsNeedingReview.slice(0, 3).map((session) => (
+                        <div key={session._id} className="flex items-center justify-between gap-3 rounded-md border border-white/10 bg-white/5 p-3">
+                          <div>
+                            <p className="text-sm text-white">{session.title}</p>
+                            <p className="text-xs text-gray-400">
+                              {typeof session.speaker === "object"
+                                ? `${session.speaker.firstname} ${session.speaker.lastname}`
+                                : session.speaker}
                             </p>
-                            {session.topics && session.topics.length > 0 && (
-                              <p className="text-xs text-gray-400 mb-2">Topics: {session.topics.join(', ')}</p>
-                            )}
-                            {session.icebreaker && (
-                              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 mb-2 mt-2">
-                                <p className="text-xs font-semibold text-yellow-400 mb-1">💡 Icebreaker</p>
-                                <p className="text-xs text-yellow-200">{session.icebreaker}</p>
-                              </div>
-                            )}
-                            <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-sm text-gray-400">
-                              <div className="flex items-center gap-1">
-                                <Calendar className="w-4 h-4" />
-                                {formatDate(session.date)}
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Clock className="w-4 h-4" />
-                                {formatTime(session.time)} ({session.duration} min)
-                              </div>
-                            </div>
-                            {session.meetingLink && (
-                              <a 
-                                href={session.meetingLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-sm text-purple-400 hover:text-purple-300 mt-2 inline-block"
-                              >
-                                Join Meeting →
-                              </a>
-                            )}
                           </div>
-                          <div className="flex flex-col items-end gap-2">
-                            <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30">
-                              {session.status}
-                            </Badge>
+                          <Button
+                            size="sm"
+                            className="bg-purple-600 text-white hover:bg-purple-500"
+                            onClick={() => handleRateSession(session)}
+                          >
+                            {t('learnerDashboard.actionCenter.review')}
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-400">
+                      {t('learnerDashboard.actionCenter.noPending')}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <p className="mb-2 text-xs uppercase tracking-wide text-gray-400">
+                    {t('learnerDashboard.actionCenter.startingSoon')}
+                  </p>
+                  {startingSoonSessions.length > 0 ? (
+                    <div className="space-y-2">
+                      {startingSoonSessions.slice(0, 3).map((session) => (
+                        <div key={session._id} className="flex items-center justify-between gap-3 rounded-md border border-white/10 bg-white/5 p-3">
+                          <div>
+                            <p className="text-sm text-white">{session.title}</p>
+                            <p className="text-xs text-gray-400">
+                              {Math.max(Math.round(getHoursUntilSession(session)), 0)}h · {formatDateLong(session.date)}
+                            </p>
+                          </div>
+                          {session.meetingLink ? (
                             <Button
-                              onClick={() => handleCancelSession(session)}
+                              asChild
                               variant="outline"
                               size="sm"
-                              className="text-red-400 cursor-pointer border-red-400/50 hover:bg-red-400/10"
+                              className="border-purple-400/40 text-purple-200"
                             >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Cancel
+                              <Link href={session.meetingLink} target="_blank" rel="noopener noreferrer">
+                                {t('learnerDashboard.actionCenter.join')}
+                              </Link>
                             </Button>
-                          </div>
+                          ) : (
+                            <Button variant="outline" size="sm" className="border-white/20 text-white">
+                              {t('learnerDashboard.actionCenter.view')}
+                            </Button>
+                          )}
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-center text-gray-400 py-8">No upcoming sessions</p>
-                )}
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-400">
+                      {t('learnerDashboard.actionCenter.noStartingSoon')}
+                    </p>
+                  )}
+                </div>
               </CardContent>
             </Card>
 
-            {/* Past Sessions */}
-            <Card className="bg-white/10 backdrop-blur-lg border-white/20">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5" />
-                  Past Sessions & Reviews
-                </CardTitle>
-                <CardDescription className="text-gray-300">
-                  {pastSessions.length} session{pastSessions.length !== 1 ? 's' : ''} completed
+            <Card className="border-white/20 bg-white/10 backdrop-blur-lg">
+              <CardHeader className="pb-2">
+                <div className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-purple-400" />
+                  <CardTitle className="text-white text-base sm:text-lg">
+                    {t('learnerDashboard.topSpeakers.title')}
+                  </CardTitle>
+                </div>
+                <CardDescription className="text-xs text-gray-300">
+                  {t('learnerDashboard.topSpeakers.subtitle')}
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                {pastSessions.length > 0 ? (
-                  <div className="space-y-4">
-                    {pastSessions.map((session) => (
-                      <div
-                        key={session._id}
-                        className="p-4 bg-white/5 rounded-lg border border-white/10"
-                      >
-                        <div className="flex flex-col gap-3">
-                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
-                            <div className="flex-1">
-                              <h4 className="text-lg font-semibold text-white mb-1">{session.title}</h4>
-                              <p className="text-sm text-gray-300">
-                                with <span className="font-medium">
-                                  {typeof session.speaker === 'object' 
-                                    ? `${session.speaker.firstname} ${session.speaker.lastname}`
-                                    : session.speaker}
-                                </span>
-                              </p>
-                              <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-sm text-gray-400 mt-2">
-                                <div className="flex items-center gap-1">
-                                  <Calendar className="w-4 h-4" />
-                                  {formatDate(session.date)}
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <Clock className="w-4 h-4" />
-                                  {formatTime(session.time)}
-                                </div>
-                              </div>
-                            </div>
-                            <Badge className={`${
-                              session.status === 'completed'
-                                ? 'bg-green-500/20 text-green-300 border-green-500/30'
-                                : 'bg-gray-500/20 text-gray-300 border-gray-500/30'
-                            } self-start`}>
-                              {session.status.charAt(0).toUpperCase() + session.status.slice(1)}
-                            </Badge>
-                          </div>
-                          
-                          {/* Rate Button - Only show for completed sessions */}
-                          {session.status === 'completed' && (
-                            <div className="flex justify-end">
-                              <Button
-                                onClick={() => handleRateSession(session)}
-                                variant="outline"
-                                size="sm"
-                                className="text-purple-400 cursor-pointer border-purple-400/50 hover:bg-purple-400/10"
-                              >
-                                <Star className="mr-2 h-4 w-4" />
-                                Rate & Review
-                              </Button>
-                            </div>
-                          )}
-                          
-                          {/* Show cancellation reason if cancelled */}
-                          {session.status === 'cancelled' && (session as any).cancellationReason && (
-                            <div className="mt-2 p-2 bg-gray-500/10 border border-gray-500/20 rounded text-xs text-gray-400">
-                              <span className="font-medium">Cancellation reason: </span>
-                              {(session as any).cancellationReason}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+              <CardContent className="space-y-3">
+                {topSpeakers.length === 0 ? (
+                  <p className="text-sm text-gray-400">
+                    {t('learnerDashboard.topSpeakers.none')}
+                  </p>
                 ) : (
-                  <p className="text-center text-gray-400 py-8">No completed sessions yet</p>
+                  topSpeakers.map((speaker) => (
+                    <div key={speaker.id} className="flex items-center justify-between gap-3 rounded-md border border-white/10 bg-white/5 p-3">
+                      <div>
+                        <p className="text-sm font-semibold text-white">{speaker.name}</p>
+                        <p className="text-xs text-gray-400">
+                          {speaker.sessions} {t('learnerDashboard.topSpeakers.sessions')}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {t('learnerDashboard.topSpeakers.lastSession')} {formatDateLong(speaker.lastSession.toISOString())}
+                        </p>
+                      </div>
+                      <div className="text-right text-xs text-gray-300">
+                        {speaker.rating ? `${speaker.rating.toFixed(1)}★` : t('learnerDashboard.topSpeakers.noRating')}
+                      </div>
+                    </div>
+                  ))
                 )}
               </CardContent>
             </Card>
@@ -614,14 +967,13 @@ export default function LearnerDashboardPage() {
         </div>
       </div>
 
-      {/* Learner Rating Modal */}
       {selectedSessionForRating && (
         <LearnerRatingModal
           open={ratingModalOpen}
           onOpenChange={setRatingModalOpen}
           sessionId={selectedSessionForRating._id}
           speakerName={
-            typeof selectedSessionForRating.speaker === 'object'
+            typeof selectedSessionForRating.speaker === "object"
               ? `${selectedSessionForRating.speaker.firstname} ${selectedSessionForRating.speaker.lastname}`
               : selectedSessionForRating.speaker
           }
@@ -629,115 +981,85 @@ export default function LearnerDashboardPage() {
         />
       )}
 
-      {/* Cancellation Modal */}
-      <Dialog open={cancelModalOpen} onOpenChange={setCancelModalOpen}>
-        <DialogContent className="bg-[#1A1A33] border-white/20 text-white">
+      <Dialog open={cancelModalOpen} onOpenChange={handleCloseCancellationModal}>
+        <DialogContent className="border-white/20 bg-[#1A1A33] text-white">
           <DialogHeader>
-            <DialogTitle className="text-white text-2xl flex items-center gap-2">
-              <AlertTriangle className="w-6 h-6 text-yellow-400" />
-              Cancel Session
+            <DialogTitle className="text-lg font-semibold flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-yellow-400" />
+              {t('learnerDashboard.cancel.title')}
             </DialogTitle>
+            <DialogDescription className="text-sm text-gray-300">
+              {t('learnerDashboard.cancel.description')}
+            </DialogDescription>
           </DialogHeader>
-          {selectedSessionForCancellation && (
-            <div className="space-y-4">
-              {/* Cancellation Rules */}
-              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
-                <h4 className="text-yellow-400 font-semibold mb-2 flex items-center gap-2">
-                  <AlertTriangle className="w-5 h-5" />
-                  Cancellation Policy
-                </h4>
-                <ul className="text-sm text-yellow-200 space-y-1 list-disc list-inside">
-                  <li>Sessions must be cancelled at least 24 hours before the scheduled time</li>
-                  {(() => {
-                    const hoursUntil = getHoursUntilSession(selectedSessionForCancellation)
-                    return (
-                      <li>
-                        This session is {hoursUntil > 0 
-                          ? `${Math.round(hoursUntil)} hours away`
-                          : 'less than an hour away'}
-                        {hoursUntil < 24 && hoursUntil > 0 && (
-                          <span className="text-red-400"> (May not be eligible for cancellation)</span>
-                        )}
-                      </li>
-                    )
-                  })()}
-                  <li>The speaker will be automatically notified of the cancellation</li>
-                </ul>
-              </div>
 
-              {/* Session Details */}
-              <div className="bg-white/5 rounded-lg p-4">
-                <h4 className="text-white font-semibold mb-2">Session Details</h4>
-                <p className="text-gray-300 text-sm mb-1">
-                  <span className="font-medium">{selectedSessionForCancellation.title}</span>
+          {selectedSessionForCancellation && (
+            <div className="space-y-4 py-2">
+              <div className="rounded-md border border-white/10 bg-white/5 p-3 text-sm text-gray-200">
+                <p className="font-semibold text-white">{selectedSessionForCancellation.title}</p>
+                <p className="text-xs text-gray-400">
+                  {formatDateLong(selectedSessionForCancellation.date)} · {selectedSessionForCancellation.time}
                 </p>
-                <p className="text-gray-400 text-xs">
-                  with {typeof selectedSessionForCancellation.speaker === 'object'
+                <p className="text-xs text-gray-400">
+                  {t('learnerDashboard.sessions.with')}{' '}
+                  {typeof selectedSessionForCancellation.speaker === "object"
                     ? `${selectedSessionForCancellation.speaker.firstname} ${selectedSessionForCancellation.speaker.lastname}`
                     : selectedSessionForCancellation.speaker}
                 </p>
-                <p className="text-gray-400 text-xs">
-                  {formatDate(selectedSessionForCancellation.date)} at {selectedSessionForCancellation.time}
+                <p className="text-xs text-yellow-200 mt-2">
+                  {Math.max(Math.round(getHoursUntilSession(selectedSessionForCancellation)), 0)} {t('learnerDashboard.cancel.hoursAway')}
                 </p>
               </div>
 
-              {/* Cancellation Reason */}
-              <div>
-                <Label htmlFor="cancellationReason" className="text-white">
-                  Reason for Cancellation (Optional)
+              <div className="space-y-2">
+                <Label htmlFor="cancellation-reason" className="text-sm text-gray-200">
+                  {t('learnerDashboard.cancel.reasonLabel')}
                 </Label>
                 <Textarea
-                  id="cancellationReason"
+                  id="cancellation-reason"
                   value={cancellationReason}
                   onChange={(e) => setCancellationReason(e.target.value)}
-                  placeholder="Please let us know why you're cancelling..."
-                  className="bg-white/10 border-white/20 text-white mt-2"
-                  rows={3}
+                  placeholder={t('learnerDashboard.cancel.reasonPlaceholder')}
+                  rows={4}
+                  className="bg-white/5 border-white/10 text-sm text-white"
                 />
               </div>
 
-              {/* Error Message */}
-              {error && (
-                <div className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded p-2">
-                  {error}
+              {cancelError && (
+                <div className="rounded-md border border-red-500/30 bg-red-500/10 p-2 text-sm text-red-200">
+                  {cancelError}
                 </div>
               )}
-
-              {/* Action Buttons */}
-              <div className="flex gap-3 justify-end">
-                <Button
-                  onClick={() => {
-                    setCancelModalOpen(false)
-                    setSelectedSessionForCancellation(null)
-                    setCancellationReason("")
-                    setError("")
-                  }}
-                  variant="outline"
-                  disabled={isCancelling}
-                  className="border-white/20 cursor-pointer text-white hover:bg-white/10"
-                >
-                  Keep Session
-                </Button>
-                <Button
-                  onClick={handleConfirmCancellation}
-                  disabled={isCancelling}
-                  className="bg-red-600 cursor-pointer hover:bg-red-700 text-white"
-                >
-                  {isCancelling ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Cancelling...
-                    </>
-                  ) : (
-                    <>
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Confirm Cancellation
-                    </>
-                  )}
-                </Button>
-              </div>
             </div>
           )}
+
+          <DialogFooter className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+            <Button
+              variant="outline"
+              onClick={handleCloseCancellationModal}
+              className="border-white/20 text-white hover:bg-white/10"
+              disabled={isCancelling}
+            >
+              {t('learnerDashboard.cancel.keep')}
+            </Button>
+            <Button
+              onClick={handleConfirmCancellation}
+              className="bg-red-600 text-white hover:bg-red-700"
+              disabled={isCancelling}
+            >
+              {isCancelling ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {t('learnerDashboard.cancel.cancelling')}
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  {t('learnerDashboard.cancel.confirm')}
+                </>
+              )}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

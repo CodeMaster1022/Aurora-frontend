@@ -194,6 +194,16 @@ export type TranslationKey =
   | 'dashboard.sessions.rate'
   | 'dashboard.sessions.cancel'
   | 'dashboard.sessions.reason'
+  | 'dashboard.analytics.sessions'
+  | 'dashboard.analytics.range7d'
+  | 'dashboard.analytics.range7dLabel'
+  | 'dashboard.analytics.range30d'
+  | 'dashboard.analytics.range30dLabel'
+  | 'dashboard.analytics.scheduled'
+  | 'dashboard.analytics.completed'
+  | 'dashboard.analytics.cancelled'
+  | 'dashboard.analytics.completionRate'
+  | 'dashboard.analytics.empty'
   | 'dashboard.reviews.received.title'
   | 'dashboard.reviews.received.count'
   | 'dashboard.reviews.received.none'
@@ -294,6 +304,17 @@ export type TranslationKey =
   | 'learnerDashboard.profile.saving'
   | 'learnerDashboard.profile.upcoming'
   | 'learnerDashboard.profile.completed'
+  | 'learnerDashboard.summary.upcoming'
+  | 'learnerDashboard.summary.upcomingHelper'
+  | 'learnerDashboard.summary.completed'
+  | 'learnerDashboard.summary.completedHelper'
+  | 'learnerDashboard.summary.reviewed'
+  | 'learnerDashboard.summary.reviewedHelper'
+  | 'learnerDashboard.summary.reviewedAvg'
+  | 'learnerDashboard.summary.speakers'
+  | 'learnerDashboard.summary.speakersHelper'
+  | 'learnerDashboard.analytics.title'
+  | 'learnerDashboard.analytics.empty'
   | 'learnerDashboard.sessions.upcoming.title'
   | 'learnerDashboard.sessions.upcoming.count'
   | 'learnerDashboard.sessions.upcoming.none'
@@ -308,7 +329,41 @@ export type TranslationKey =
   | 'learnerDashboard.sessions.past.with'
   | 'learnerDashboard.sessions.past.rate'
   | 'learnerDashboard.sessions.past.cancellationReason'
+  | 'learnerDashboard.sessions.with'
+  | 'learnerDashboard.sessions.icebreaker'
+  | 'learnerDashboard.sessions.join'
+  | 'learnerDashboard.sessions.cancel'
+  | 'learnerDashboard.sessions.rate'
+  | 'learnerDashboard.sessions.cancellationReason'
+  | 'learnerDashboard.sessionsTab.title'
+  | 'learnerDashboard.sessionsTab.subtitle'
+  | 'learnerDashboard.sessionsTab.upcoming'
+  | 'learnerDashboard.sessionsTab.past'
+  | 'learnerDashboard.sessionsTab.next'
+  | 'learnerDashboard.sessionsTab.noUpcoming'
+  | 'learnerDashboard.sessionsTab.noPast'
+  | 'learnerDashboard.reviews.title'
+  | 'learnerDashboard.reviews.subtitle'
+  | 'learnerDashboard.reviews.noReviews'
+  | 'learnerDashboard.reviews.emptyComment'
+  | 'learnerDashboard.reviews.sessionLabel'
+  | 'learnerDashboard.actionCenter.title'
+  | 'learnerDashboard.actionCenter.subtitle'
+  | 'learnerDashboard.actionCenter.pendingReviews'
+  | 'learnerDashboard.actionCenter.review'
+  | 'learnerDashboard.actionCenter.noPending'
+  | 'learnerDashboard.actionCenter.startingSoon'
+  | 'learnerDashboard.actionCenter.join'
+  | 'learnerDashboard.actionCenter.view'
+  | 'learnerDashboard.actionCenter.noStartingSoon'
+  | 'learnerDashboard.topSpeakers.title'
+  | 'learnerDashboard.topSpeakers.subtitle'
+  | 'learnerDashboard.topSpeakers.none'
+  | 'learnerDashboard.topSpeakers.sessions'
+  | 'learnerDashboard.topSpeakers.lastSession'
+  | 'learnerDashboard.topSpeakers.noRating'
   | 'learnerDashboard.cancel.title'
+  | 'learnerDashboard.cancel.description'
   | 'learnerDashboard.cancel.policy'
   | 'learnerDashboard.cancel.policy24h'
   | 'learnerDashboard.cancel.policyHoursAway'
@@ -316,11 +371,24 @@ export type TranslationKey =
   | 'learnerDashboard.cancel.policyMayNotEligible'
   | 'learnerDashboard.cancel.policyNotify'
   | 'learnerDashboard.cancel.sessionDetails'
+  | 'learnerDashboard.cancel.hoursAway'
   | 'learnerDashboard.cancel.reasonLabel'
   | 'learnerDashboard.cancel.reasonPlaceholder'
   | 'learnerDashboard.cancel.keep'
   | 'learnerDashboard.cancel.cancelling'
   | 'learnerDashboard.cancel.confirm'
+  | 'learnerProfile.summary.title'
+  | 'learnerProfile.summary.description'
+  | 'learnerProfile.summary.totalSessions'
+  | 'learnerProfile.summary.completed'
+  | 'learnerProfile.summary.upcoming'
+  | 'learnerProfile.summary.completionRate'
+  | 'learnerProfile.summary.nextSession'
+  | 'learnerProfile.summary.noUpcoming'
+  | 'learnerProfile.summary.rating'
+  | 'learnerProfile.recentSessions.title'
+  | 'learnerProfile.recentSessions.description'
+  | 'learnerProfile.recentSessions.none'
 
   // Speaker Profile/Detail Page
   | 'speakerProfile.backToSpeakers'
@@ -373,6 +441,12 @@ export type TranslationKey =
   | 'about.mission.point1'
   | 'about.mission.point2'
   | 'about.mission.point3'
+  | 'about.mission.cards.warm.title'
+  | 'about.mission.cards.warm.description'
+  | 'about.mission.cards.diverse.title'
+  | 'about.mission.cards.diverse.description'
+  | 'about.mission.cards.flexible.title'
+  | 'about.mission.cards.flexible.description'
   | 'about.community.badge'
   | 'about.community.title'
   | 'about.community.subtitle'
@@ -384,6 +458,8 @@ export type TranslationKey =
   | 'about.community.card3.subtitle'
   | 'about.community.card4.title'
   | 'about.community.card4.subtitle'
+  | 'about.community.card5.title'
+  | 'about.community.card5.subtitle'
   | 'about.faq.title'
   | 'about.faq.q1'
   | 'about.faq.a1'
@@ -408,7 +484,7 @@ export const translations: Record<Language, Translations> = {
     'header.home': 'Home',
     'header.nosotros': 'About Us',
     'header.dashboard': 'Dashboard',
-    'header.speakerDashboard': 'Speaker Dashboard',
+    'header.speakerDashboard': 'Dashboard',
     'header.speakers': 'Speakers',
     'header.login': 'Sign In',
     'header.signup': 'Sign Up',
@@ -597,6 +673,16 @@ export const translations: Record<Language, Translations> = {
     'dashboard.sessions.rate': 'Rate',
     'dashboard.sessions.cancel': 'Cancel Session',
     'dashboard.sessions.reason': 'Reason:',
+    'dashboard.analytics.sessions': 'Sessions analytics',
+    'dashboard.analytics.range7d': '7 days',
+    'dashboard.analytics.range7dLabel': 'Last 7 days',
+    'dashboard.analytics.range30d': '30 days',
+    'dashboard.analytics.range30dLabel': 'Last 30 days',
+    'dashboard.analytics.scheduled': 'Scheduled',
+    'dashboard.analytics.completed': 'Completed',
+    'dashboard.analytics.cancelled': 'Cancelled',
+    'dashboard.analytics.completionRate': 'Completion rate',
+    'dashboard.analytics.empty': 'Not enough session activity to display analytics yet.',
     'dashboard.reviews.received.title': 'Reviews Received',
     'dashboard.reviews.received.count': 'reviews',
     'dashboard.reviews.received.none': 'No reviews yet',
@@ -684,6 +770,17 @@ export const translations: Record<Language, Translations> = {
     'learnerDashboard.errors.saveFailed': 'Failed to save profile',
     'learnerDashboard.errors.avatarFailed': 'Failed to upload avatar',
     'learnerDashboard.errors.cancelFailed': 'Failed to cancel session',
+    'learnerDashboard.summary.upcoming': 'Upcoming',
+    'learnerDashboard.summary.upcomingHelper': 'No sessions scheduled yet',
+    'learnerDashboard.summary.completed': 'Completed',
+    'learnerDashboard.summary.completedHelper': 'Total sessions completed',
+    'learnerDashboard.summary.reviewed': 'Reviews',
+    'learnerDashboard.summary.reviewedHelper': 'No reviews yet',
+    'learnerDashboard.summary.reviewedAvg': 'Average rating',
+    'learnerDashboard.summary.speakers': 'Top Speakers',
+    'learnerDashboard.summary.speakersHelper': 'Connect with more speakers',
+    'learnerDashboard.analytics.title': 'Learning Overview',
+    'learnerDashboard.analytics.empty': 'No session activity yet',
     'learnerDashboard.profile.title': 'Profile',
     'learnerDashboard.profile.description': 'Your personal information',
     'learnerDashboard.profile.firstName': 'First Name',
@@ -711,7 +808,41 @@ export const translations: Record<Language, Translations> = {
     'learnerDashboard.sessions.past.with': 'with',
     'learnerDashboard.sessions.past.rate': 'Rate & Review',
     'learnerDashboard.sessions.past.cancellationReason': 'Cancellation reason:',
+    'learnerDashboard.sessions.with': 'with',
+    'learnerDashboard.sessions.icebreaker': 'Icebreaker',
+    'learnerDashboard.sessions.join': 'Join Meeting →',
+    'learnerDashboard.sessions.cancel': 'Cancel Session',
+    'learnerDashboard.sessions.rate': 'Rate Session',
+    'learnerDashboard.sessions.cancellationReason': 'Cancellation reason:',
+    'learnerDashboard.sessionsTab.title': 'Sessions',
+    'learnerDashboard.sessionsTab.subtitle': 'Overview of your upcoming and past sessions',
+    'learnerDashboard.sessionsTab.upcoming': 'Upcoming',
+    'learnerDashboard.sessionsTab.past': 'Past',
+    'learnerDashboard.sessionsTab.next': 'Next session:',
+    'learnerDashboard.sessionsTab.noUpcoming': 'No upcoming sessions right now',
+    'learnerDashboard.sessionsTab.noPast': 'No past sessions yet',
+    'learnerDashboard.reviews.title': 'Session Reviews',
+    'learnerDashboard.reviews.subtitle': 'All feedback from your speakers',
+    'learnerDashboard.reviews.noReviews': 'No reviews yet',
+    'learnerDashboard.reviews.emptyComment': 'No comment provided.',
+    'learnerDashboard.reviews.sessionLabel': 'Session',
+    'learnerDashboard.actionCenter.title': 'Action Center',
+    'learnerDashboard.actionCenter.subtitle': 'Stay ahead of your sessions',
+    'learnerDashboard.actionCenter.pendingReviews': 'Pending reviews',
+    'learnerDashboard.actionCenter.review': 'Review',
+    'learnerDashboard.actionCenter.noPending': 'Nothing needs your review right now',
+    'learnerDashboard.actionCenter.startingSoon': 'Starting soon',
+    'learnerDashboard.actionCenter.join': 'Join',
+    'learnerDashboard.actionCenter.view': 'View',
+    'learnerDashboard.actionCenter.noStartingSoon': 'No sessions starting in the next 24 hours',
+    'learnerDashboard.topSpeakers.title': 'Top Speakers',
+    'learnerDashboard.topSpeakers.subtitle': 'Based on your completed sessions',
+    'learnerDashboard.topSpeakers.none': 'No speaker history yet',
+    'learnerDashboard.topSpeakers.sessions': 'sessions together',
+    'learnerDashboard.topSpeakers.lastSession': 'Last session:',
+    'learnerDashboard.topSpeakers.noRating': 'No rating yet',
     'learnerDashboard.cancel.title': 'Cancel Session',
+    'learnerDashboard.cancel.description': 'Confirm you want to cancel this session.',
     'learnerDashboard.cancel.policy': 'Cancellation Policy',
     'learnerDashboard.cancel.policy24h': 'Sessions must be cancelled at least 24 hours before the scheduled time',
     'learnerDashboard.cancel.policyHoursAway': 'hours away',
@@ -719,11 +850,24 @@ export const translations: Record<Language, Translations> = {
     'learnerDashboard.cancel.policyMayNotEligible': '(May not be eligible for cancellation)',
     'learnerDashboard.cancel.policyNotify': 'The speaker will be automatically notified of the cancellation',
     'learnerDashboard.cancel.sessionDetails': 'Session Details',
+    'learnerDashboard.cancel.hoursAway': 'hours away',
     'learnerDashboard.cancel.reasonLabel': 'Reason for Cancellation (Optional)',
     'learnerDashboard.cancel.reasonPlaceholder': 'Please let us know why you\'re cancelling...',
     'learnerDashboard.cancel.keep': 'Keep Session',
     'learnerDashboard.cancel.cancelling': 'Cancelling...',
     'learnerDashboard.cancel.confirm': 'Confirm Cancellation',
+    'learnerProfile.summary.title': 'Learning Summary',
+    'learnerProfile.summary.description': 'Snapshot of your progress and upcoming sessions',
+    'learnerProfile.summary.totalSessions': 'Total Sessions',
+    'learnerProfile.summary.completed': 'Completed',
+    'learnerProfile.summary.upcoming': 'Upcoming',
+    'learnerProfile.summary.completionRate': 'Completion Rate',
+    'learnerProfile.summary.nextSession': 'Next session',
+    'learnerProfile.summary.noUpcoming': 'No upcoming sessions yet',
+    'learnerProfile.summary.rating': 'Average rating',
+    'learnerProfile.recentSessions.title': 'Recent Sessions',
+    'learnerProfile.recentSessions.description': 'Last sessions you completed',
+    'learnerProfile.recentSessions.none': 'No sessions recorded yet',
 
     // Speaker Profile/Detail Page
     'speakerProfile.backToSpeakers': 'Back to Speakers',
@@ -769,13 +913,19 @@ export const translations: Record<Language, Translations> = {
     'about.hero.title': 'Aurora: Bringing English to Life',
     'about.hero.subtitle': 'We believe language unlocks opportunity. Aurora connects learners with kind, inspiring speakers for warm, human conversations that build confidence—one meaningful session at a time.',
     'about.story.title': 'The Story of Aurora',
-    'about.story.p1': 'If you are new here, my name is Monica Medina and my mission in life is communication—helping people to communicate and helping people to feel happy.I have been teaching English, at multiple levels, including children and adults, since 1988. Besides teaching, I have a special chemistry with elderly people. They are living treasures, as they possess a thorough encyclopedia within, and an exceptional storybook of experiences. I have prepared hundreds of English students to be successful in the language. They have become better people!',
-    'about.story.p2': 'From living rooms to laptops, from nerves to smiles—Aurora is where learners show up as themselves and leave a little braver every time.',
+    'about.story.p1': 'If you are new here, my name is Monica Medina and my mission in life is communication—helping people to communicate and helping people to feel happy. \n\nI have been teaching English, at multiple levels, including children and adults, since 1988. Besides teaching, I have a special chemistry with elderly people. They are living treasures, as they possess a thorough encyclopedia within, and an exceptional storybook of experiences. I have prepared hundreds of English students to be successful in the language. They have become better people!',
+    'about.story.p2': 'From living rooms to laptops, from nerves to smiles—Aurora is where learners show up as themselves and leave a little braver every time.\n\n',
     'about.mission.title': 'Our Mission',
     'about.mission.p1': 'To make English practice accessible, human, and joyful—by matching learners with thoughtful speakers and giving them everything they need to connect, grow, and belong.',
     'about.mission.point1': 'Warm, one‑to‑one sessions that build confidence',
     'about.mission.point2': 'Diverse speakers with real‑world experience',
     'about.mission.point3': 'Flexible scheduling that fits real life',
+    'about.mission.cards.warm.title': 'Warm Sessions',
+    'about.mission.cards.warm.description': 'One-to-one conversations that build confidence naturally',
+    'about.mission.cards.diverse.title': 'Diverse Speakers',
+    'about.mission.cards.diverse.description': 'Real people with real-world experience and stories to share',
+    'about.mission.cards.flexible.title': 'Flexible Scheduling',
+    'about.mission.cards.flexible.description': 'Book sessions that fit your schedule and learning pace',
     'about.community.badge': 'Our Community',
     'about.community.title': 'Join Thousands of Learners',
     'about.community.subtitle': 'Connect with passionate speakers and embark on your English learning journey',
@@ -787,6 +937,8 @@ export const translations: Record<Language, Translations> = {
     'about.community.card3.subtitle': 'Real conversations',
     'about.community.card4.title': 'Community',
     'about.community.card4.subtitle': 'Grow together',
+    'about.community.card5.title': 'Events',
+    'about.community.card5.subtitle': 'Connecting in real life',
     'about.faq.title': 'Frequently Asked Questions',
     'about.faq.q1': 'How do donations work?',
     'about.faq.a1': 'Donations help us support free or reduced‑cost sessions for learners who need it, and sustain our platform. You can add a donation at checkout or through your account settings anytime.',
@@ -808,7 +960,7 @@ export const translations: Record<Language, Translations> = {
     'header.home': 'Inicio',
     'header.nosotros': 'Nosotros',
     'header.dashboard': 'Panel',
-    'header.speakerDashboard': 'Panel de Speaker',
+    'header.speakerDashboard': 'Panel',
     'header.speakers': 'Speakers',
     'header.login': 'Inicia sesión',
     'header.signup': 'Regístrate',
@@ -997,6 +1149,16 @@ export const translations: Record<Language, Translations> = {
     'dashboard.sessions.rate': 'Calificar',
     'dashboard.sessions.cancel': 'Cancelar Sesión',
     'dashboard.sessions.reason': 'Razón:',
+    'dashboard.analytics.sessions': 'Analítica de sesiones',
+    'dashboard.analytics.range7d': '7 días',
+    'dashboard.analytics.range7dLabel': 'Últimos 7 días',
+    'dashboard.analytics.range30d': '30 días',
+    'dashboard.analytics.range30dLabel': 'Últimos 30 días',
+    'dashboard.analytics.scheduled': 'Programadas',
+    'dashboard.analytics.completed': 'Completadas',
+    'dashboard.analytics.cancelled': 'Canceladas',
+    'dashboard.analytics.completionRate': 'Tasa de finalización',
+    'dashboard.analytics.empty': 'Aún no hay suficiente actividad para mostrar analíticas.',
     'dashboard.reviews.received.title': 'Reseñas Recibidas',
     'dashboard.reviews.received.count': 'reseñas',
     'dashboard.reviews.received.none': 'Aún no hay reseñas',
@@ -1084,6 +1246,17 @@ export const translations: Record<Language, Translations> = {
     'learnerDashboard.errors.saveFailed': 'Error al guardar perfil',
     'learnerDashboard.errors.avatarFailed': 'Error al subir avatar',
     'learnerDashboard.errors.cancelFailed': 'Error al cancelar sesión',
+    'learnerDashboard.summary.upcoming': 'Próximas',
+    'learnerDashboard.summary.upcomingHelper': 'Aún no hay sesiones programadas',
+    'learnerDashboard.summary.completed': 'Completadas',
+    'learnerDashboard.summary.completedHelper': 'Total de sesiones completadas',
+    'learnerDashboard.summary.reviewed': 'Reseñas',
+    'learnerDashboard.summary.reviewedHelper': 'Aún no tienes reseñas',
+    'learnerDashboard.summary.reviewedAvg': 'Calificación promedio',
+    'learnerDashboard.summary.speakers': 'Speakers Destacados',
+    'learnerDashboard.summary.speakersHelper': 'Conecta con más speakers',
+    'learnerDashboard.analytics.title': 'Resumen de Aprendizaje',
+    'learnerDashboard.analytics.empty': 'Aún no hay actividad de sesiones',
     'learnerDashboard.profile.title': 'Perfil',
     'learnerDashboard.profile.description': 'Tu información personal',
     'learnerDashboard.profile.firstName': 'Nombre',
@@ -1111,7 +1284,41 @@ export const translations: Record<Language, Translations> = {
     'learnerDashboard.sessions.past.with': 'con',
     'learnerDashboard.sessions.past.rate': 'Calificar y Reseñar',
     'learnerDashboard.sessions.past.cancellationReason': 'Razón de cancelación:',
+    'learnerDashboard.sessions.with': 'con',
+    'learnerDashboard.sessions.icebreaker': 'Rompehielos',
+    'learnerDashboard.sessions.join': 'Unirse a la Reunión →',
+    'learnerDashboard.sessions.cancel': 'Cancelar sesión',
+    'learnerDashboard.sessions.rate': 'Calificar sesión',
+    'learnerDashboard.sessions.cancellationReason': 'Razón de cancelación:',
+    'learnerDashboard.sessionsTab.title': 'Sesiones',
+    'learnerDashboard.sessionsTab.subtitle': 'Resumen de tus sesiones próximas y pasadas',
+    'learnerDashboard.sessionsTab.upcoming': 'Próximas',
+    'learnerDashboard.sessionsTab.past': 'Pasadas',
+    'learnerDashboard.sessionsTab.next': 'Próxima sesión:',
+    'learnerDashboard.sessionsTab.noUpcoming': 'No hay sesiones próximas en este momento',
+    'learnerDashboard.sessionsTab.noPast': 'Aún no hay sesiones pasadas',
+    'learnerDashboard.reviews.title': 'Reseñas de Sesiones',
+    'learnerDashboard.reviews.subtitle': 'Todo el feedback de tus speakers',
+    'learnerDashboard.reviews.noReviews': 'Aún no tienes reseñas',
+    'learnerDashboard.reviews.emptyComment': 'Sin comentario.',
+    'learnerDashboard.reviews.sessionLabel': 'Sesión',
+    'learnerDashboard.actionCenter.title': 'Centro de Acción',
+    'learnerDashboard.actionCenter.subtitle': 'Mantente al día con tus sesiones',
+    'learnerDashboard.actionCenter.pendingReviews': 'Reseñas pendientes',
+    'learnerDashboard.actionCenter.review': 'Reseñar',
+    'learnerDashboard.actionCenter.noPending': 'No tienes reseñas pendientes',
+    'learnerDashboard.actionCenter.startingSoon': 'Comienzan pronto',
+    'learnerDashboard.actionCenter.join': 'Unirse',
+    'learnerDashboard.actionCenter.view': 'Ver',
+    'learnerDashboard.actionCenter.noStartingSoon': 'No hay sesiones que comiencen en las próximas 24 horas',
+    'learnerDashboard.topSpeakers.title': 'Speakers destacados',
+    'learnerDashboard.topSpeakers.subtitle': 'Según tus sesiones completadas',
+    'learnerDashboard.topSpeakers.none': 'Aún no tienes historial con speakers',
+    'learnerDashboard.topSpeakers.sessions': 'sesiones juntos',
+    'learnerDashboard.topSpeakers.lastSession': 'Última sesión:',
+    'learnerDashboard.topSpeakers.noRating': 'Sin calificación',
     'learnerDashboard.cancel.title': 'Cancelar Sesión',
+    'learnerDashboard.cancel.description': 'Confirma que deseas cancelar esta sesión.',
     'learnerDashboard.cancel.policy': 'Política de Cancelación',
     'learnerDashboard.cancel.policy24h': 'Las sesiones deben cancelarse al menos 24 horas antes de la hora programada',
     'learnerDashboard.cancel.policyHoursAway': 'horas de distancia',
@@ -1119,11 +1326,24 @@ export const translations: Record<Language, Translations> = {
     'learnerDashboard.cancel.policyMayNotEligible': '(Puede no ser elegible para cancelación)',
     'learnerDashboard.cancel.policyNotify': 'El speaker será notificado automáticamente de la cancelación',
     'learnerDashboard.cancel.sessionDetails': 'Detalles de la Sesión',
+    'learnerDashboard.cancel.hoursAway': 'horas de distancia',
     'learnerDashboard.cancel.reasonLabel': 'Razón de Cancelación (Opcional)',
     'learnerDashboard.cancel.reasonPlaceholder': 'Por favor cuéntanos por qué estás cancelando...',
     'learnerDashboard.cancel.keep': 'Mantener Sesión',
     'learnerDashboard.cancel.cancelling': 'Cancelando...',
     'learnerDashboard.cancel.confirm': 'Confirmar Cancelación',
+    'learnerProfile.summary.title': 'Resumen de Aprendizaje',
+    'learnerProfile.summary.description': 'Instantánea de tu progreso y próximas sesiones',
+    'learnerProfile.summary.totalSessions': 'Sesiones Totales',
+    'learnerProfile.summary.completed': 'Completadas',
+    'learnerProfile.summary.upcoming': 'Próximas',
+    'learnerProfile.summary.completionRate': 'Tasa de finalización',
+    'learnerProfile.summary.nextSession': 'Próxima sesión',
+    'learnerProfile.summary.noUpcoming': 'Aún no hay sesiones próximas',
+    'learnerProfile.summary.rating': 'Calificación promedio',
+    'learnerProfile.recentSessions.title': 'Sesiones Recientes',
+    'learnerProfile.recentSessions.description': 'Tus últimas sesiones completadas',
+    'learnerProfile.recentSessions.none': 'Aún no hay sesiones registradas',
 
     // Speaker Profile/Detail Page
     'speakerProfile.backToSpeakers': 'Volver a Speakers',
@@ -1176,6 +1396,12 @@ export const translations: Record<Language, Translations> = {
     'about.mission.point1': 'Sesiones cálidas de uno a uno que construyen confianza',
     'about.mission.point2': 'Hablantes diversos con experiencia en el mundo real',
     'about.mission.point3': 'Programación flexible que se adapta a la vida real',
+    'about.mission.cards.warm.title': 'Sesiones Cálidas',
+    'about.mission.cards.warm.description': 'Conversaciones uno a uno que generan confianza de forma natural',
+    'about.mission.cards.diverse.title': 'Hablantes Diversos',
+    'about.mission.cards.diverse.description': 'Personas reales con experiencias e historias del mundo real',
+    'about.mission.cards.flexible.title': 'Programación Flexible',
+    'about.mission.cards.flexible.description': 'Reserva sesiones que se ajusten a tu horario y ritmo de aprendizaje',
     'about.community.badge': 'Nuestra Comunidad',
     'about.community.title': 'Únete a Miles de Aprendices',
     'about.community.subtitle': 'Conéctate con hablantes apasionados y comienza tu viaje de aprendizaje de inglés',
@@ -1187,6 +1413,8 @@ export const translations: Record<Language, Translations> = {
     'about.community.card3.subtitle': 'Conversaciones reales',
     'about.community.card4.title': 'Comunidad',
     'about.community.card4.subtitle': 'Crecer juntos',
+    'about.community.card5.title': 'Eventos',
+    'about.community.card5.subtitle': 'Conectando en la vida real',
     'about.faq.title': 'Preguntas Frecuentes',
     'about.faq.q1': '¿Cómo funcionan las donaciones?',
     'about.faq.a1': 'Las donaciones nos ayudan a apoyar sesiones gratuitas o con costo reducido para los aprendices que lo necesitan, y a mantener nuestra plataforma. Puedes agregar una donación en el pago o a través de la configuración de tu cuenta en cualquier momento.',

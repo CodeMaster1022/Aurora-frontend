@@ -1,29 +1,26 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { 
-  Calendar, 
-  Clock, 
-  Star, 
-  Edit, 
-  Save, 
-  X, 
-  Upload, 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import {
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart"
+import {
+  Calendar,
+  Clock,
+  Star,
   MessageSquare,
-  Settings,
   Loader2,
-  Camera,
-  User,
-  Link as LinkIcon,
-  Unlink,
   CheckCircle2,
   Trash2,
   AlertTriangle
@@ -33,7 +30,8 @@ import { useAppSelector, useAppDispatch } from "@/lib/hooks/redux"
 import { getCurrentUser } from "@/lib/store/authSlice"
 import { SpeakerRatingModal } from "@/components/SpeakerRatingModal"
 import { useTranslation } from "@/lib/hooks/useTranslation"
-import Image from "next/image"
+import Link from "next/link"
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
 
 interface ReviewWithType extends Review {
   type: 'received' | 'given'
@@ -48,20 +46,8 @@ export default function SpeakerDashboardPage() {
   const [reviews, setReviews] = useState<ReviewWithType[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState("")
-  
-  // Profile editing states
-  const [isEditingProfile, setIsEditingProfile] = useState(false)
-  const [bio, setBio] = useState("")
-  const [age, setAge] = useState<string>("")
-  const [cost, setCost] = useState<string>("")
-  const [interests, setInterests] = useState<string[]>([])
   const [availability, setAvailability] = useState<SpeakerAvailability[]>([])
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
-  const [isUploading, setIsUploading] = useState(false)
-  const [isSavingAvailability, setIsSavingAvailability] = useState(false)
-  
-  // Available topic options - loaded from backend
-  const [availableTopics, setAvailableTopics] = useState<string[]>([])
+  const [analyticsRange, setAnalyticsRange] = useState<"7d" | "30d">("7d")
 
   // Rating modal states
   const [ratingModalOpen, setRatingModalOpen] = useState(false)
@@ -75,7 +61,6 @@ export default function SpeakerDashboardPage() {
 
   // Google Calendar states
   const [isCalendarConnected, setIsCalendarConnected] = useState(false)
-  const [isConnectingCalendar, setIsConnectingCalendar] = useState(false)
   const [calendarExpiresAt, setCalendarExpiresAt] = useState<string | null>(null)
 
   // Days of the week
@@ -127,34 +112,12 @@ export default function SpeakerDashboardPage() {
   }
 
   useEffect(() => {
-    console.log('=== Dashboard First Render ===')
-    console.log('User:', user)
-    console.log('isAuthenticated:', isAuthenticated)
-    console.log('authLoading:', authLoading)
-    console.log('Has user?', !!user)
-    console.log('==========================')
-    
-    // If authenticated but no user data, fetch it
-    if (isAuthenticated && !user) {
-      console.log('Authenticated but no user - fetching current user...')
-      dispatch(getCurrentUser())
+    if (authLoading) {
+      return
     }
 
-    // Check for OAuth callback params
-    const params = new URLSearchParams(window.location.search)
-    const calendarStatus = params.get('calendar')
-    if (calendarStatus === 'connected') {
-      // Calendar connected successfully
-      console.log('Calendar connected successfully')
-      setError('') // Clear any errors
-      // Refresh calendar status
-      checkCalendarStatus()
-      // Clean up URL
-      window.history.replaceState({}, '', window.location.pathname)
-    } else if (calendarStatus === 'error') {
-        setError(t('dashboard.errors.calendarConnectFailed'))
-      // Clean up URL
-      window.history.replaceState({}, '', window.location.pathname)
+    if (isAuthenticated && !user) {
+      dispatch(getCurrentUser())
     }
   }, [isAuthenticated, user, dispatch, authLoading])
 
@@ -170,22 +133,6 @@ export default function SpeakerDashboardPage() {
       console.error('Error checking calendar status:', error)
     }
   }
-
-  // Load topics from backend on mount
-  useEffect(() => {
-    const loadTopics = async () => {
-      try {
-        const response = await speakerService.getTopics()
-        if (response.success && response.data.topics) {
-          setAvailableTopics(response.data.topics)
-        }
-      } catch (error) {
-        console.error('Error loading topics:', error)
-        // Keep default topics if backend fails
-      }
-    }
-    loadTopics()
-  }, [])
 
   // Initialize availability if empty after data load
   useEffect(() => {
@@ -286,13 +233,8 @@ export default function SpeakerDashboardPage() {
         }))
         setReviews(processedReviews)
         
-        // Update profile data
+        // Update availability data
         if (profile) {
-          setBio(profile.bio || "")
-          setAge(profile.age ? profile.age.toString() : "")
-          setCost(profile.cost ? profile.cost.toString() : "")
-          setInterests(user?.interests || [])
-          // Normalize availability to ensure all 7 days are present
           const profileAvailability = profile.availability || []
           console.log('Loaded availability from backend:', profileAvailability)
           const normalizedAvailability = normalizeAvailability(profileAvailability)
@@ -302,12 +244,10 @@ export default function SpeakerDashboardPage() {
           // If no profile data, initialize with default availability
           console.log('No profile data, initializing with defaults')
           setAvailability(getDefaultAvailability())
-          setInterests(user?.interests || [])
         }
-      }
-      // Set avatar if user has one
-      if (user?.avatar) {
-        setAvatarPreview(user.avatar)
+      } else {
+        // No profile data returned
+        setAvailability(getDefaultAvailability())
       }
     } catch (err) {
       console.error("Error fetching dashboard data:", err)
@@ -315,84 +255,6 @@ export default function SpeakerDashboardPage() {
     } finally {
       setIsLoading(false)
     }
-  }
-
-  const handleSaveProfile = async () => {
-    try {
-      setIsUploading(true)
-      
-      // Update user interests in backend
-      await speakerService.updateInterests(interests)
-      
-      await speakerService.updateProfile({ 
-        bio, 
-        age: age ? Number(age) : undefined,
-        cost: cost ? Number(cost) : undefined,
-        availability 
-      })
-      await speakerService.updateAvailability(availability)
-      setIsEditingProfile(false)
-    } catch (err) {
-      console.error("Error saving profile:", err)
-      setError(t('dashboard.errors.saveFailed'))
-    } finally {
-      setIsUploading(false)
-    }
-  }
-
-  const handleInterestToggle = (interest: string) => {
-    setInterests(prev => {
-      if (prev.includes(interest)) {
-        // Remove interest
-        return prev.filter(i => i !== interest)
-      } else if (prev.length < 4) {
-        // Add interest (max 4)
-        return [...prev, interest]
-      }
-      return prev
-    })
-  }
-
-  const handleSaveAvailability = async () => {
-    try {
-      setIsSavingAvailability(true)
-      await speakerService.updateAvailability(availability)
-      setError("") // Clear any errors on success
-    } catch (err) {
-      console.error("Error saving availability:", err)
-      setError(t('dashboard.errors.availabilityFailed'))
-    } finally {
-      setIsSavingAvailability(false)
-    }
-  }
-
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      try {
-        setIsUploading(true)
-        const avatarUrl = await speakerService.uploadAvatar(file)
-        setAvatarPreview(avatarUrl)
-        // Update user in Redux store if needed
-      } catch (err) {
-        console.error("Error uploading avatar:", err)
-        setError(t('dashboard.errors.avatarFailed'))
-      } finally {
-        setIsUploading(false)
-      }
-    }
-  }
-
-  const handleAvailabilityToggle = (index: number) => {
-    const updated = [...availability]
-    updated[index].isAvailable = !updated[index].isAvailable
-    setAvailability(updated)
-  }
-
-  const handleTimeChange = (index: number, field: "startTime" | "endTime", value: string) => {
-    const updated = [...availability]
-    updated[index][field] = value
-    setAvailability(updated)
   }
 
   const formatDate = (dateString: string) => {
@@ -404,10 +266,21 @@ export default function SpeakerDashboardPage() {
     })
   }
 
-  // Check if a session has been reviewed by this speaker
-  const hasBeenReviewed = (sessionId: string) => {
-    return givenReviews.some(review => review.session === sessionId)
+  const getSessionDateTime = (session: Session) => {
+    const sessionDate = new Date(session.date)
+    if (session.time) {
+      const [hours, minutes] = session.time.split(':')
+      const parsedHours = Number.parseInt(hours, 10)
+      const parsedMinutes = Number.parseInt(minutes ?? "0", 10)
+      if (!Number.isNaN(parsedHours)) {
+        sessionDate.setHours(parsedHours, Number.isNaN(parsedMinutes) ? 0 : parsedMinutes, 0, 0)
+      }
+    }
+    return sessionDate
   }
+
+  const receivedReviews = reviews.filter(r => r.type === "received")
+  const givenReviews = reviews.filter(r => r.type === "given")
 
   // Check if a session has received any reviews (from anyone)
   const hasReceivedReviews = (sessionId: string) => {
@@ -416,16 +289,10 @@ export default function SpeakerDashboardPage() {
 
   // Check if a session has ended (date + time + duration has passed)
   const hasSessionEnded = (session: Session): boolean => {
-    const sessionDate = new Date(session.date)
-    const sessionTime = session.time.split(':')
-    sessionDate.setHours(parseInt(sessionTime[0]), parseInt(sessionTime[1]), 0, 0)
-    
-    // Add session duration (default to 30 minutes if not specified)
+    const start = getSessionDateTime(session)
     const duration = session.duration || 30
-    const sessionEndTime = new Date(sessionDate.getTime() + duration * 60 * 1000)
-    
-    const now = new Date()
-    return sessionEndTime <= now
+    const sessionEndTime = new Date(start.getTime() + duration * 60 * 1000)
+    return sessionEndTime <= new Date()
   }
 
   const handleRateSession = (session: Session) => {
@@ -471,61 +338,370 @@ export default function SpeakerDashboardPage() {
 
   // Calculate hours until session for cancellation rules
   const getHoursUntilSession = (session: Session): number => {
-    const sessionDate = new Date(session.date)
-    const sessionTime = session.time.split(':')
-    sessionDate.setHours(parseInt(sessionTime[0]), parseInt(sessionTime[1]), 0, 0)
-    
+    const sessionDate = getSessionDateTime(session)
     const now = new Date()
     const hoursUntil = (sessionDate.getTime() - now.getTime()) / (1000 * 60 * 60)
     return hoursUntil
   }
 
-  const handleConnectCalendar = async () => {
-    try {
-      setIsConnectingCalendar(true)
-      setError('')
-      
-      // Get the OAuth URL from the backend
-      const response = await speakerService.getCalendarAuthUrl()
-      
-      if (response.success && response.data.authUrl && user?._id) {
-        // Add user ID as state parameter for the callback
-        const authUrl = new URL(response.data.authUrl)
-        authUrl.searchParams.set('state', user._id)
-        
-        // Redirect to Google OAuth
-        window.location.href = authUrl.toString()
-      } else {
-        setError(t('dashboard.errors.calendarInitFailed'))
-        setIsConnectingCalendar(false)
+  const sortedUpcomingSessions = useMemo(
+    () =>
+      [...upcomingSessions].sort(
+        (a, b) => getSessionDateTime(a).getTime() - getSessionDateTime(b).getTime()
+      ),
+    [upcomingSessions]
+  )
+
+  const sortedPastSessions = useMemo(
+    () =>
+      [...pastSessions].sort(
+        (a, b) => getSessionDateTime(b).getTime() - getSessionDateTime(a).getTime()
+      ),
+    [pastSessions]
+  )
+
+  const nextSession = sortedUpcomingSessions[0]
+  const completedPastSessions = useMemo(
+    () => sortedPastSessions.filter((session) => session.status === "completed"),
+    [sortedPastSessions]
+  )
+  const cancelledPastSessions = useMemo(
+    () => sortedPastSessions.filter((session) => session.status === "cancelled"),
+    [sortedPastSessions]
+  )
+
+  const sessionsNeedingReview = completedPastSessions.filter(
+    (session) => !hasReceivedReviews(session._id)
+  )
+  const startingSoonSessions = sortedUpcomingSessions.filter((session) => {
+    const hours = getHoursUntilSession(session)
+    return hours > 0 && hours <= 24
+  })
+  const activeAvailability = useMemo(
+    () => availability.filter((day) => day.isAvailable),
+    [availability]
+  )
+
+  const analyticsDataBase = useMemo(() => {
+    const map = new Map<
+      string,
+      { label: string; date: Date; scheduled: number; completed: number; cancelled: number }
+    >()
+
+    const addEntry = (session: Session, field: "scheduled" | "completed" | "cancelled") => {
+      const date = getSessionDateTime(session)
+      const key = date.toISOString().split("T")[0]
+      const label = date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      })
+
+      const existing = map.get(key) ?? {
+        date,
+        label,
+        scheduled: 0,
+        completed: 0,
+        cancelled: 0,
       }
-    } catch (err) {
-      console.error('Error connecting calendar:', err)
-      setError(t('dashboard.errors.calendarConnectFailed'))
-      setIsConnectingCalendar(false)
+
+      existing[field] += 1
+      map.set(key, existing)
     }
+
+    sortedUpcomingSessions.forEach((session) => addEntry(session, "scheduled"))
+    sortedPastSessions.forEach((session) => {
+      if (session.status === "completed") {
+        addEntry(session, "completed")
+      } else if (session.status === "cancelled") {
+        addEntry(session, "cancelled")
+      } else {
+        addEntry(session, "scheduled")
+      }
+    })
+
+    return Array.from(map.values())
+      .sort((a, b) => a.date.getTime() - b.date.getTime())
+  }, [sortedUpcomingSessions, sortedPastSessions])
+
+  const analyticsData = useMemo(() => {
+    if (!analyticsDataBase.length) return []
+
+    const days = analyticsRange === "7d" ? 7 : 30
+    const cutoff = new Date()
+    cutoff.setHours(0, 0, 0, 0)
+    cutoff.setDate(cutoff.getDate() - (days - 1))
+
+    return analyticsDataBase
+      .filter((entry) => entry.date >= cutoff)
+      .slice(-days)
+  }, [analyticsDataBase, analyticsRange])
+
+  const analyticsSummary = useMemo(() => {
+    const totals = analyticsData.reduce(
+      (acc, entry) => {
+        acc.scheduled += entry.scheduled
+        acc.completed += entry.completed
+        acc.cancelled += entry.cancelled
+        return acc
+      },
+      { scheduled: 0, completed: 0, cancelled: 0 }
+    )
+
+    const totalSessions = totals.scheduled + totals.completed + totals.cancelled
+    const totalDecisive = totals.completed + totals.cancelled
+    const completionRate =
+      totalDecisive > 0 ? Math.round((totals.completed / totalDecisive) * 100) : null
+
+    return {
+      ...totals,
+      total: totalSessions,
+      completionRate,
+    }
+  }, [analyticsData])
+
+  const analyticsRangeLabel =
+    analyticsRange === "7d"
+      ? t('dashboard.analytics.range7dLabel')
+      : t('dashboard.analytics.range30dLabel')
+
+  const chartConfig = useMemo(
+    () => ({
+      scheduled: {
+        label: t('dashboard.analytics.scheduled'),
+        color: "hsl(266, 85%, 70%)",
+      },
+      completed: {
+        label: t('dashboard.analytics.completed'),
+        color: "hsl(152, 76%, 60%)",
+      },
+      cancelled: {
+        label: t('dashboard.analytics.cancelled'),
+        color: "hsl(0, 84%, 65%)",
+      },
+    }),
+    [t],
+  )
+
+  const averageRating = receivedReviews.length
+    ? (
+        receivedReviews.reduce((total, review) => total + (review.rating || 0), 0) /
+        receivedReviews.length
+      ).toFixed(1)
+    : null
+
+  const summaryCards = useMemo(
+    () => [
+      {
+        label: t('dashboard.sessions.upcoming.title'),
+        value: upcomingSessions.length,
+        helper: nextSession
+          ? `${formatDate(nextSession.date)} · ${nextSession.time}`
+          : t('dashboard.sessions.upcoming.none'),
+        icon: Calendar
+      },
+      {
+        label: t('dashboard.sessions.past.title'),
+        value: pastSessions.length,
+        helper:
+          completedPastSessions.length > 0
+            ? `${completedPastSessions.length} completed`
+            : t('dashboard.sessions.past.none'),
+        icon: CheckCircle2
+      },
+      {
+        label: t('dashboard.reviews.received.title'),
+        value: receivedReviews.length,
+        helper: averageRating ? `Avg rating ${averageRating}` : t('dashboard.reviews.received.none'),
+        icon: Star
+      },
+      {
+        label: t('dashboard.reviews.given.title'),
+        value: givenReviews.length,
+        helper:
+          sessionsNeedingReview.length > 0
+            ? `${sessionsNeedingReview.length} follow ups`
+            : t('dashboard.reviews.given.none'),
+        icon: MessageSquare
+      }
+    ],
+    [
+      averageRating,
+      completedPastSessions.length,
+      givenReviews.length,
+      nextSession,
+      pastSessions.length,
+      receivedReviews.length,
+      sessionsNeedingReview.length,
+      t,
+      upcomingSessions.length
+    ]
+  )
+
+  const renderSessionCard = (session: Session, context: "upcoming" | "past") => {
+    const learner =
+      typeof session.learner === "object"
+        ? `${session.learner.firstname} ${session.learner.lastname}`
+        : session.learner
+    const topics = (session as any).topics as string[] | undefined
+    const icebreaker = (session as any).icebreaker as string | undefined
+    const meetingLink = (session as any).meetingLink as string | undefined
+    const isCancelled = session.status === "cancelled"
+    const canCancel = context === "upcoming" && session.status === "scheduled"
+    const canReview =
+      context === "past" && session.status === "completed" && !hasReceivedReviews(session._id)
+    const hoursUntil = getHoursUntilSession(session)
+
+    return (
+      <div
+        key={session._id}
+        className="rounded-lg border border-white/10 bg-white/5 p-4 shadow-sm transition hover:border-white/20 mb-12"
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <h4 className="text-base font-semibold text-white">{session.title}</h4>
+              <Badge
+                className={
+                  isCancelled
+                    ? "bg-red-500/20 text-red-300 border-red-500/30"
+                    : "bg-purple-500/20 text-purple-200 border-purple-400/30"
+                }
+              >
+                {session.status}
+              </Badge>
+            </div>
+            <p className="text-sm text-gray-300">
+              {t('dashboard.sessions.with')} <span className="font-medium text-white">{learner}</span>
+            </p>
+            <div className="flex flex-wrap items-center gap-3 text-xs text-gray-400">
+              <span>{formatDate(session.date)}</span>
+              <span>•</span>
+              <span>{session.time}</span>
+              {session.duration && (
+                <>
+                  <span>•</span>
+                  <span>{session.duration} min</span>
+                </>
+              )}
+              {context === "upcoming" && (
+                <>
+                  <span>•</span>
+                  <span>{Math.max(Math.round(hoursUntil), 0)}h remaining</span>
+                </>
+              )}
+            </div>
+          </div>
+          {meetingLink && (
+            <Button asChild variant="outline" size="sm" className="border-purple-400/40 text-purple-200 cursor-pointer">
+              <a href={meetingLink} target="_blank" rel="noopener noreferrer">
+                Join
+              </a>
+            </Button>
+          )}
+        </div>
+
+        {topics && topics.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {topics.map((topic) => (
+              <Badge
+                key={topic}
+                variant="secondary"
+                className="bg-purple-500/15 text-purple-200 border-purple-400/30"
+              >
+                {topic}
+              </Badge>
+            ))}
+          </div>
+        )}
+
+        {icebreaker && (
+          <div className="mt-3 rounded-lg border border-yellow-500/20 bg-yellow-500/10 p-3 text-xs text-yellow-100">
+            <p className="mb-1 font-semibold uppercase tracking-wide text-yellow-300">
+              {t('dashboard.sessions.icebreaker')}
+            </p>
+            <p>{icebreaker}</p>
+          </div>
+        )}
+
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="text-xs text-gray-400">
+            {context === "upcoming"
+              ? `Starts ${formatDate(session.date)}`
+              : `Recorded ${formatDate(session.date)}`}
+          </div>
+          <div className="flex items-center gap-2">
+            {canCancel && (
+              <Button
+                variant="destructive"
+                size="sm"
+                className="cursor-pointer bg-red-500/20 text-red-200 hover:bg-red-500/30 border-red-500/40"
+                onClick={() => handleCancelSession(session)}
+              >
+                {t('dashboard.sessions.cancel')}
+              </Button>
+            )}
+            {canReview && (
+              <Button
+                size="sm"
+                onClick={() => handleRateSession(session)}
+                className="cursor-pointer bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600"
+              >
+                <Star className="mr-2 h-3 w-3" />
+                {t('dashboard.sessions.rate')}
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+    )
   }
 
-  const handleDisconnectCalendar = async () => {
-    try {
-      setIsConnectingCalendar(true)
-      setError('')
-      
-      await speakerService.disconnectCalendar()
-      
-      // Update local state
-      setIsCalendarConnected(false)
-      setCalendarExpiresAt(null)
-    } catch (err) {
-      console.error('Error disconnecting calendar:', err)
-      setError(t('dashboard.errors.calendarDisconnectFailed'))
-    } finally {
-      setIsConnectingCalendar(false)
-    }
-  }
+  const renderReviewCard = (review: ReviewWithType, type: "received" | "given") => {
+    const counterpart =
+      type === "received"
+        ? review.from
+        : review.to
 
-  const receivedReviews = reviews.filter(r => r.type === "received")
-  const givenReviews = reviews.filter(r => r.type === "given")
+    const counterpartName =
+      typeof counterpart === "object"
+        ? `${counterpart.firstname} ${counterpart.lastname}`
+        : counterpart
+
+    return (
+      <div
+        key={review._id}
+        className="rounded-lg border border-white/10 bg-white/5 p-4 space-y-3"
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold text-white">{counterpartName}</p>
+            <p className="text-xs text-gray-400">
+              {new Date(review.createdAt).toLocaleDateString()}
+            </p>
+          </div>
+          <div className="flex items-center gap-1">
+            {[...Array(5)].map((_, index) => (
+              <Star
+                key={index}
+                className={`h-4 w-4 ${
+                  index < review.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-500"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+        <p className="text-sm text-gray-200">
+          {review.comment?.trim() ||
+            (type === "received"
+              ? t('dashboard.reviews.received.none')
+              : t('dashboard.reviews.given.none'))}
+        </p>
+        <p className="text-xs text-gray-500">
+          Session ID: {review.session}
+        </p>
+      </div>
+    )
+  }
 
   if (isLoading) {
     return (
@@ -536,609 +712,386 @@ export default function SpeakerDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br pt-24 from-[#1A1A33] via-purple-900 to-[#1A1A33] p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">{t('dashboard.title')}</h1>
-          <p className="text-gray-300">{t('dashboard.subtitle')}</p>
+    <div className="min-h-screen bg-gradient-to-br from-[#1A1A33] via-purple-900 to-[#1A1A33] py-24 px-4 sm:px-6">
+      <div className="mx-auto flex max-w-5xl flex-col gap-6">
+        <div className="space-y-2">
+          <h1 className="lg:text-3xl md:text-2xl text-xl xl:text-4xl font-bold text-white">{t('dashboard.title')}</h1>
+          <p className="text-gray-300 text-sm">{t('dashboard.subtitle')}</p>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-600">{error}</p>
+          <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">
+            {error}
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Profile & Availability */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Profile Card */}
-            <Card className="bg-white/10 backdrop-blur-lg border-white/20">
-              <CardHeader>
-                <div className="flex items-start justify-between">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {summaryCards.map((card) => {
+            const Icon = card.icon
+            return (
+              <div
+                key={card.label}
+                className="border-white/20 bg-white/10 backdrop-blur-lg rounded-lg"
+              >
+                <CardContent className="flex items-center justify-between gap-2 md:gap-4 p-2 md:p-5">
                   <div>
-                    <CardTitle className="text-white mb-2">{t('dashboard.profile.title')}</CardTitle>
-                    <CardDescription className="text-gray-300">{t('dashboard.profile.description')}</CardDescription>
+                    <p className="text-sm text-gray-300">{card.label}</p>
+                    <p className="text-xl md:text-2xl font-semibold text-white">{card.value}</p>
+                    <p className="mt-1 text-xs text-gray-400">{card.helper}</p>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setIsEditingProfile(!isEditingProfile)}
-                    className="text-white hover:bg-white/20 cursor-pointer"
-                  >
-                    {isEditingProfile ? <X /> : <Edit />}
-                  </Button>
-                </div>
+                  <div className="flex  md:h-12 md:w-12 h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-purple-500/40 to-cyan-500/40">
+                    <Icon className="md:h-6 md:w-6 h-4 w-4 text-white" />
+                  </div>
+                </CardContent>
+              </div>
+            )
+          })}
+        </div>
+
+        <div className="grid grid-cols-1 gap-6">
+          <div className="space-y-6">
+            <Card className="border-white/20 bg-white/10 backdrop-blur-lg">
+              <CardHeader>
+                <CardTitle className="text-white text-base">Schedule Overview</CardTitle>
+                <CardDescription className="text-xs text-gray-300">
+                  Quick glance at your integrations and availability
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Avatar */}
-                <div className="flex flex-col items-center space-y-4">
-                  <div className="relative w-full max-w-[200px] mx-auto">
-                    <div className="relative z-10 w-full aspect-square flex items-end">
-                      {avatarPreview ? (
-                        <Image
-                          src={avatarPreview}
-                          alt="Avatar"
-                          width={200}
-                          height={200}
-                          className="w-full h-full object-cover rounded-2xl drop-shadow-2xl"
-                        />
+                <div className="grid gap-3 md:grid-cols-3">
+                  <div
+                    className={`rounded-lg border sm:p-4 p-2 ${
+                      isCalendarConnected
+                        ? "border-green-500/30 bg-green-500/10 text-green-200"
+                        : "border-yellow-500/30 bg-yellow-500/10 text-yellow-200"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 text-sm pb-2">
+                      {isCalendarConnected ? (
+                        <CheckCircle2 className="h-4 w-4" />
                       ) : (
-                        <div className="w-full h-full rounded-2xl bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center drop-shadow-2xl">
-                          <User className="w-20 h-20 text-white" />
-                        </div>
+                        <AlertTriangle className="h-4 w-4" />
                       )}
-                      {isEditingProfile && (
-                        <label className="absolute top-2 right-2 bg-purple-600 p-2 rounded-full cursor-pointer hover:bg-purple-700 transition-colors z-20 shadow-lg">
-                          <Camera className="w-4 h-4 text-white" />
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleAvatarUpload}
-                            className="hidden"
-                            disabled={isUploading}
-                          />
-                        </label>
-                      )}
+                      <span>
+                        {isCalendarConnected
+                          ? t('dashboard.calendar.connected')
+                          : t('dashboard.calendar.notConnected')}
+                      </span>
                     </div>
-
-                    {/* Decorative Elements */}
-                    <div className="absolute -top-2 -right-2 w-12 h-12 bg-purple-500/30 rounded-full blur-xl animate-pulse"></div>
-                    <div className="absolute -bottom-2 -left-2 w-10 h-10 bg-cyan-500/30 rounded-full blur-xl animate-pulse" style={{ animationDelay: '700ms' }}></div>
-                  </div>
-                  <div className="text-center">
-                    <h3 className="text-xl font-bold text-white mb-1">
-                      {user?.firstname} {user?.lastname}
-                    </h3>
-                    <p className="text-sm text-gray-400">{user?.email}</p>
-                  </div>
-                </div>
-
-                {/* Interests/Topics */}
-                {isEditingProfile ? (
-                  <div>
-                    <Label className="text-white mb-2">Topics & Interests</Label>
-                    <div className="flex flex-wrap gap-2">
-                      {availableTopics.map((topic) => (
-                        <button
-                          key={topic}
-                          type="button"
-                          onClick={() => handleInterestToggle(topic)}
-                          disabled={!interests.includes(topic) && interests.length >= 4}
-                          className={`px-3 py-1.5 rounded-full transition-all text-xs font-medium ${
-                            interests.includes(topic)
-                              ? "bg-gradient-to-r from-purple-500 to-cyan-500 text-white border-2 border-purple-400"
-                              : "bg-white/10 border border-white/20 text-gray-300 hover:border-purple-400/50"
-                          } ${!interests.includes(topic) && interests.length >= 4 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                        >
-                          {topic}
-                        </button>
-                      ))}
-                    </div>
-                    {interests.length > 0 && (
-                      <p className="mt-2 text-xs text-gray-400">
-                        Selected: {interests.length}/4
+                    {!isCalendarConnected && (
+                      <p className="mt-2 text-xs text-white/70">
+                        {t('dashboard.calendar.notConnectedDesc')}
+                      </p>
+                    )}
+                    {activeAvailability.length > 0 ? (
+                      <div className="flex flex-wrap gap-1 md:gap-2 py-2 md:py-4">
+                        {activeAvailability.slice(0, 7).map((day) => {
+                          const dayData = daysOfWeek.find((d) => d.key === day.day)
+                          const label = dayData ? t(dayData.translationKey as any) : day.day
+                          return (
+                            <Badge
+                              key={day.day}
+                              variant="secondary"
+                              className="bg-purple-500/15 text-purple-100 border-purple-400/20"
+                            >
+                              {label}·{(day.startTime || "09:00")}-{(day.endTime || "17:00")}
+                            </Badge>
+                          )
+                        })}
+                        {activeAvailability.length > 7 && (
+                          <Badge className="bg-white/10 text-white border-white/20">
+                            +{activeAvailability.length - 7}
+                          </Badge>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-400">
+                        {t('dashboard.availability.description')}
                       </p>
                     )}
                   </div>
-                ) : (
-                  user?.interests && user.interests.length > 0 && (
-                    <div>
-                      <div className="flex flex-wrap gap-2 justify-center">
-                        {user.interests.map((interest, index) => (
-                          <div 
-                            key={index}
-                            className="px-3 py-1 bg-gradient-to-r from-purple-500/20 to-cyan-500/20 border border-purple-400/30 rounded-full"
+                  <div className="rounded-lg border border-white/10 bg-white/5 p-4 md:col-span-2">
+                    <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <span className="text-sm font-semibold text-white">
+                          {t('dashboard.analytics.sessions')}
+                        </span>
+                        <p className="text-xs text-gray-400">
+                          {analyticsData.length > 0
+                            ? analyticsRangeLabel
+                            : t('dashboard.analytics.empty')}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {(['7d', '30d'] as const).map((range) => (
+                          <Button
+                            key={range}
+                            size="sm"
+                            variant={analyticsRange === range ? "default" : "outline"}
+                            className={`h-7 px-3 text-xs ${
+                              analyticsRange === range
+                                ? "bg-purple-600 text-white hover:bg-purple-500 cursor-pointer"
+                                : "border-white/20 text-gray-800 hover:bg-white/10 cursor-pointer"
+                            }`}
+                            onClick={() => setAnalyticsRange(range)}
                           >
-                            <span className="text-purple-200 text-xs font-medium">{interest}</span>
-                          </div>
+                            {range === "7d"
+                              ? t('dashboard.analytics.range7d')
+                              : t('dashboard.analytics.range30d')}
+                          </Button>
                         ))}
                       </div>
                     </div>
-                  )
-                )}
-
-                {/* Bio */}
-                {isEditingProfile ? (
-                  <div>
-                    <Label className="text-white mb-2">{t('dashboard.profile.bio')}</Label>
-                    <Textarea
-                      value={bio}
-                      onChange={(e) => setBio(e.target.value)}
-                      rows={3}
-                      className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                      placeholder={t('dashboard.profile.bioPlaceholder')}
-                    />
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-300">{bio || t('dashboard.profile.noBio')}</p>
-                )}
-
-                {/* Age and Cost */}
-                {isEditingProfile ? (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-white mb-2">Age</Label>
-                      <Input
-                        type="number"
-                        value={age}
-                        onChange={(e) => setAge(e.target.value)}
-                        min={18}
-                        max={120}
-                        className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                        placeholder="Enter your age"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-white mb-2">Cost per Session (USD)</Label>
-                      <Input
-                        type="number"
-                        value={cost}
-                        onChange={(e) => setCost(e.target.value)}
-                        min={0}
-                        step="0.01"
-                        className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                        placeholder="Enter hourly rate"
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  (age || cost) && (
-                    <div className="flex flex-wrap gap-2">
-                      {age && (
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-500/20 border border-purple-500/30 rounded-full">
-                          <span className="text-purple-300 text-sm font-medium">Age:</span>
-                          <span className="text-white text-sm font-semibold">{age}</span>
+                    {/* {analyticsSummary.total > 0 && (
+                      <div className="mb-3 grid gap-2 text-xs text-gray-300 sm:grid-cols-2 lg:grid-cols-4">
+                        <div className="rounded-md border border-white/10 bg-white/5 p-2">
+                          <p className="mb-1 text-[0.65rem] uppercase tracking-wide text-gray-400">
+                            {t('dashboard.analytics.scheduled')}
+                          </p>
+                          <p className="text-base font-semibold text-white">
+                            {analyticsSummary.scheduled}
+                          </p>
                         </div>
-                      )}
-                      {cost && (
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-cyan-500/20 border border-cyan-500/30 rounded-full">
-                          <span className="text-cyan-300 text-sm font-medium">Cost:</span>
-                          <span className="text-white text-sm font-semibold">${cost}</span>
+                        <div className="rounded-md border border-white/10 bg-white/5 p-2">
+                          <p className="mb-1 text-[0.65rem] uppercase tracking-wide text-gray-400">
+                            {t('dashboard.analytics.completed')}
+                          </p>
+                          <p className="text-base font-semibold text-white">
+                            {analyticsSummary.completed}
+                          </p>
                         </div>
-                      )}
-                    </div>
-                  )
-                )}
-
-                {isEditingProfile && (
-                  <Button
-                    onClick={handleSaveProfile}
-                    disabled={isUploading}
-                    className="w-full bg-gradient-to-r from-purple-600 to-purple-500 cursor-pointer"
-                  >
-                    {isUploading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {t('dashboard.profile.saving')}
-                      </>
+                        <div className="rounded-md border border-white/10 bg-white/5 p-2">
+                          <p className="mb-1 text-[0.65rem] uppercase tracking-wide text-gray-400">
+                            {t('dashboard.analytics.cancelled')}
+                          </p>
+                          <p className="text-base font-semibold text-white">
+                            {analyticsSummary.cancelled}
+                          </p>
+                        </div>
+                        <div className="rounded-md border border-white/10 bg-white/5 p-2">
+                          <p className="mb-1 text-[0.65rem] uppercase tracking-wide text-gray-400">
+                            {t('dashboard.analytics.completionRate')}
+                          </p>
+                          <p className="text-base font-semibold text-white">
+                            {analyticsSummary.completionRate !== null
+                              ? `${analyticsSummary.completionRate}%`
+                              : '—'}
+                          </p>
+                        </div>
+                      </div>
+                    )} */}
+                    {analyticsData.length > 0 ? (
+                      <ChartContainer
+                        config={chartConfig}
+                        className="h-36 md:h-56 w-full"
+                      >
+                        <AreaChart data={analyticsData}>
+                          <CartesianGrid
+                            strokeDasharray="3 3"
+                            stroke="rgba(255,255,255,0.08)"
+                            vertical={false}
+                          />
+                          <XAxis
+                            dataKey="label"
+                            axisLine={false}
+                            tickLine={false}
+                            stroke="#9ca3af"
+                          />
+                          <YAxis hide domain={[0, "dataMax + 1"]} />
+                          <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
+                          <ChartLegend
+                            verticalAlign="top"
+                            wrapperStyle={{ paddingBottom: 12 }}
+                            content={
+                              <ChartLegendContent className="justify-start text-xs text-gray-300" />
+                            }
+                          />
+                          <Area
+                            type="monotone"
+                            dataKey="scheduled"
+                            stroke="var(--color-scheduled)"
+                            fill="var(--color-scheduled)"
+                            fillOpacity={0.12}
+                            strokeWidth={2}
+                            dot={false}
+                          />
+                          <Area
+                            type="monotone"
+                            dataKey="completed"
+                            stroke="var(--color-completed)"
+                            fill="var(--color-completed)"
+                            fillOpacity={0.16}
+                            strokeWidth={2}
+                            dot={false}
+                          />
+                          <Area
+                            type="monotone"
+                            dataKey="cancelled"
+                            stroke="var(--color-cancelled)"
+                            fill="var(--color-cancelled)"
+                            fillOpacity={0.08}
+                            strokeDasharray="6 4"
+                            strokeWidth={2}
+                            dot={false}
+                          />
+                        </AreaChart>
+                      </ChartContainer>
                     ) : (
-                      <>
-                        <Save className="mr-2 h-4 w-4" />
-                        {t('dashboard.profile.save')}
-                      </>
-                    )}
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Google Calendar Connection Card */}
-            <Card className="bg-white/10 backdrop-blur-lg border-white/20">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="text-purple-400 w-5 h-5" />
-                    <CardTitle className="text-white">{t('dashboard.calendar.title')}</CardTitle>
-                  </div>
-                  {isCalendarConnected && (
-                    <CheckCircle2 className="w-5 h-5 text-green-400" />
-                  )}
-                </div>
-                <CardDescription className="text-gray-300">
-                  {t('dashboard.calendar.description')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {isCalendarConnected ? (
-                  <>
-                    <div className="flex items-center gap-2 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
-                      <CheckCircle2 className="w-5 h-5 text-green-400" />
-                      <span className="text-sm text-green-300">{t('dashboard.calendar.connected')}</span>
-                    </div>
-                    {calendarExpiresAt && (
                       <p className="text-xs text-gray-400">
-                        {t('dashboard.calendar.expires')} {new Date(calendarExpiresAt).toLocaleDateString()}
+                        {/* {t('dashboard.analytics.empty')} */}
                       </p>
                     )}
-                    <Button
-                      onClick={handleDisconnectCalendar}
-                      disabled={isConnectingCalendar}
-                      variant="outline"
-                      className="w-full border-red-500/50 text-red-300 hover:bg-red-500/10 cursor-pointer"
-                    >
-                      {isConnectingCalendar ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          {t('dashboard.calendar.disconnecting')}
-                        </>
-                      ) : (
-                        <>
-                          <Unlink className="mr-2 h-4 w-4" />
-                          {t('dashboard.calendar.disconnect')}
-                        </>
-                      )}
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                      <p className="text-sm text-yellow-300 mb-2">
-                        {t('dashboard.calendar.notConnected')}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        {t('dashboard.calendar.notConnectedDesc')}
-                      </p>
-                    </div>
-                    <Button
-                      onClick={handleConnectCalendar}
-                      disabled={isConnectingCalendar}
-                      className="w-full bg-gradient-to-r from-purple-600 to-purple-500 cursor-pointer"
-                    >
-                      {isConnectingCalendar ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          {t('dashboard.calendar.connecting')}
-                        </>
-                      ) : (
-                        <>
-                          <LinkIcon className="mr-2 h-4 w-4" />
-                          {t('dashboard.calendar.connect')}
-                        </>
-                      )}
-                    </Button>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Availability Card */}
-            <Card className="bg-white/10 backdrop-blur-lg border-white/20">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Settings className="text-[#7C3AED] w-4 h-4" />
-                    <CardTitle className="text-white text-base">{t('dashboard.availability.title')}</CardTitle>
                   </div>
-                  <Badge variant="secondary" className="bg-purple-500/20 text-purple-300 text-xs">
-                    {availability.filter(a => a.isAvailable).length} {t('dashboard.availability.daysActive')}
-                  </Badge>
                 </div>
-                <CardDescription className="text-gray-300 text-xs mt-1">{t('dashboard.availability.description')}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-1.5 pt-0">
-                {availability.map((day, index) => {
-                  const dayData = daysOfWeek.find(d => d.key === day.day)
-                  const dayLabel = dayData ? t(dayData.translationKey as any) : day.day
-                  return (
-                    <div key={day.day} className="space-y-1.5 p-2 bg-white/5 rounded-md">
-                      <div className="flex items-center justify-between">
-                        <span className="text-white font-medium text-sm">{dayLabel}</span>
-                        <Switch
-                          checked={day.isAvailable || false}
-                          onCheckedChange={() => handleAvailabilityToggle(index)}
-                        />
-                      </div>
-                      {day.isAvailable && (
-                        <div className="flex items-center gap-1.5 pt-1">
-                          <Input
-                            type="time"
-                            value={day.startTime || "09:00"}
-                            onChange={(e) => handleTimeChange(index, "startTime", e.target.value)}
-                            className="bg-white/10 border-white/20 text-white h-8 text-xs"
-                          />
-                          <span className="text-gray-400 text-xs">{t('dashboard.availability.to')}</span>
-                          <Input
-                            type="time"
-                            value={day.endTime || "17:00"}
-                            onChange={(e) => handleTimeChange(index, "endTime", e.target.value)}
-                            className="bg-white/10 border-white/20 text-white h-8 text-xs"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-                <Button
-                  onClick={handleSaveAvailability}
-                  disabled={isSavingAvailability}
-                  className="w-full bg-gradient-to-r from-purple-600 cursor-pointer to-purple-500 hover:from-purple-700 hover:to-purple-600 mt-2 h-9 text-sm"
-                >
-                  {isSavingAvailability ? (
-                    <>
-                      <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                      {t('dashboard.availability.saving')}
-                    </>
-                  ) : (
-                    <>
-                      <Save className="mr-2 h-3 w-3" />
-                      {t('dashboard.availability.save')}
-                    </>
-                  )}
-                </Button>
               </CardContent>
             </Card>
           </div>
+          <Card className="flex flex-col border-white/20 bg-white/10 backdrop-blur-lg xl:col-span-2">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-white text-xl">
+                {t('dashboard.sessions.upcoming.title')}
+              </CardTitle>
+              <CardDescription className="text-gray-300">
+                {t('dashboard.sessions.upcoming.count')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <Tabs defaultValue="upcoming" className="w-full">
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                  <TabsList className="bg-white/10 text-gray-300">
+                    <TabsTrigger
+                      value="upcoming"
+                      className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+                    >
+                      {t('dashboard.sessions.upcoming.title')} ({upcomingSessions.length})
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="past"
+                      className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+                    >
+                      {t('dashboard.sessions.past.title')} ({pastSessions.length})
+                    </TabsTrigger>
+                  </TabsList>
+                  {nextSession && (
+                    <p className="text-xs text-gray-400">
+                      Next: {formatDate(nextSession.date)} · {nextSession.time}
+                    </p>
+                  )}
+                </div>
 
-          {/* Right Column - Sessions & Reviews */}
-          <div className="lg:col-span-2 space-y-3">
-            {/* Upcoming Sessions */}
-            <Card className="bg-white/10 backdrop-blur-lg border-white/20">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Calendar className="w-5 h-5" />
-                  {t('dashboard.sessions.upcoming.title')}
-                </CardTitle>
-                <CardDescription className="text-gray-300">
-                  {upcomingSessions.length} {t('dashboard.sessions.upcoming.count')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {upcomingSessions.length > 0 ? (
-                  <div className="space-y-4">
-                    {upcomingSessions.map((session) => (
-                      <div
-                        key={session._id}
-                        className="p-4 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors"
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h4 className="text-lg font-semibold text-white mb-1">{session.title}</h4>
-                            <p className="text-sm text-gray-300 mb-2">
-                              {t('dashboard.sessions.with')} <span className="font-medium">
-                                {typeof session.learner === 'object' 
-                                  ? `${session.learner.firstname} ${session.learner.lastname}`
-                                  : session.learner}
-                              </span>
+                <TabsContent value="upcoming" className="mt-0">
+                  {sortedUpcomingSessions.length > 0 ? (
+                    <ScrollArea className="h-[420px] pr-4">
+                      <div className="space-y-4">
+                        {sortedUpcomingSessions.map((session) =>
+                          renderSessionCard(session, "upcoming")
+                        )}
+                      </div>
+                    </ScrollArea>
+                  ) : (
+                    <p className="py-4 text-center text-sm text-gray-400">
+                      {t('dashboard.sessions.upcoming.none')}
+                    </p>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="past" className="mt-0">
+                  {sortedPastSessions.length > 0 ? (
+                    <ScrollArea className="max-h-[420px] pr-4">
+                      <div className="space-y-6">
+                        {completedPastSessions.length > 0 && (
+                          <div className="space-y-3">
+                            <p className="text-xs uppercase tracking-wide text-gray-400">
+                              Completed
                             </p>
-                            {(session as any).topics && (session as any).topics.length > 0 && (
-                              <p className="text-xs text-gray-400 mb-2">{t('dashboard.sessions.topics')} {(session as any).topics.join(', ')}</p>
-                            )}
-                            {(session as any).icebreaker && (
-                              <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 mb-2 mt-2">
-                                <p className="text-xs font-semibold text-yellow-400 mb-1">{t('dashboard.sessions.icebreaker')}</p>
-                                <p className="text-xs text-yellow-200">{(session as any).icebreaker}</p>
-                              </div>
-                            )}
-                            {(session as any).meetingLink && (
-                              <a 
-                                href={(session as any).meetingLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-sm text-purple-400 hover:text-purple-300 mb-2 inline-block"
-                              >
-                                Join Meeting →
-                              </a>
-                            )}
-                            <div className="flex items-center gap-4 text-sm text-gray-400">
-                              <div className="flex items-center gap-1">
-                                <Calendar className="w-4 h-4" />
-                                {formatDate(session.date)}
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Clock className="w-4 h-4" />
-                                {session.time} ({session.duration} min)
-                              </div>
+                            <div className="space-y-3">
+                              {completedPastSessions.map((session) =>
+                                renderSessionCard(session, "past")
+                              )}
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30">
-                              {session.status}
-                            </Badge>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => handleCancelSession(session)}
-                              className="bg-red-500/20 cursor-pointer hover:bg-red-500/30 text-red-300 border-red-500/30"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-center text-gray-400 py-8">{t('dashboard.sessions.upcoming.none')}</p>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Past Sessions */}
-            <Card className="bg-white/10 backdrop-blur-lg border-white/20">
-              <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
-                  <Calendar className="w-5 h-5" />
-                  {t('dashboard.sessions.past.title')}
-                </CardTitle>
-                <CardDescription className="text-gray-300">
-                  {pastSessions.length} {t('dashboard.sessions.past.count')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {pastSessions.length > 0 ? (
-                  <div className="space-y-4">
-                    {pastSessions.map((session) => (
-                      <div
-                        key={session._id}
-                        className="p-4 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors"
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h4 className="text-lg font-semibold text-white mb-1">{session.title}</h4>
-                            <p className="text-sm text-gray-300 mb-2">
-                              with <span className="font-medium">
-                                {typeof session.learner === 'object' 
-                                  ? `${session.learner.firstname} ${session.learner.lastname}`
-                                  : session.learner}
-                              </span>
+                        )}
+                        {cancelledPastSessions.length > 0 && (
+                          <div className="space-y-3">
+                            <p className="text-xs uppercase tracking-wide text-gray-400">
+                              Cancelled
                             </p>
-                            <div className="flex items-center gap-4 text-sm text-gray-400">
-                              <div className="flex items-center gap-1">
-                                <Calendar className="w-4 h-4" />
-                                {formatDate(session.date)}
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Clock className="w-4 h-4" />
-                                {session.time}
-                              </div>
+                            <div className="space-y-3">
+                              {cancelledPastSessions.map((session) =>
+                                renderSessionCard(session, "past")
+                              )}
                             </div>
-                            {(session as any).cancellationReason && (
-                              <p className="text-xs text-red-300 mt-1 italic">
-                                {t('dashboard.sessions.reason')} {(session as any).cancellationReason}
-                              </p>
-                            )}
                           </div>
-                          <div className="flex flex-col items-end gap-2">
-                            <Badge className={
-                              session.status === 'cancelled'
-                                ? "bg-red-500/20 text-red-300 border-red-500/30"
-                                : "bg-green-500/20 text-green-300 border-green-500/30"
-                            }>
-                              {session.status}
-                            </Badge>
-                            {session.status === 'completed' && !hasReceivedReviews(session._id) && (
-                              <Button
-                                size="sm"
-                                onClick={() => handleRateSession(session)}
-                                className="cursor-pointer bg-gradient-to-r  from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600"
-                              >
-                                <Star className="w-3 h-3 mr-1" />
-                                {t('dashboard.sessions.rate')}
-                              </Button>
-                            )}
-                          </div>
-                        </div>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-center text-gray-400 py-8">{t('dashboard.sessions.past.none')}</p>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Reviews */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Reviews Received */}
-              <Card className="bg-white/10 backdrop-blur-lg border-white/20">
-                <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <Star className="w-5 h-5" />
-                    {t('dashboard.reviews.received.title')}
-                  </CardTitle>
-                  <CardDescription className="text-gray-300">
-                    {receivedReviews.length} {t('dashboard.reviews.received.count')}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {receivedReviews.length > 0 ? (
-                    <div className="space-y-4 max-h-96 overflow-y-auto">
-                      {receivedReviews.map((review) => (
-                        <div key={review._id} className="p-3 bg-white/5 rounded-lg">
-                          <div className="flex items-center gap-2 mb-2">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`w-4 h-4 ${
-                                  i < review.rating
-                                    ? "text-yellow-400 fill-yellow-400"
-                                    : "text-gray-400"
-                                }`}
-                              />
-                            ))}
-                          </div>
-                          <p className="text-sm text-white mb-1">{review.comment}</p>
-                          <p className="text-xs text-gray-400">
-                            {t('dashboard.reviews.received.from')} {typeof review.from === 'object' 
-                              ? `${review.from.firstname} ${review.from.lastname}`
-                              : review.from} • {new Date(review.createdAt).toLocaleDateString()}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
+                    </ScrollArea>
                   ) : (
-                    <p className="text-center text-gray-400 py-8">{t('dashboard.reviews.received.none')}</p>
+                    <p className="py-4 text-center text-sm text-gray-400">
+                      {t('dashboard.sessions.past.none')}
+                    </p>
                   )}
-                </CardContent>
-              </Card>
-
-              {/* Reviews Given */}
-              <Card className="bg-white/10 backdrop-blur-lg border-white/20">
-                <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <MessageSquare className="w-5 h-5" />
-                    {t('dashboard.reviews.given.title')}
-                  </CardTitle>
-                  <CardDescription className="text-gray-300">
-                    {givenReviews.length} {t('dashboard.reviews.given.count')}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {givenReviews.length > 0 ? (
-                    <div className="space-y-4 max-h-96 overflow-y-auto">
-                      {givenReviews.map((review) => (
-                        <div key={review._id} className="p-3 bg-white/5 rounded-lg">
-                          <div className="flex items-center gap-2 mb-2">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`w-4 h-4 ${
-                                  i < review.rating
-                                    ? "text-yellow-400 fill-yellow-400"
-                                    : "text-gray-400"
-                                }`}
-                              />
-                            ))}
-                          </div>
-                          <p className="text-sm text-white mb-1">{review.comment}</p>
-                          <p className="text-xs text-gray-400">
-                            {t('dashboard.reviews.given.for')} {typeof review.to === 'object' 
-                              ? `${review.to.firstname} ${review.to.lastname}`
-                              : review.to} • {new Date(review.createdAt).toLocaleDateString()}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-center text-gray-400 py-8">{t('dashboard.reviews.received.none')}</p>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
         </div>
+
+        <Card className="border-white/20 bg-white/10 backdrop-blur-lg">
+          <CardHeader>
+            <CardTitle className="text-white text-xl">
+              {t('dashboard.reviews.received.title')}
+            </CardTitle>
+            <CardDescription className="text-gray-300">
+              Insights from learners and your feedback history
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <Tabs defaultValue="received" className="w-full">
+              <div className="mb-4">
+                <TabsList className="bg-white/10 text-gray-300">
+                  <TabsTrigger
+                    value="received"
+                    className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+                  >
+                    {t('dashboard.reviews.received.title')} ({receivedReviews.length})
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="given"
+                    className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+                  >
+                    {t('dashboard.reviews.given.title')} ({givenReviews.length})
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+              <TabsContent value="received" className="mt-0">
+                {receivedReviews.length > 0 ? (
+                  <ScrollArea className="max-h-[360px] pr-4">
+                    <div className="space-y-4">
+                      {receivedReviews.map((review) => renderReviewCard(review, "received"))}
+                    </div>
+                  </ScrollArea>
+                ) : (
+                  <p className="py-4 text-center text-sm text-gray-400">
+                    {t('dashboard.reviews.received.none')}
+                  </p>
+                )}
+              </TabsContent>
+              <TabsContent value="given" className="mt-0">
+                {givenReviews.length > 0 ? (
+                  <ScrollArea className="h-[360px] pr-4">
+                    <div className="space-y-4">
+                      {givenReviews.map((review) => renderReviewCard(review, "given"))}
+                    </div>
+                  </ScrollArea>
+                ) : (
+                  <p className="py-4 text-center text-sm text-gray-400">
+                    {t('dashboard.reviews.given.none')}
+                  </p>
+                )}
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Rating Modal */}
@@ -1244,7 +1197,7 @@ export default function SpeakerDashboardPage() {
               variant="destructive"
               onClick={handleConfirmCancellation}
               disabled={isCancelling}
-              className="bg-red-500 hover:bg-red-600 text-white"
+              className="bg-red-500 hover:bg-red-600 text-white cursor-pointer"
             >
               {isCancelling ? (
                 <>

@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppSelector, useAppDispatch } from '@/lib/hooks/redux';
 import { getCurrentUser, initializeAuth, setUser } from '@/lib/store/authSlice';
 import { TermsAcceptanceModal } from '@/components/TermsAcceptanceModal';
+import { AuthModal } from '@/components/auth/AuthModal';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -15,12 +16,14 @@ interface ProtectedRouteProps {
 export function ProtectedRoute({ 
   children, 
   requireAuth = true, 
-  redirectTo = '/auth/signin' 
+  redirectTo = '/' 
 }: ProtectedRouteProps) {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { isAuthenticated, isLoading, user } = useAppSelector((state) => state.auth);
   const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const hasPromptedRef = useRef(false);
 
   useEffect(() => {
     // Initialize auth state from localStorage
@@ -28,14 +31,20 @@ export function ProtectedRoute({
   }, [dispatch]);
 
   useEffect(() => {
-    if (!isLoading) {
-      if (requireAuth && !isAuthenticated) {
-        router.push(redirectTo);
-      }
-      // Remove automatic redirect to dashboard for authenticated users on public pages
-      // This allows users to stay on the current page after refresh
+    if (!requireAuth || isLoading) {
+      return;
     }
-  }, [isAuthenticated, isLoading, requireAuth, redirectTo, router]);
+
+    if (!isAuthenticated) {
+      if (!hasPromptedRef.current) {
+        setShowAuthModal(true);
+        hasPromptedRef.current = true;
+      }
+    } else {
+      setShowAuthModal(false);
+      hasPromptedRef.current = false;
+    }
+  }, [isAuthenticated, isLoading, requireAuth]);
 
   useEffect(() => {
     // If we have a token but no user data, fetch current user
@@ -73,6 +82,20 @@ export function ProtectedRoute({
     }
   };
 
+  const handleAuthModalChange = useCallback(
+    (open: boolean) => {
+      setShowAuthModal(open);
+      if (!open && !isAuthenticated) {
+        if (typeof window !== 'undefined' && window.history.length > 1) {
+          router.back();
+        } else if (redirectTo) {
+          router.push(redirectTo);
+        }
+      }
+    },
+    [isAuthenticated, redirectTo, router],
+  );
+
   // Show loading state while checking authentication
   if (isLoading) {
     return (
@@ -84,7 +107,11 @@ export function ProtectedRoute({
 
   // Don't render children if auth requirements aren't met
   if (requireAuth && !isAuthenticated) {
-    return null;
+    return (
+      <>
+        <AuthModal initialView="signin" open={showAuthModal} onOpenChange={handleAuthModalChange} />
+      </>
+    );
   }
 
   // Block access until terms are accepted

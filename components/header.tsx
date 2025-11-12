@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Menu, X, User, LogOut, Settings, Globe, ChevronDown, Moon, Sun, Home, LayoutDashboard, Mic, UserCircle, Info, LogIn } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { useAppSelector, useAppDispatch } from "@/lib/hooks/redux"
 import { logoutUser } from "@/lib/store/authSlice"
@@ -20,6 +20,8 @@ export function Header() {
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [showLoginMenu, setShowLoginMenu] = useState(false)
+  const [recentlyActivatedMobileItem, setRecentlyActivatedMobileItem] = useState<string | null>(null)
+  const mobileInteractionTimeoutRef = useRef<number | null>(null)
   const router = useRouter()
   const pathname = usePathname()
   const dispatch = useAppDispatch()
@@ -53,6 +55,22 @@ export function Header() {
       document.body.style.overflow = 'unset'
     }
   }, [isMenuOpen])
+
+  useEffect(() => {
+    setRecentlyActivatedMobileItem(null)
+    if (mobileInteractionTimeoutRef.current) {
+      window.clearTimeout(mobileInteractionTimeoutRef.current)
+      mobileInteractionTimeoutRef.current = null
+    }
+  }, [pathname])
+
+  useEffect(() => {
+    return () => {
+      if (mobileInteractionTimeoutRef.current) {
+        window.clearTimeout(mobileInteractionTimeoutRef.current)
+      }
+    }
+  }, [])
 
   // Close user menu when clicking outside
   useEffect(() => {
@@ -155,10 +173,16 @@ export function Header() {
             href: '/speakers/dashboard',
           },
           {
+            key: 'dashboard',
+            label: t('header.speakerDashboard'),
+            icon: LayoutDashboard,
+            href: '/speakers/dashboard',
+          },
+          {
             key: 'profile',
             label: t('header.profile'),
             icon: UserCircle,
-            href: '/profile',
+            href: '/speakers/profile',
           },
           {
             key: 'logout',
@@ -221,7 +245,7 @@ export function Header() {
         key: 'About',
         label: "About",
         icon: Info,
-        href: '/',
+        href: '/about',
       },
       {
         key: 'speakers',
@@ -248,6 +272,13 @@ export function Header() {
   })()
 
   const handleMobileNavClick = (item: MobileNavItem) => {
+    if (mobileInteractionTimeoutRef.current) {
+      window.clearTimeout(mobileInteractionTimeoutRef.current)
+      mobileInteractionTimeoutRef.current = null
+    }
+
+    setRecentlyActivatedMobileItem(item.key)
+
     if (item.key === 'menu') {
       setIsMenuOpen(true)
       return
@@ -262,25 +293,34 @@ export function Header() {
     }
 
     setIsMenuOpen(false)
+
+    if (!item.href) {
+      mobileInteractionTimeoutRef.current = window.setTimeout(() => {
+        setRecentlyActivatedMobileItem((current) => (current === item.key ? null : current))
+        mobileInteractionTimeoutRef.current = null
+      }, 600)
+    }
   }
 
   return (
     <>
-      <header className={`w-full fixed top-0 z-50 transition-all duration-300 ${
-      isScrolled 
-        ? 'bg-white/10 backdrop-blur-lg shadow-lg' 
-        : ''
-    }`}>
+      <header
+        className={`w-full fixed top-0 z-50 transition-all duration-300 border-b border-transparent ${
+          isScrolled
+            ? 'bg-white/80 dark:bg-slate-950/80 backdrop-blur-lg shadow-lg shadow-black/10 dark:shadow-black/40 border-slate-200/60 dark:border-slate-700/60'
+            : 'bg-transparent dark:bg-transparent'
+        }`}
+      >
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 cursor-pointer">
-            <h3 className="text-2xl font-bold text-purple-600 dark:text-primary transition-colors duration-300">Aurora</h3>
+            <h3 className="text-2xl font-bold text-[#6b3bbd] dark:text-primary transition-colors duration-300">Aurora</h3>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center justify-end flex-1 px-8">
-            <div className="flex items-center space-x-12 xl:space-x-16 text-gray-800 dark:text-primary transition-colors duration-300">
+            <div className="flex items-center space-x-12 xl:space-x-16 text-gray-800 dark:text-gray-300 transition-colors duration-300">
               {isAuthenticated ? (
                 <>
                   {user?.role === 'speaker' ? (
@@ -288,8 +328,14 @@ export function Header() {
                       <Link href="/" className="hover:text-orange-400 transition-colors text-lg font-medium">
                         {t('header.home')}
                       </Link>
+                      <Link href="/about" className="hover:text-orange-400 transition-colors text-lg font-medium">
+                        About Us
+                      </Link>
                       <Link href="/speakers/dashboard" className="px-2 py-2 rounded-xl hover:text-orange-400 transition-colors text-lg font-medium">
                         {t('header.speakerDashboard')}
+                      </Link>
+                      <Link href="/speakers/profile" className="px-2 py-2 rounded-xl hover:text-orange-400 transition-colors text-lg font-medium">
+                        {t('header.profile')}
                       </Link>
                     </>
                   ) : (
@@ -297,11 +343,17 @@ export function Header() {
                       <Link href="/learners/dashboard" className="hover:text-orange-400 transition-colors text-lg font-medium">
                         {t('header.home')}
                       </Link>
+                      <Link href="/about" className="hover:text-orange-400 transition-colors text-lg font-medium">
+                        About Us
+                      </Link>
                       <Link href="/learners/dashboard" className="hover:text-orange-400 transition-colors text-lg font-medium">
                         {t('header.dashboard')}
                       </Link>
                       <Link href="/speakers" className="hover:text-orange-400 transition-colors text-lg font-medium">
                         {t('header.speakers')}
+                      </Link>
+                      <Link href="/learners/profile" className="hover:text-orange-400 transition-colors text-lg font-medium">
+                        {t('header.profile')}
                       </Link>
                     </>
                   )}
@@ -315,8 +367,8 @@ export function Header() {
                       <Link href="/about" className="hover:text-orange-400 transition-colors text-lg font-medium">
                         {t('header.nosotros')}
                       </Link>
-                      <Link href="/about" className="hover:text-orange-400 transition-colors text-lg font-medium">
-                        Profile
+                      <Link href="/profile" className="hover:text-orange-400 transition-colors text-lg font-medium">
+                        {t('header.profile')}
                       </Link>
                 </>
               )}
@@ -328,19 +380,23 @@ export function Header() {
             {/* Language Switcher */}
             <button
               onClick={toggleLanguage}
-              className="p-2 text-gray-800 hover:text-orange-400 transition-colors rounded-full hover:bg-white/20"
+              className="p-2 text-gray-800 dark:text-gray-300 hover:text-orange-400 dark:hover:text-orange-300 transition-colors rounded-full hover:bg-white/20 dark:hover:bg-slate-700/40"
               aria-label={`Switch to ${language === 'en' ? 'Español' : 'English'}`}
               title={`Switch to ${language === 'en' ? 'Español' : 'English'}`}
             >
-              <Globe className="w-5 h-5 text-black" />
+              <Globe className="w-5 h-5 text-gray-800 dark:text-gray-300 transition-colors hover:text-orange-400" />
             </button>
             <button
               onClick={toggleTheme}
-              className="p-2 text-gray-300 hover:text-orange-400 transition-colors rounded-full hover:bg-white/20"
+              className="p-2 text-gray-800 dark:text-gray-300 hover:text-orange-400 dark:hover:text-orange-300 transition-colors rounded-full hover:bg-white/20 dark:hover:bg-slate-700/40"
               aria-label={`Activate ${isDarkMode ? 'light' : 'dark'} mode`}
               title={`${isDarkMode ? 'Light' : 'Dark'} mode`}
             >
-              {isDarkMode ? <Sun className="w-5 h-5 text-black" /> : <Moon className="w-5 h-5 text-black" />}
+              {isDarkMode ? (
+                <Sun className="w-5 h-5 text-gray-800 dark:text-gray-300 transition-colors" />
+              ) : (
+                <Moon className="w-5 h-5 text-gray-800 dark:text-gray-300 transition-colors" />
+              )}
             </button>
             {isAuthenticated ? (
               <div className="relative user-menu-container">
@@ -353,10 +409,10 @@ export function Header() {
                 </button>
                 
                 {showUserMenu && (
-                  <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border overflow-hidden z-50">
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-800 text-gray-800 dark:text-gray-300 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden z-50">
                     <button
                       onClick={handleLogout}
-                      className="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
+                      className="w-full text-left px-4 py-3 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors flex items-center gap-2"
                     >
                       <LogOut className="w-4 h-4" />
                       {t('header.logout')}
@@ -367,7 +423,7 @@ export function Header() {
             ) : (
               <div className="relative login-menu-container">
                 <button
-                  className="px-2 py-1 rounded-lg cursor-pointer text-white border-2 hover:border-gray-400 hover:bg-gray-100 hover:text-[#49BBBD] font-semibold transition-all duration-300 flex items-center gap-2 bg-purple-500"
+                  className="px-2 py-1 rounded-lg cursor-pointer text-white hover:bg-gray-100 hover:text-[#49BBBD] font-semibold transition-all duration-300 flex items-center gap-2 bg-purple-500"
                   onClick={() => setShowLoginMenu((prev) => !prev)}
                   aria-haspopup="menu"
                   aria-expanded={showLoginMenu}
@@ -379,9 +435,9 @@ export function Header() {
                   />
                 </button>
                 {showLoginMenu && (
-                  <div className="absolute right-0 mt-2 w-32 rounded-lg bg-white shadow-lg border border-gray-200 overflow-hidden z-50">
+                  <div className="absolute right-0 mt-2 w-32 rounded-lg bg-white dark:bg-slate-800 text-gray-800 dark:text-gray-300 shadow-lg border border-gray-200 dark:border-slate-700 overflow-hidden z-50">
                     <button
-                      className="w-full px-4 py-3 cursor-pointer text-left text-gray-800 hover:bg-gray-100 transition-colors"
+                      className="w-full px-4 py-3 cursor-pointer text-left text-gray-800 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
                       onClick={() => {
                         openAuthModal('signin')
                       }}
@@ -389,7 +445,7 @@ export function Header() {
                       Student
                     </button>
                     <button
-                      className="w-full px-4 py-3 cursor-pointer text-left text-gray-700 hover:bg-gray-100 transition-colors"
+                      className="w-full px-4 py-3 cursor-pointer text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
                       onClick={() => {
                         openSpeakerSignupModal()
                       }}
@@ -406,19 +462,23 @@ export function Header() {
           <div className="flex items-center gap-2 md:hidden">
             <button
               onClick={toggleLanguage}
-              className="p-2 text-black hover:text-orange-300 transition-colors rounded-full hover:bg-white/10"
+              className="p-2 text-gray-800 dark:text-gray-300 hover:text-orange-300 dark:hover:text-orange-300 transition-colors rounded-full hover:bg-white/10 dark:hover:bg-slate-700/40"
               aria-label={`Switch to ${language === 'en' ? 'Español' : 'English'}`}
               title={`Switch to ${language === 'en' ? 'Español' : 'English'}`}
             >
-              <Globe className="w-5 h-5 text-black" />
+              <Globe className="w-5 h-5 text-gray-800 dark:text-gray-300 transition-colors" />
             </button>
             <button
               onClick={toggleTheme}
-              className="p-2 text-black hover:text-orange-300 transition-colors rounded-full hover:bg-white/10"
+              className="p-2 text-gray-800 dark:text-gray-300 hover:text-orange-300 dark:hover:text-orange-300 transition-colors rounded-full hover:bg-white/10 dark:hover:bg-slate-700/40"
               aria-label={`Activate ${isDarkMode ? 'light' : 'dark'} mode`}
               title={`${isDarkMode ? 'Light' : 'Dark'} mode`}
             >
-              {isDarkMode ? <Sun className="w-5 h-5 text-black" /> : <Moon className="w-5 h-5 text-black" />}
+              {isDarkMode ? (
+                <Sun className="w-5 h-5 text-gray-800 dark:text-gray-300 transition-colors" />
+              ) : (
+                <Moon className="w-5 h-5 text-gray-800 dark:text-gray-300 transition-colors" />
+              )}
             </button>
           </div>
         
@@ -428,24 +488,33 @@ export function Header() {
       {!isMenuOpen && (
         <div className="fixed inset-x-0 bottom-0 z-40 pb-0 md:hidden">
           <nav className="mx-auto max-w-3xl px-0">
-            <div className="bg-white/90 dark:bg-slate-900/80 shadow-[0_10px_30px_rgba(0,0,0,0.15)] backdrop-blur-md border border-white/30 dark:border-white/10">
-              <div className="flex items-stretch justify-around py-3">
+            <div className="bg-white/90 dark:bg-slate-900/80 shadow-[0_10px_30px_rgba(0,0,0,0.15)] backdrop-blur-md border border-white/30 dark:border-white/10 rounded-t-3xl transition-transform duration-200 ease-out">
+              <div className="flex items-center justify-around gap-2 px-3 py-2">
                 {mobileNavItems.map((item) => {
                   const Icon = item.icon
                   const isActive = item.href ? pathname === item.href : false
+                  const isHighlighted = isActive || recentlyActivatedMobileItem === item.key
                   return (
                     <button
                       key={item.key}
                       onClick={() => handleMobileNavClick(item)}
-                      className={`flex flex-col items-center gap-1 text-xs font-medium transition-colors ${
-                        isActive
-                          ? 'text-black'
-                          : 'text-slate-600 dark:text-slate-200 hover:text-black dark:hover:text-black'
+                      className={`group relative flex-1 min-w-0 rounded-2xl px-3 py-2 text-[11px] font-semibold uppercase tracking-wide transition-all duration-200 transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-purple-400/60 ${
+                        isHighlighted
+                          ? 'bg-gradient-to-br from-purple-600 via-purple-500 to-purple-400 text-white shadow-lg shadow-purple-600/30 scale-105'
+                          : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-white/10 active:scale-95'
                       }`}
+                      aria-current={isActive ? 'page' : undefined}
+                      aria-label={item.label}
                     >
-                      <Icon className="h-5 w-5" />
-                      <span className="uppercase tracking-wide text-[10px]">
-                        {item.label}
+                      <span className="flex flex-col items-center gap-1">
+                        <Icon
+                          className={`h-5 w-5 transition-transform duration-200 ${
+                            isHighlighted
+                              ? 'text-white scale-110 drop-shadow-sm'
+                              : 'text-gray-500 group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-white'
+                          }`}
+                        />
+                        <span className="tracking-wide">{item.label}</span>
                       </span>
                     </button>
                   )

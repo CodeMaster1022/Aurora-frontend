@@ -1,8 +1,9 @@
 "use client"
 
 import Image from "next/image"
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import { HeartHandshake, Users, CalendarCheck, ArrowRight } from "lucide-react"
+import { HeartHandshake, Users, CalendarCheck, ArrowRight, ChevronLeft, ChevronRight, Target, HelpCircle } from "lucide-react"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -12,40 +13,106 @@ import { useTranslation } from "@/lib/hooks/useTranslation"
 
 export default function AboutPage() {
   const { t } = useTranslation()
+  const carouselItems = [
+    {
+      image: "/image/1.jpeg",
+      title: t('about.community.card1.title'),
+      subtitle: t('about.community.card1.subtitle'),
+    },
+    {
+      image: "/image/2.jpeg",
+      title: t('about.community.card2.title'),
+      subtitle: t('about.community.card2.subtitle'),
+    },
+    {
+      image: "/image/3.jpeg",
+      title: t('about.community.card3.title'),
+      subtitle: t('about.community.card3.subtitle'),
+    },
+    {
+      image: "/image/4.jpeg",
+      title: t('about.community.card4.title'),
+      subtitle: t('about.community.card4.subtitle'),
+    },
+    {
+      image: "/image/5.jpeg",
+      title: t('about.community.card4.title'),
+      subtitle: t('about.community.card4.subtitle'),
+    },
+  ]
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [isHovered, setIsHovered] = useState(false)
+  const missionHighlights = [
+    {
+      icon: HeartHandshake,
+      title: t('about.mission.cards.warm.title'),
+      description: t('about.mission.cards.warm.description'),
+    },
+    {
+      icon: Users,
+      title: t('about.mission.cards.diverse.title'),
+      description: t('about.mission.cards.diverse.description'),
+    },
+    {
+      icon: CalendarCheck,
+      title: t('about.mission.cards.flexible.title'),
+      description: t('about.mission.cards.flexible.description'),
+    },
+  ]
+
+  const handlePrev = () => {
+    setActiveIndex((prev) => (prev - 1 + carouselItems.length) % carouselItems.length)
+  }
+
+  const handleNext = () => {
+    setActiveIndex((prev) => (prev + 1) % carouselItems.length)
+  }
+
+  useEffect(() => {
+    if (isHovered) {
+      return
+    }
+
+    const interval = window.setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % carouselItems.length)
+    }, 4000)
+
+    return () => {
+      window.clearInterval(interval)
+    }
+  }, [carouselItems.length, isHovered])
+
   return (
-    <main className="min-h-screen bg-gradient-to-b from-[#0b1420] via-[#0b1420] to-[#0f1c2b] text-white">
+    <main className="min-h-screen bg-background text-foreground transition-colors duration-500">
       {/* Hero */}
-      <section className="relative pt-28 md:pt-36 pb-16 overflow-hidden">
+      <section className="relative overflow-hidden pt-28 md:pt-36 pb-16">
         <div className="absolute inset-0 pointer-events-none">
-          <Image
-            src="/image/hero-meeting.jpg"
-            alt="Learners and mentors connecting"
-            fill
-            priority
-            className="object-cover opacity-20"
-          />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#49BBBD]/30 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-b from-indigo-100/70 via-transparent to-transparent dark:from-indigo-900/60" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(73,187,189,0.18),transparent_60%)] dark:bg-[radial-gradient(circle_at_top,_rgba(73,187,189,0.25),transparent_65%)]" />
         </div>
         <div className="relative max-w-6xl mx-auto px-4">
-          <motion.div 
+          <motion.div
             className="flex flex-col items-center text-center gap-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
           >
-            <Badge className="bg-white/10 text-white border border-white/20 px-3 py-1 rounded-full">{t('about.hero.badge')}</Badge>
-            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#49BBBD] dark:text-[#7ae2e4]">
               {t('about.hero.title')}
             </h1>
-            <p className="max-w-3xl text-lg md:text-xl text-white/80 leading-relaxed">
+            <p className="max-w-3xl text-base md:text-lg lg:text-xl text-muted-foreground leading-relaxed">
               {t('about.hero.subtitle')}
             </p>
           </motion.div>
         </div>
       </section>
-
       {/* Story & Mission */}
-      <section className="relative py-8 md:py-14">
+      <div className="max-w-6xl mx-auto px-4 pt-6">
+        <h2 className="text-2xl md:text-3xl font-semibold text-foreground">
+          {t('about.story.title')}
+        </h2>
+      </div>
+      <section className="relative pb-10 md:pb-16 pt-4">
         <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-8 md:gap-12 items-stretch">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
@@ -53,236 +120,194 @@ export default function AboutPage() {
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
-            <Card className="bg-white/5 border-white/10 backdrop-blur-md h-full">
-              <CardContent className="p-6 md:p-8 flex flex-col gap-4">
-                <h2 className="text-2xl md:text-3xl font-bold text-orange-400">{t('about.story.title')}</h2>
-                <p className="text-white/80 leading-relaxed">
-                  {t('about.story.p1')}
+            <div className="h-full transition-colors duration-300">
+              <div className="flex flex-col gap-5">
+                <p className="text-base md:text-lg leading-relaxed text-muted-foreground">
+                If you're new here, my name is Mónica Medina, and my mission in life is communication—helping people express themselves and feel happy.
                 </p>
-                {/* <p className="text-white/80 leading-relaxed">
-                  {t('about.story.p2')}
-                </p> */}
-              </CardContent>
-            </Card>
+                <p className="text-base md:text-lg leading-relaxed text-muted-foreground">
+                I've been teaching English at multiple levels, from children to adults, since 1988. Beyond teaching, I have a special bond with elderly people—they are living treasures, with encyclopedic knowledge and extraordinary life stories.
+                </p>
+                <p className="text-base md:text-lg leading-relaxed text-muted-foreground">
+                I've helped hundreds of English learners succeed—and they've become better people through it.
+                </p>
+              </div>
+            </div>
           </motion.div>
 
+          <div className="max-w-[460px] mx-auto px-4 relative z-10 w-full h-full">
+          <div
+            className="relative"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            onFocusCapture={() => setIsHovered(true)}
+            onBlur={() => setIsHovered(false)}
+          >
+            <motion.div
+              key={activeIndex}
+              className="relative overflow-hidden rounded-3xl shadow-xl border border-border/60 aspect-[4/3]"
+              initial={{ opacity: 0, scale: 0.98, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+            >
+              <Image
+                src={carouselItems[activeIndex].image}
+                alt={carouselItems[activeIndex].title}
+                fill
+                className="object-cover"
+                priority
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent dark:from-black/70 dark:via-black/30" />
+            </motion.div>
+
+            <button
+              type="button"
+              onClick={handlePrev}
+              className="absolute left-1 md:left-3 top-1/2 -translate-y-1/2 z-20 rounded-full bg-black/10 hover:bg-black/15 border border-black/10 p-2 text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary dark:bg-white/20 dark:hover:bg-white/30 dark:border-white/30 cursor-pointer"
+              aria-label="Previous slide"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={handleNext}
+              className="absolute right-1 md:right-3 top-1/2 -translate-y-1/2 z-20 rounded-full bg-black/10 hover:bg-black/15 border border-black/10 p-2 text-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary dark:bg-white/20 dark:hover:bg-white/30 dark:border-white/30 cursor-pointer"
+              aria-label="Next slide"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+        </div>
+      </section>
+
+      {/* Mission Highlights */}
+      <section className="py-12 md:py-16">
+        <div className="max-w-4xl mx-auto px-4">
           <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            className="text-left max-w-3xl"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
-            <Card className="bg-white/5 border-white/10 backdrop-blur-md h-full">
-              <CardContent className="p-6 md:p-8 flex flex-col gap-4">
-                <h2 className="text-2xl md:text-3xl font-bold text-[#49BBBD]">{t('about.mission.title')}</h2>
-                <p className="text-white/80 leading-relaxed">
-                  {t('about.mission.p1')}
-                </p>
-                <ul className="space-y-4 text-white/90">
-                  <li className="flex items-start gap-3">
-                    <HeartHandshake className="w-6 h-6 mt-1 text-[#49BBBD]" />
-                    <span>{t('about.mission.point1')}</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <Users className="w-6 h-6 mt-1 text-[#49BBBD]" />
-                    <span>{t('about.mission.point2')}</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CalendarCheck className="w-6 h-6 mt-1 text-[#49BBBD]" />
-                    <span>{t('about.mission.point3')}</span>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
+            <div className="flex items-center gap-3 text-[#49BBBD] dark:text-[#7ae2e4]">
+              <Target className="w-7 h-7" />
+              <span className="text-3xl md:text-4xl font-bold text-foreground">
+                {t('about.mission.title')}
+              </span>
+            </div>
+            <p className="mt-4 text-base md:text-lg text-muted-foreground leading-relaxed">
+              {t('about.mission.p1')}
+            </p>
           </motion.div>
-        </div>
-      </section>
 
-      {/* Photo card */}
-      <section className="py-8 md:py-12">
-        <div className="max-w-xl mx-auto px-4">
-          <motion.div 
-            className="relative aspect-square w-full rounded-2xl overflow-hidden group cursor-pointer"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            whileHover={{ scale: 1.02, y: -5 }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10" />
-            <Image 
-              src="/image/3.jpeg" 
-              alt="Community" 
-              fill 
-              className="object-cover transition-transform duration-500 group-hover:scale-110" 
-            />
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Visual strip */}
-      <section className="py-12 md:py-16 relative overflow-hidden">
-        {/* Background decoration */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#49BBBD]/5 to-transparent" />
-        
-        <div className="max-w-6xl mx-auto px-4 relative z-10">
-          {/* Section header */}
           <motion.div
-            className="text-center mb-10"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            variants={{
+              hidden: {},
+              visible: {
+                transition: {
+                  staggerChildren: 0.12,
+                },
+              },
+            }}
           >
-            <Badge className="bg-[#49BBBD]/20 text-[#49BBBD] border border-[#49BBBD]/30 px-4 py-1.5 mb-4">{t('about.community.badge')}</Badge>
-            <h2 className="text-3xl md:text-4xl font-bold mb-3">{t('about.community.title')}</h2>
-            <p className="text-white/70 max-w-2xl mx-auto">{t('about.community.subtitle')}</p>
-          </motion.div>
-
-          {/* Image grid */}
-          <motion.div 
-            className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6"
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-          >
-            <motion.div 
-              className="relative h-64 md:h-96 rounded-2xl overflow-hidden group cursor-pointer"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              whileHover={{ scale: 1.05, y: -5 }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10" />
-              <Image 
-                src="/image/1.jpeg" 
-                alt="Learner" 
-                fill 
-                className="object-cover transition-transform duration-500 group-hover:scale-110" 
-              />
-              <div className="absolute bottom-4 left-4 right-4 z-20 text-white">
-                <p className="font-semibold text-sm md:text-base">{t('about.community.card1.title')}</p>
-                <p className="text-xs md:text-sm text-white/80">{t('about.community.card1.subtitle')}</p>
-              </div>
-            </motion.div>
-            
-            <motion.div 
-              className="relative h-64 md:h-96 rounded-2xl overflow-hidden group cursor-pointer"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              whileHover={{ scale: 1.05, y: -5 }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10" />
-              <Image 
-                src="/image/2.jpeg" 
-                alt="Speaker" 
-                fill 
-                className="object-cover transition-transform duration-500 group-hover:scale-110" 
-              />
-              <div className="absolute bottom-4 left-4 right-4 z-20 text-white">
-                <p className="font-semibold text-sm md:text-base">{t('about.community.card2.title')}</p>
-                <p className="text-xs md:text-sm text-white/80">{t('about.community.card2.subtitle')}</p>
-              </div>
-            </motion.div>
-            
-            <motion.div 
-              className="relative h-64 md:h-96 rounded-2xl overflow-hidden group cursor-pointer"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              whileHover={{ scale: 1.05, y: -5 }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10" />
-              <Image 
-                src="/image/3.jpeg" 
-                alt="Learning" 
-                fill 
-                className="object-cover transition-transform duration-500 group-hover:scale-110" 
-              />
-              <div className="absolute bottom-4 left-4 right-4 z-20 text-white">
-                <p className="font-semibold text-sm md:text-base">{t('about.community.card3.title')}</p>
-                <p className="text-xs md:text-sm text-white/80">{t('about.community.card3.subtitle')}</p>
-              </div>
-            </motion.div>
+            {missionHighlights.map(({ icon: Icon, title, description }) => (
+              <motion.div
+                key={title}
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  visible: { opacity: 1, y: 0 },
+                }}
+              >
+                <div className="h-full border border-border/60 bg-card rounded-2xl shadow-lg transition-colors duration-300 hover:border-[#49BBBD]/40 hover:shadow-xl">
+                  <CardContent className="p-4 sm:p-6 space-y-3">
+                    {/* <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#49BBBD]/15 text-[#49BBBD] dark:bg-[#49BBBD]/20 dark:text-[#7ae2e4]">
+                      <Icon className="w-5 h-5" />
+                    </div> */}
+                    <h3 className="text-lg font-semibold text-foreground">
+                      {title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {description}
+                    </p>
+                  </CardContent>
+                </div>
+              </motion.div>
+            ))}
           </motion.div>
         </div>
       </section>
-
       {/* FAQs */}
-      <section className="py-12 md:py-16">
+      <section className="py-4 md:py-8 max-w-5xl mx-auto">
         <motion.div 
-          className="max-w-3xl mx-auto px-4"
+          className="max-w-4xl mx-auto px-4"
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-center">{t('about.faq.title')}</h2>
-          <Accordion type="single" collapsible className="bg-white/5 border border-white/10 rounded-xl divide-y divide-white/10">
+          <div className="flex items-center gap-3 mb-6 text-left">
+            <HelpCircle className="w-8 h-8 text-[#49BBBD] dark:text-[#7ae2e4]" aria-hidden="true" />
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground">
+              FAQ
+            </h2>
+          </div>
+          <Accordion
+            type="single"
+            collapsible
+            className="rounded-2xl divide-y divide-border/60 transition-colors duration-300"
+          >
             <AccordionItem value="donations">
-              <AccordionTrigger className="px-4 md:px-6 text-left hover:text-orange-400 transition-colors">{t('about.faq.q1')}</AccordionTrigger>
-              <AccordionContent className="px-4 md:px-6 text-white/80">
+              <AccordionTrigger className="px-4 md:px-6 text-left text-foreground hover:text-[#49BBBD] transition-colors">
+                {t('about.faq.q1')}
+              </AccordionTrigger>
+              <AccordionContent className="px-4 md:px-6 text-muted-foreground">
                 {t('about.faq.a1')}
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="level">
-              <AccordionTrigger className="px-4 md:px-6 text-left hover:text-orange-400 transition-colors">{t('about.faq.q2')}</AccordionTrigger>
-              <AccordionContent className="px-4 md:px-6 text-white/80">
+              <AccordionTrigger className="px-4 md:px-6 text-left text-foreground hover:text-[#49BBBD] transition-colors">
+                {t('about.faq.q2')}
+              </AccordionTrigger>
+              <AccordionContent className="px-4 md:px-6 text-muted-foreground">
                 {t('about.faq.a2')}
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="duration">
-              <AccordionTrigger className="px-4 md:px-6 text-left hover:text-orange-400 transition-colors">{t('about.faq.q3')}</AccordionTrigger>
-              <AccordionContent className="px-4 md:px-6 text-white/80">
+              <AccordionTrigger className="px-4 md:px-6 text-left text-foreground hover:text-[#49BBBD] transition-colors">
+                {t('about.faq.q3')}
+              </AccordionTrigger>
+              <AccordionContent className="px-4 md:px-6 text-muted-foreground">
                 {t('about.faq.a3')}
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="cancellations">
-              <AccordionTrigger className="px-4 md:px-6 text-left hover:text-orange-400 transition-colors">{t('about.faq.q4')}</AccordionTrigger>
-              <AccordionContent className="px-4 md:px-6 text-white/80">
+              <AccordionTrigger className="px-4 md:px-6 text-left text-foreground hover:text-[#49BBBD] transition-colors">
+                {t('about.faq.q4')}
+              </AccordionTrigger>
+              <AccordionContent className="px-4 md:px-6 text-muted-foreground">
                 {t('about.faq.a4')}
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="tech">
-              <AccordionTrigger className="px-4 md:px-6 text-left hover:text-orange-400 transition-colors">{t('about.faq.q5')}</AccordionTrigger>
-              <AccordionContent className="px-4 md:px-6 text-white/80">
+              <AccordionTrigger className="px-4 md:px-6 text-left text-foreground hover:text-[#49BBBD] transition-colors">
+                {t('about.faq.q5')}
+              </AccordionTrigger>
+              <AccordionContent className="px-4 md:px-6 text-muted-foreground">
                 {t('about.faq.a5')}
               </AccordionContent>
             </AccordionItem>
           </Accordion>
-          <p className="mt-8 text-center text-white/70">{t('about.faq.more')}</p>
-        </motion.div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-12">
-        <motion.div 
-          className="max-w-4xl mx-auto px-4 text-center"
-          initial={{ opacity: 0, scale: 0.9 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true, amount: 0.5 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-        >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">{t('about.cta.title')}</h2>
-          <p className="max-w-2xl mx-auto text-white/80 mb-8">
-            {t('about.cta.subtitle')}
-          </p>
-          <Link href="/speakers">
-            <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white font-bold text-lg px-8 py-6 rounded-full group">
-              {t('about.cta.button')}
-              <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
-            </Button>
-          </Link>
         </motion.div>
       </section>
 
       {/* Footer spacer for aesthetics */}
-      <div className="h-10" />
+      <div className="h-36" />
     </main>
   )
 }

@@ -10,7 +10,7 @@
    children: React.ReactNode
  }) {
    const pathname = usePathname()
-   const publicPaths = new Set<string>(["/", "/privacy-policy", "/terms-and-conditions", "/about"]) 
+   const publicPaths = new Set<string>(["/", "/speakers", "/privacy-policy", "/terms-and-conditions", "/about"]) 
    const isAuthSection = pathname?.startsWith('/auth')
    const isPublic = isAuthSection || (pathname ? publicPaths.has(pathname) : true)
    
