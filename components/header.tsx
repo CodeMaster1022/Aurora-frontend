@@ -132,6 +132,7 @@ export function Header() {
   const closeActiveModal = () => {
     setActiveAuthView(null)
   }
+  const desktopNavLinkClass = `${isDarkMode ? 'text-white' : 'text-gray-800'} dark:text-white hover:text-orange-400 transition-colors text-lg font-medium`
 
   type MobileNavItem = {
     key: string
@@ -215,13 +216,19 @@ export function Header() {
           href: '/speakers',
         },
         {
-          key: 'speaker-signup',
-          label: 'Become Speaker',
-          icon: Mic,
-          onClick: () => {
-            openSpeakerSignupModal()
-          },
+          key: 'Profile',
+          label: t('header.profile'),
+          icon: User,
+          href: '/learners/profile',
         },
+        // {
+        //   key: 'speaker-signup',
+        //   label: 'Become Speaker',
+        //   icon: Mic,
+        //   onClick: () => {
+        //     openSpeakerSignupModal()
+        //   },
+        // },
         {
           key: 'logout',
           label: t('header.logout'),
@@ -325,34 +332,34 @@ export function Header() {
                 <>
                   {user?.role === 'speaker' ? (
                     <>
-                      <Link href="/" className="hover:text-orange-400 transition-colors text-lg font-medium">
+                      <Link href="/" className={desktopNavLinkClass}>
                         {t('header.home')}
                       </Link>
-                      <Link href="/about" className="hover:text-orange-400 transition-colors text-lg font-medium">
+                      <Link href="/about" className={desktopNavLinkClass}>
                         About Us
                       </Link>
-                      <Link href="/speakers/dashboard" className="px-2 py-2 rounded-xl hover:text-orange-400 transition-colors text-lg font-medium">
+                      <Link href="/speakers/dashboard" className={`px-2 py-2 rounded-xl ${desktopNavLinkClass}`}>
                         {t('header.speakerDashboard')}
                       </Link>
-                      <Link href="/speakers/profile" className="px-2 py-2 rounded-xl hover:text-orange-400 transition-colors text-lg font-medium">
+                      <Link href="/speakers/profile" className={`px-2 py-2 rounded-xl ${desktopNavLinkClass}`}>
                         {t('header.profile')}
                       </Link>
                     </>
                   ) : (
                     <>
-                      <Link href="/learners/dashboard" className="hover:text-orange-400 transition-colors text-lg font-medium">
+                      <Link href="/learners/dashboard" className={desktopNavLinkClass}>
                         {t('header.home')}
                       </Link>
-                      <Link href="/about" className="hover:text-orange-400 transition-colors text-lg font-medium">
+                      <Link href="/about" className={desktopNavLinkClass}>
                         About Us
                       </Link>
-                      <Link href="/learners/dashboard" className="hover:text-orange-400 transition-colors text-lg font-medium">
+                      <Link href="/learners/dashboard" className={desktopNavLinkClass}>
                         {t('header.dashboard')}
                       </Link>
-                      <Link href="/speakers" className="hover:text-orange-400 transition-colors text-lg font-medium">
+                      <Link href="/speakers" className={desktopNavLinkClass}>
                         {t('header.speakers')}
                       </Link>
-                      <Link href="/learners/profile" className="hover:text-orange-400 transition-colors text-lg font-medium">
+                      <Link href="/learners/profile" className={desktopNavLinkClass}>
                         {t('header.profile')}
                       </Link>
                     </>
@@ -360,14 +367,14 @@ export function Header() {
                 </>
               ) : (
                 <>
-                      <Link href="/" className="hover:text-orange-400 transition-colors text-lg font-medium">
+                      <Link href="/" className={desktopNavLinkClass}>
                         {t('header.home')}
                       </Link>
-                      <Link href="/speakers" className="hover:text-orange-400 transition-colors text-lg font-medium">Speakers</Link>
-                      <Link href="/about" className="hover:text-orange-400 transition-colors text-lg font-medium">
+                      <Link href="/speakers" className={desktopNavLinkClass}>Speakers</Link>
+                      <Link href="/about" className={desktopNavLinkClass}>
                         {t('header.nosotros')}
                       </Link>
-                      <Link href="/profile" className="hover:text-orange-400 transition-colors text-lg font-medium">
+                      <Link href="/profile" className={desktopNavLinkClass}>
                         {t('header.profile')}
                       </Link>
                 </>
@@ -384,7 +391,7 @@ export function Header() {
               aria-label={`Switch to ${language === 'en' ? 'Español' : 'English'}`}
               title={`Switch to ${language === 'en' ? 'Español' : 'English'}`}
             >
-              <Globe className="w-5 h-5 text-gray-800 dark:text-gray-300 transition-colors hover:text-orange-400" />
+              <Globe className={`w-5 h-5 ${desktopNavLinkClass}`} />
             </button>
             <button
               onClick={toggleTheme}
@@ -393,9 +400,9 @@ export function Header() {
               title={`${isDarkMode ? 'Light' : 'Dark'} mode`}
             >
               {isDarkMode ? (
-                <Sun className="w-5 h-5 text-gray-800 dark:text-gray-300 transition-colors" />
+                <Sun className={`w-5 h-5 ${desktopNavLinkClass}`} />
               ) : (
-                <Moon className="w-5 h-5 text-gray-800 dark:text-gray-300 transition-colors" />
+                <Moon className={`w-5 h-5 ${desktopNavLinkClass}`} />
               )}
             </button>
             {isAuthenticated ? (

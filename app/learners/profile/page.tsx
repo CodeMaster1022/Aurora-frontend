@@ -22,7 +22,7 @@ import {
   Star,
   ArrowRight,
 } from "lucide-react"
-import { learnerService, Session, Review, Speaker, LearnerProfile } from "@/lib/services/learnerService"
+import { learnerService, Session, Review, Speaker } from "@/lib/services/learnerService"
 import { useAppDispatch, useAppSelector } from "@/lib/hooks/redux"
 import { getCurrentUser, setUser } from "@/lib/store/authSlice"
 import { useTranslation } from "@/lib/hooks/useTranslation"
@@ -85,7 +85,6 @@ export default function LearnerProfilePage() {
   const [isUploading, setIsUploading] = useState(false)
   const [isSavingProfile, setIsSavingProfile] = useState(false)
 
-  const [profileStats, setProfileStats] = useState<LearnerProfile | null>(null)
   const [upcomingSessions, setUpcomingSessions] = useState<Session[]>([])
   const [pastSessions, setPastSessions] = useState<Session[]>([])
   const [reviews, setReviews] = useState<ProcessedReview[]>([])
@@ -123,11 +122,10 @@ export default function LearnerProfilePage() {
 
       const response = await learnerService.getDashboard()
       if (response.success && response.data) {
-        const { upcomingSessions, pastSessions, reviews, profile } = response.data
+        const { upcomingSessions, pastSessions, reviews } = response.data
 
         setUpcomingSessions(upcomingSessions || [])
         setPastSessions(pastSessions || [])
-        setProfileStats(profile || null)
 
         const processedReviews: ProcessedReview[] = (reviews || []).map((review) => ({
           ...review,
@@ -256,10 +254,14 @@ export default function LearnerProfilePage() {
       .slice(0, 5)
   }, [pastSessions])
 
-  const totalSessions = profileStats?.totalSessions ?? (pastSessions.length + upcomingSessions.length)
-  const completedSessions = profileStats?.completedSessions ?? pastSessions.filter((s) => s.status === "completed").length
-  const upcomingCount = profileStats?.upcomingSessions ?? upcomingSessions.length
-  const completionRate = totalSessions > 0 ? Math.round((completedSessions / totalSessions) * 100) : 0
+  const completedSessionsCount = pastSessions.filter((session) => session.status === "completed").length
+  const cancelledSessionsCount = pastSessions.filter((session) => session.status === "cancelled").length
+  const upcomingCount = sortedUpcomingSessions.length
+  const totalSessions = pastSessions.length + upcomingCount
+  const completionRate =
+    completedSessionsCount + cancelledSessionsCount > 0
+      ? Math.round((completedSessionsCount / (completedSessionsCount + cancelledSessionsCount)) * 100)
+      : 0
 
   const averageRating = reviews.length
     ? (
@@ -293,7 +295,7 @@ export default function LearnerProfilePage() {
           <Button
             variant="outline"
             asChild
-            className="border-white/20 text-white hover:bg-white/10"
+            className="border-white/20 text-white bg-white/10"
           >
             <Link href="/learners/dashboard" className="inline-flex items-center gap-2">
               {t('learnerDashboard.summary.upcoming')}
@@ -502,7 +504,7 @@ export default function LearnerProfilePage() {
                   <p className="text-xs uppercase tracking-wide text-gray-400">
                     {t('learnerProfile.summary.completed')}
                   </p>
-                  <p className="text-2xl font-semibold text-white">{completedSessions}</p>
+                  <p className="text-2xl font-semibold text-white">{completedSessionsCount}</p>
                 </div>
                 <div className="rounded-lg border border-white/10 bg-white/5 p-3">
                   <p className="text-xs uppercase tracking-wide text-gray-400">
@@ -603,101 +605,6 @@ export default function LearnerProfilePage() {
                     </div>
                   ))}
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <Card className="border-white/20 bg-white/10 backdrop-blur-lg">
-            <CardHeader className="pb-2">
-              <div className="flex items-center gap-2">
-                <Star className="h-5 w-5 text-yellow-400" />
-                <CardTitle className="text-white text-lg">
-                  {t('learnerDashboard.reviews.title')}
-                </CardTitle>
-              </div>
-              <CardDescription className="text-xs text-gray-300">
-                {t('learnerDashboard.reviews.subtitle')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <ScrollArea className="h-[320px] pr-4">
-                {reviews.length === 0 ? (
-                  <p className="py-6 text-center text-sm text-gray-400">
-                    {t('learnerDashboard.reviews.noReviews')}
-                  </p>
-                ) : (
-                  <div className="space-y-4">
-                    {reviews.map((review) => (
-                      <div key={review._id} className="rounded-lg border border-white/10 bg-white/5 p-4">
-                        <div className="mb-2 flex items-center justify-between">
-                          <div>
-                            <p className="text-sm font-semibold text-white">
-                              {review.speaker
-                                ? `${review.speaker.firstname} ${review.speaker.lastname}`
-                                : typeof review.to === "object" && review.to
-                                ? `${(review.to as Speaker).firstname} ${(review.to as Speaker).lastname}`
-                                : review.to}
-                            </p>
-                            <p className="text-xs text-gray-400">
-                              {formatDateShort(review.createdAt)}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            {[...Array(5)].map((_, index) => (
-                              <Star
-                                key={`${review._id}-${index}`}
-                                className={`h-3.5 w-3.5 ${index < review.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-500"}`}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                        <p className="text-sm text-gray-200">
-                          {review.comment || t('learnerDashboard.reviews.emptyComment')}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </ScrollArea>
-            </CardContent>
-          </Card>
-
-          <Card className="border-white/20 bg-white/10 backdrop-blur-lg">
-            <CardHeader className="pb-2">
-              <div className="flex items-center gap-2">
-                <User className="h-5 w-5 text-purple-400" />
-                <CardTitle className="text-white text-lg">
-                  {t('learnerDashboard.topSpeakers.title')}
-                </CardTitle>
-              </div>
-              <CardDescription className="text-xs text-gray-300">
-                {t('learnerDashboard.topSpeakers.subtitle')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {topSpeakers.length === 0 ? (
-                <p className="text-sm text-gray-400">
-                  {t('learnerDashboard.topSpeakers.none')}
-                </p>
-              ) : (
-                topSpeakers.map((speaker) => (
-                  <div key={speaker.id} className="flex items-center justify-between gap-4 rounded-lg border border-white/10 bg-white/5 p-3">
-                    <div>
-                      <p className="text-sm font-semibold text-white">{speaker.name}</p>
-                      <p className="text-xs text-gray-400">
-                        {speaker.sessions} {t('learnerDashboard.topSpeakers.sessions')}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {t('learnerDashboard.topSpeakers.lastSession')} {formatDateShort(speaker.lastSession.toISOString())}
-                      </p>
-                    </div>
-                    <div className="text-right text-xs text-gray-300">
-                      {speaker.rating ? `${speaker.rating.toFixed(1)}★` : t('learnerDashboard.topSpeakers.noRating')}
-                    </div>
-                  </div>
-                ))
               )}
             </CardContent>
           </Card>

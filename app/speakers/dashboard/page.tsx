@@ -15,10 +15,10 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
-import {
-  Calendar,
-  Clock,
-  Star,
+import { 
+  Calendar, 
+  Clock, 
+  Star, 
   MessageSquare,
   Loader2,
   CheckCircle2,
@@ -569,7 +569,7 @@ export default function SpeakerDashboardPage() {
               >
                 {session.status}
               </Badge>
-            </div>
+                </div>
             <p className="text-sm text-gray-300">
               {t('dashboard.sessions.with')} <span className="font-medium text-white">{learner}</span>
             </p>
@@ -588,9 +588,9 @@ export default function SpeakerDashboardPage() {
                   <span>•</span>
                   <span>{Math.max(Math.round(hoursUntil), 0)}h remaining</span>
                 </>
-              )}
-            </div>
-          </div>
+                      )}
+                    </div>
+                  </div>
           {meetingLink && (
             <Button asChild variant="outline" size="sm" className="border-purple-400/40 text-purple-200 cursor-pointer">
               <a href={meetingLink} target="_blank" rel="noopener noreferrer">
@@ -598,20 +598,20 @@ export default function SpeakerDashboardPage() {
               </a>
             </Button>
           )}
-        </div>
+                </div>
 
         {topics && topics.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-2">
             {topics.map((topic) => (
               <Badge
-                key={topic}
+                          key={topic}
                 variant="secondary"
                 className="bg-purple-500/15 text-purple-200 border-purple-400/30"
-              >
-                {topic}
+                        >
+                          {topic}
               </Badge>
-            ))}
-          </div>
+                      ))}
+                    </div>
         )}
 
         {icebreaker && (
@@ -628,7 +628,7 @@ export default function SpeakerDashboardPage() {
             {context === "upcoming"
               ? `Starts ${formatDate(session.date)}`
               : `Recorded ${formatDate(session.date)}`}
-          </div>
+                  </div>
           <div className="flex items-center gap-2">
             {canCancel && (
               <Button
@@ -650,10 +650,10 @@ export default function SpeakerDashboardPage() {
                 {t('dashboard.sessions.rate')}
               </Button>
             )}
-          </div>
-        </div>
-      </div>
-    )
+                          </div>
+                      </div>
+                    </div>
+                  )
   }
 
   const renderReviewCard = (review: ReviewWithType, type: "received" | "given") => {
@@ -673,12 +673,12 @@ export default function SpeakerDashboardPage() {
         className="rounded-lg border border-white/10 bg-white/5 p-4 space-y-3"
       >
         <div className="flex items-start justify-between gap-4">
-          <div>
+                    <div>
             <p className="text-sm font-semibold text-white">{counterpartName}</p>
             <p className="text-xs text-gray-400">
               {new Date(review.createdAt).toLocaleDateString()}
             </p>
-          </div>
+                    </div>
           <div className="flex items-center gap-1">
             {[...Array(5)].map((_, index) => (
               <Star
@@ -688,8 +688,8 @@ export default function SpeakerDashboardPage() {
                 }`}
               />
             ))}
-          </div>
-        </div>
+                    </div>
+                  </div>
         <p className="text-sm text-gray-200">
           {review.comment?.trim() ||
             (type === "received"
@@ -699,7 +699,7 @@ export default function SpeakerDashboardPage() {
         <p className="text-xs text-gray-500">
           Session ID: {review.session}
         </p>
-      </div>
+                        </div>
     )
   }
 
@@ -707,8 +707,8 @@ export default function SpeakerDashboardPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
-      </div>
-    )
+                    </div>
+                  )
   }
 
   return (
@@ -742,11 +742,11 @@ export default function SpeakerDashboardPage() {
                   <div className="flex  md:h-12 md:w-12 h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-purple-500/40 to-cyan-500/40">
                     <Icon className="md:h-6 md:w-6 h-4 w-4 text-white" />
                   </div>
-                </CardContent>
-              </div>
+              </CardContent>
+                  </div>
             )
           })}
-        </div>
+                </div>
 
         <div className="grid grid-cols-1 gap-6">
           <div className="space-y-6">
@@ -767,7 +767,7 @@ export default function SpeakerDashboardPage() {
                     }`}
                   >
                     <div className="flex items-center gap-2 text-sm pb-2">
-                      {isCalendarConnected ? (
+                {isCalendarConnected ? (
                         <CheckCircle2 className="h-4 w-4" />
                       ) : (
                         <AlertTriangle className="h-4 w-4" />
@@ -816,32 +816,32 @@ export default function SpeakerDashboardPage() {
                         <span className="text-sm font-semibold text-white">
                           {t('dashboard.analytics.sessions')}
                         </span>
-                        <p className="text-xs text-gray-400">
+                      <p className="text-xs text-gray-400">
                           {analyticsData.length > 0
                             ? analyticsRangeLabel
                             : t('dashboard.analytics.empty')}
-                        </p>
-                      </div>
+                      </p>
+                    </div>
                       <div className="flex items-center gap-2">
                         {(['7d', '30d'] as const).map((range) => (
-                          <Button
+                    <Button
                             key={range}
                             size="sm"
                             variant={analyticsRange === range ? "default" : "outline"}
                             className={`h-7 px-3 text-xs ${
                               analyticsRange === range
                                 ? "bg-purple-600 text-white hover:bg-purple-500 cursor-pointer"
-                                : "border-white/20 text-gray-800 hover:bg-white/10 cursor-pointer"
+                                : "border-white/20 text-gray-800 bg-white/10 cursor-pointer"
                             }`}
                             onClick={() => setAnalyticsRange(range)}
                           >
                             {range === "7d"
                               ? t('dashboard.analytics.range7d')
                               : t('dashboard.analytics.range30d')}
-                          </Button>
+                    </Button>
                         ))}
-                      </div>
-                    </div>
+                  </div>
+                </div>
                     {/* {analyticsSummary.total > 0 && (
                       <div className="mb-3 grid gap-2 text-xs text-gray-300 sm:grid-cols-2 lg:grid-cols-4">
                         <div className="rounded-md border border-white/10 bg-white/5 p-2">
@@ -851,7 +851,7 @@ export default function SpeakerDashboardPage() {
                           <p className="text-base font-semibold text-white">
                             {analyticsSummary.scheduled}
                           </p>
-                        </div>
+                      </div>
                         <div className="rounded-md border border-white/10 bg-white/5 p-2">
                           <p className="mb-1 text-[0.65rem] uppercase tracking-wide text-gray-400">
                             {t('dashboard.analytics.completed')}
@@ -867,7 +867,7 @@ export default function SpeakerDashboardPage() {
                           <p className="text-base font-semibold text-white">
                             {analyticsSummary.cancelled}
                           </p>
-                        </div>
+                    </div>
                         <div className="rounded-md border border-white/10 bg-white/5 p-2">
                           <p className="mb-1 text-[0.65rem] uppercase tracking-wide text-gray-400">
                             {t('dashboard.analytics.completionRate')}
@@ -949,12 +949,12 @@ export default function SpeakerDashboardPage() {
           <Card className="flex flex-col border-white/20 bg-white/10 backdrop-blur-lg xl:col-span-2">
             <CardHeader className="pb-2">
               <CardTitle className="text-white text-xl">
-                {t('dashboard.sessions.upcoming.title')}
-              </CardTitle>
-              <CardDescription className="text-gray-300">
+                  {t('dashboard.sessions.upcoming.title')}
+                </CardTitle>
+                <CardDescription className="text-gray-300">
                 {t('dashboard.sessions.upcoming.count')}
-              </CardDescription>
-            </CardHeader>
+                </CardDescription>
+              </CardHeader>
             <CardContent className="pt-0">
               <Tabs defaultValue="upcoming" className="w-full">
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -977,7 +977,7 @@ export default function SpeakerDashboardPage() {
                       Next: {formatDate(nextSession.date)} · {nextSession.time}
                     </p>
                   )}
-                </div>
+                              </div>
 
                 <TabsContent value="upcoming" className="mt-0">
                   {sortedUpcomingSessions.length > 0 ? (
@@ -986,7 +986,7 @@ export default function SpeakerDashboardPage() {
                         {sortedUpcomingSessions.map((session) =>
                           renderSessionCard(session, "upcoming")
                         )}
-                      </div>
+                              </div>
                     </ScrollArea>
                   ) : (
                     <p className="py-4 text-center text-sm text-gray-400">
@@ -1008,8 +1008,8 @@ export default function SpeakerDashboardPage() {
                               {completedPastSessions.map((session) =>
                                 renderSessionCard(session, "past")
                               )}
-                            </div>
-                          </div>
+                              </div>
+                              </div>
                         )}
                         {cancelledPastSessions.length > 0 && (
                           <div className="space-y-3">
@@ -1019,32 +1019,32 @@ export default function SpeakerDashboardPage() {
                             <div className="space-y-3">
                               {cancelledPastSessions.map((session) =>
                                 renderSessionCard(session, "past")
-                              )}
-                            </div>
+                            )}
                           </div>
-                        )}
-                      </div>
+                          </div>
+                            )}
+                          </div>
                     </ScrollArea>
-                  ) : (
+                ) : (
                     <p className="py-4 text-center text-sm text-gray-400">
                       {t('dashboard.sessions.past.none')}
                     </p>
-                  )}
+                )}
                 </TabsContent>
               </Tabs>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
         </div>
 
         <Card className="border-white/20 bg-white/10 backdrop-blur-lg">
-          <CardHeader>
+                <CardHeader>
             <CardTitle className="text-white text-xl">
-              {t('dashboard.reviews.received.title')}
-            </CardTitle>
-            <CardDescription className="text-gray-300">
+                    {t('dashboard.reviews.received.title')}
+                  </CardTitle>
+                  <CardDescription className="text-gray-300">
               Insights from learners and your feedback history
-            </CardDescription>
-          </CardHeader>
+                  </CardDescription>
+                </CardHeader>
           <CardContent className="pt-0">
             <Tabs defaultValue="received" className="w-full">
               <div className="mb-4">
@@ -1064,11 +1064,11 @@ export default function SpeakerDashboardPage() {
                 </TabsList>
               </div>
               <TabsContent value="received" className="mt-0">
-                {receivedReviews.length > 0 ? (
+                  {receivedReviews.length > 0 ? (
                   <ScrollArea className="max-h-[360px] pr-4">
                     <div className="space-y-4">
                       {receivedReviews.map((review) => renderReviewCard(review, "received"))}
-                    </div>
+                          </div>
                   </ScrollArea>
                 ) : (
                   <p className="py-4 text-center text-sm text-gray-400">
@@ -1077,11 +1077,11 @@ export default function SpeakerDashboardPage() {
                 )}
               </TabsContent>
               <TabsContent value="given" className="mt-0">
-                {givenReviews.length > 0 ? (
+                  {givenReviews.length > 0 ? (
                   <ScrollArea className="h-[360px] pr-4">
                     <div className="space-y-4">
                       {givenReviews.map((review) => renderReviewCard(review, "given"))}
-                    </div>
+                          </div>
                   </ScrollArea>
                 ) : (
                   <p className="py-4 text-center text-sm text-gray-400">
@@ -1090,8 +1090,8 @@ export default function SpeakerDashboardPage() {
                 )}
               </TabsContent>
             </Tabs>
-          </CardContent>
-        </Card>
+                </CardContent>
+              </Card>
       </div>
 
       {/* Rating Modal */}

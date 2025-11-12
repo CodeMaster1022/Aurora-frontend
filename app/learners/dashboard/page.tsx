@@ -135,7 +135,7 @@ export default function LearnerDashboardPage() {
       setIsLoading(false)
       setError(t('learnerDashboard.errors.loginRequired'))
     }
-  }, [authLoading, isAuthenticated, t, user])
+  }, [authLoading, isAuthenticated, user])
 
   useEffect(() => {
     if (isLoading || !user) return
@@ -599,7 +599,7 @@ export default function LearnerDashboardPage() {
           {summaryCards.map((card) => {
             const Icon = card.icon
             return (
-              <Card key={card.label} className="border-white/20 bg-white/10 backdrop-blur-md">
+              <div key={card.label} className="border-white/20 bg-white/10 backdrop-blur-md rounded-lg">
                 <CardContent className="flex items-center justify-between gap-2 p-3 sm:p-4">
                   <div>
                     <p className="text-xs text-gray-300 sm:text-sm">{card.label}</p>
@@ -610,12 +610,135 @@ export default function LearnerDashboardPage() {
                     <Icon className="h-4 w-4 text-white sm:h-6 sm:w-6" />
                   </div>
                 </CardContent>
-              </Card>
+              </div>
             )
           })}
         </div>
 
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Card className="border-white/20 bg-white/10 backdrop-blur-lg">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-white text-base sm:text-lg">
+                  {t('learnerDashboard.actionCenter.title')}
+                </CardTitle>
+                <CardDescription className="text-xs text-gray-300">
+                  {t('learnerDashboard.actionCenter.subtitle')}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <p className="mb-2 text-xs uppercase tracking-wide text-gray-400">
+                    {t('learnerDashboard.actionCenter.pendingReviews')}
+                  </p>
+                  {sessionsNeedingReview.length > 0 ? (
+                    <div className="space-y-2">
+                      {sessionsNeedingReview.slice(0, 3).map((session) => (
+                        <div key={session._id} className="flex items-center justify-between gap-3 rounded-md border border-white/10 bg-white/5 p-3">
+                          <div>
+                            <p className="text-sm text-white">{session.title}</p>
+                            <p className="text-xs text-gray-400">
+                              {typeof session.speaker === "object"
+                                ? `${session.speaker.firstname} ${session.speaker.lastname}`
+                                : session.speaker}
+                            </p>
+                          </div>
+                          <Button
+                            size="sm"
+                            className="bg-purple-600 text-white hover:bg-purple-500"
+                            onClick={() => handleRateSession(session)}
+                          >
+                            {t('learnerDashboard.actionCenter.review')}
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-400">
+                      {t('learnerDashboard.actionCenter.noPending')}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <p className="mb-2 text-xs uppercase tracking-wide text-gray-400">
+                    {t('learnerDashboard.actionCenter.startingSoon')}
+                  </p>
+                  {startingSoonSessions.length > 0 ? (
+                    <div className="space-y-2">
+                      {startingSoonSessions.slice(0, 3).map((session) => (
+                        <div key={session._id} className="flex items-center justify-between gap-3 rounded-md border border-white/10 bg-white/5 p-3">
+                          <div>
+                            <p className="text-sm text-white">{session.title}</p>
+                            <p className="text-xs text-gray-400">
+                              {Math.max(Math.round(getHoursUntilSession(session)), 0)}h · {formatDateLong(session.date)}
+                            </p>
+                          </div>
+                          {session.meetingLink ? (
+                            <Button
+                              asChild
+                              variant="outline"
+                              size="sm"
+                              className="border-purple-400/40 text-purple-200"
+                            >
+                              <Link href={session.meetingLink} target="_blank" rel="noopener noreferrer">
+                                {t('learnerDashboard.actionCenter.join')}
+                              </Link>
+                            </Button>
+                          ) : (
+                            <Button variant="outline" size="sm" className="border-white/20 text-white">
+                              {t('learnerDashboard.actionCenter.view')}
+                            </Button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-400">
+                      {t('learnerDashboard.actionCenter.noStartingSoon')}
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="border-white/20 bg-white/10 backdrop-blur-lg">
+              <CardHeader className="pb-2">
+                <div className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-purple-400" />
+                  <CardTitle className="text-white text-base sm:text-lg">
+                    {t('learnerDashboard.topSpeakers.title')}
+                  </CardTitle>
+                </div>
+                <CardDescription className="text-xs text-gray-300">
+                  {t('learnerDashboard.topSpeakers.subtitle')}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {topSpeakers.length === 0 ? (
+                  <p className="text-sm text-gray-400">
+                    {t('learnerDashboard.topSpeakers.none')}
+                  </p>
+                ) : (
+                  topSpeakers.map((speaker) => (
+                    <div key={speaker.id} className="flex items-center justify-between gap-3 rounded-md border border-white/10 bg-white/5 p-3">
+                      <div>
+                        <p className="text-sm font-semibold text-white">{speaker.name}</p>
+                        <p className="text-xs text-gray-400">
+                          {speaker.sessions} {t('learnerDashboard.topSpeakers.sessions')}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {t('learnerDashboard.topSpeakers.lastSession')} {formatDateLong(speaker.lastSession.toISOString())}
+                        </p>
+                      </div>
+                      <div className="text-right text-xs text-gray-300">
+                        {speaker.rating ? `${speaker.rating.toFixed(1)}★` : t('learnerDashboard.topSpeakers.noRating')}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </CardContent>
+            </Card>
+          </div>
           <div className="space-y-6 xl:col-span-2">
             <Card className="border-white/20 bg-white/10 backdrop-blur-lg">
               <CardHeader>
@@ -637,7 +760,7 @@ export default function LearnerDashboardPage() {
                         className={`h-7 px-3 text-xs ${
                           analyticsRange === range
                             ? "bg-purple-600 text-white hover:bg-purple-500 cursor-pointer"
-                            : "border-white/20 text-gray-800 hover:bg-white/10 cursor-pointer"
+                            : "border-white/20 text-gray-800 bg-white hover:bg-white/10 cursor-pointer"
                         }`}
                         onClick={() => setAnalyticsRange(range)}
                       >
@@ -783,7 +906,7 @@ export default function LearnerDashboardPage() {
 
                   <TabsContent value="upcoming" className="mt-0">
                     {sortedUpcomingSessions.length > 0 ? (
-                      <ScrollArea className="h-[420px] pr-4">
+                      <ScrollArea className="max-h-[420px] pr-4">
                         <div className="space-y-4">
                           {sortedUpcomingSessions.map((session) => renderSessionCard(session, "upcoming"))}
                         </div>
@@ -797,7 +920,7 @@ export default function LearnerDashboardPage() {
 
                   <TabsContent value="past" className="mt-0">
                     {sortedPastSessions.length > 0 ? (
-                      <ScrollArea className="h-[420px] pr-4">
+                      <ScrollArea className="max-h-[420px] pr-4">
                         <div className="space-y-6">
                           {sortedPastSessions.map((session) => renderSessionCard(session, "past"))}
                         </div>
@@ -825,7 +948,7 @@ export default function LearnerDashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-0">
-                <ScrollArea className="h-[360px] pr-4">
+                <ScrollArea className="max-h-[360px] pr-4">
                   {reviews.length === 0 ? (
                     <p className="py-4 text-center text-sm text-gray-400">
                       {t('learnerDashboard.reviews.noReviews')}
@@ -836,131 +959,6 @@ export default function LearnerDashboardPage() {
                     </div>
                   )}
                 </ScrollArea>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="space-y-6">
-            <Card className="border-white/20 bg-white/10 backdrop-blur-lg">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-white text-base sm:text-lg">
-                  {t('learnerDashboard.actionCenter.title')}
-                </CardTitle>
-                <CardDescription className="text-xs text-gray-300">
-                  {t('learnerDashboard.actionCenter.subtitle')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <p className="mb-2 text-xs uppercase tracking-wide text-gray-400">
-                    {t('learnerDashboard.actionCenter.pendingReviews')}
-                  </p>
-                  {sessionsNeedingReview.length > 0 ? (
-                    <div className="space-y-2">
-                      {sessionsNeedingReview.slice(0, 3).map((session) => (
-                        <div key={session._id} className="flex items-center justify-between gap-3 rounded-md border border-white/10 bg-white/5 p-3">
-                          <div>
-                            <p className="text-sm text-white">{session.title}</p>
-                            <p className="text-xs text-gray-400">
-                              {typeof session.speaker === "object"
-                                ? `${session.speaker.firstname} ${session.speaker.lastname}`
-                                : session.speaker}
-                            </p>
-                          </div>
-                          <Button
-                            size="sm"
-                            className="bg-purple-600 text-white hover:bg-purple-500"
-                            onClick={() => handleRateSession(session)}
-                          >
-                            {t('learnerDashboard.actionCenter.review')}
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-gray-400">
-                      {t('learnerDashboard.actionCenter.noPending')}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <p className="mb-2 text-xs uppercase tracking-wide text-gray-400">
-                    {t('learnerDashboard.actionCenter.startingSoon')}
-                  </p>
-                  {startingSoonSessions.length > 0 ? (
-                    <div className="space-y-2">
-                      {startingSoonSessions.slice(0, 3).map((session) => (
-                        <div key={session._id} className="flex items-center justify-between gap-3 rounded-md border border-white/10 bg-white/5 p-3">
-                          <div>
-                            <p className="text-sm text-white">{session.title}</p>
-                            <p className="text-xs text-gray-400">
-                              {Math.max(Math.round(getHoursUntilSession(session)), 0)}h · {formatDateLong(session.date)}
-                            </p>
-                          </div>
-                          {session.meetingLink ? (
-                            <Button
-                              asChild
-                              variant="outline"
-                              size="sm"
-                              className="border-purple-400/40 text-purple-200"
-                            >
-                              <Link href={session.meetingLink} target="_blank" rel="noopener noreferrer">
-                                {t('learnerDashboard.actionCenter.join')}
-                              </Link>
-                            </Button>
-                          ) : (
-                            <Button variant="outline" size="sm" className="border-white/20 text-white">
-                              {t('learnerDashboard.actionCenter.view')}
-                            </Button>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-gray-400">
-                      {t('learnerDashboard.actionCenter.noStartingSoon')}
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-white/20 bg-white/10 backdrop-blur-lg">
-              <CardHeader className="pb-2">
-                <div className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-purple-400" />
-                  <CardTitle className="text-white text-base sm:text-lg">
-                    {t('learnerDashboard.topSpeakers.title')}
-                  </CardTitle>
-                </div>
-                <CardDescription className="text-xs text-gray-300">
-                  {t('learnerDashboard.topSpeakers.subtitle')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {topSpeakers.length === 0 ? (
-                  <p className="text-sm text-gray-400">
-                    {t('learnerDashboard.topSpeakers.none')}
-                  </p>
-                ) : (
-                  topSpeakers.map((speaker) => (
-                    <div key={speaker.id} className="flex items-center justify-between gap-3 rounded-md border border-white/10 bg-white/5 p-3">
-                      <div>
-                        <p className="text-sm font-semibold text-white">{speaker.name}</p>
-                        <p className="text-xs text-gray-400">
-                          {speaker.sessions} {t('learnerDashboard.topSpeakers.sessions')}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {t('learnerDashboard.topSpeakers.lastSession')} {formatDateLong(speaker.lastSession.toISOString())}
-                        </p>
-                      </div>
-                      <div className="text-right text-xs text-gray-300">
-                        {speaker.rating ? `${speaker.rating.toFixed(1)}★` : t('learnerDashboard.topSpeakers.noRating')}
-                      </div>
-                    </div>
-                  ))
-                )}
               </CardContent>
             </Card>
           </div>
