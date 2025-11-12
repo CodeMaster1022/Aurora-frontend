@@ -392,7 +392,7 @@ export default function HomePage() {
         <footer className="border-t border-border bg-background transition-colors duration-300">
           <div className="mx-auto max-w-7xl px-4 pt-8 pb-24 md:pb-12 text-center text-muted-foreground">
             <div className="flex flex-col items-center gap-3">
-              <span className="text-xl font-semibold tracking-wide text-primary transition-colors duration-300">Aurora</span>
+              <span className="text-xl font-semibold tracking-wide text-[#6b3bbd] transition-colors duration-300">Aurora</span>
               <div className="flex items-center gap-6 text-sm">
                 <Link href="/terms-and-conditions" className="hover:text-primary transition-colors">
                   {t('home.footer.terms')}

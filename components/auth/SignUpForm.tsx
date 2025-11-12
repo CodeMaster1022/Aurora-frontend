@@ -163,7 +163,7 @@ export function SignUpForm({
       if (response.success && response.data) {
         authService.setToken(response.data.token)
         dispatch(setUser(response.data.user))
-        router.push("/learners/dashboard")
+        router.push("/home")
       }
     } catch (err) {
       console.error("Registration error:", err)

@@ -705,14 +705,14 @@ export default function SpeakerDashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-background text-foreground transition-colors duration-300">
         <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
                     </div>
                   )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1A1A33] via-purple-900 to-[#1A1A33] py-24 px-4 sm:px-6">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300 py-24 px-4 sm:px-6">
       <div className="mx-auto flex max-w-5xl flex-col gap-6">
         <div className="space-y-2">
           <h1 className="lg:text-3xl md:text-2xl text-xl xl:text-4xl font-bold text-white">{t('dashboard.title')}</h1>

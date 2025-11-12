@@ -573,14 +573,14 @@ export default function LearnerDashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#1A1A33] via-purple-900 to-[#1A1A33]">
+      <div className="flex min-h-screen items-center justify-center bg-background text-foreground transition-colors duration-300">
         <Loader2 className="h-10 w-10 animate-spin text-purple-400" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1A1A33] via-purple-900 to-[#1A1A33] py-24 px-4 sm:px-6">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300 py-24 px-4 sm:px-6">
       <div className="mx-auto flex max-w-5xl flex-col gap-6">
         <div className="space-y-2">
           <h1 className="text-xl font-bold text-white sm:text-2xl lg:text-3xl xl:text-4xl">

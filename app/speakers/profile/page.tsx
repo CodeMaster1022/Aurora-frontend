@@ -330,14 +330,14 @@ export default function SpeakerProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[#1A1A33] via-purple-900 to-[#1A1A33]">
+      <div className="flex items-center justify-center min-h-screen bg-background text-foreground transition-colors duration-300">
         <Loader2 className="h-10 w-10 animate-spin text-purple-400" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1A1A33] via-purple-900 to-[#1A1A33] pt-24 pb-16 px-4">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300 pt-24 pb-16 px-4">
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="space-y-2">
           <h1 className="text-4xl font-bold text-white">{t("dashboard.profile.title")}</h1>
