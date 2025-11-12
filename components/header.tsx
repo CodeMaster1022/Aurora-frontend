@@ -401,7 +401,7 @@ export function Header() {
             >
               <Globe className={`w-5 h-5 ${desktopNavLinkClass}`} />
             </button>
-            {/* <button
+            <button
               onClick={toggleTheme}
               className="p-2 text-gray-800 dark:text-gray-300 hover:text-orange-400 dark:hover:text-orange-300 transition-colors rounded-full hover:bg-white/20 dark:hover:bg-slate-700/40"
               aria-label={`Activate ${isDarkMode ? 'light' : 'dark'} mode`}
@@ -412,7 +412,7 @@ export function Header() {
               ) : (
                 <Moon className={`w-5 h-5 ${desktopNavLinkClass}`} />
               )}
-            </button> */}
+            </button>
             {isAuthenticated ? (
               <div className="relative user-menu-container">
                 <button 
@@ -483,7 +483,7 @@ export function Header() {
             >
               <Globe className="w-5 h-5 text-gray-800 dark:text-gray-300 transition-colors" />
             </button>
-            {/* <button
+            <button
               onClick={toggleTheme}
               className="p-2 text-gray-800 dark:text-gray-300 hover:text-orange-300 dark:hover:text-orange-300 transition-colors rounded-full hover:bg-white/10 dark:hover:bg-slate-700/40"
               aria-label={`Activate ${isDarkMode ? 'light' : 'dark'} mode`}
@@ -494,7 +494,7 @@ export function Header() {
               ) : (
                 <Moon className="w-5 h-5 text-gray-800 dark:text-gray-300 transition-colors" />
               )}
-            </button> */}
+            </button>
           </div>
         
         </div>
