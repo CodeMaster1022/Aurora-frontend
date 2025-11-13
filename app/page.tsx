@@ -121,13 +121,8 @@ export default function HomePage() {
             <div className="mx-auto h-full w-full max-w-5xl rounded-full bg-primary/30 dark:bg-primary/20" />
           </div>
           <div className="mx-auto flex max-w-4xl flex-col items-center gap-8 px-6 text-center sm:px-8">
-            <span className="text-sm font-semibold uppercase tracking-[0.4em] text-primary">
-              {t("home.badge")}
-            </span>
             <h1 className="text-4xl font-bold leading-tight text-foreground sm:text-5xl lg:text-6xl">
-              <span className="block">{t("home.title.line1")}</span>
-              <span className="block">{t("home.title.line2")}</span>
-              <span className="block">{t("home.title.line3")}</span>
+            {t("home.badge")}
             </h1>
             <p className="max-w-2xl text-base text-muted-foreground sm:text-lg lg:text-xl">
               {t("home.hero.subtitle")}
