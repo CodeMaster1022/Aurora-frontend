@@ -145,7 +145,7 @@ export default function AboutPage() {
           >
             <motion.div
               key={activeIndex}
-              className="relative overflow-hidden rounded-3xl shadow-xl border border-border/60 aspect-[4/4] object-fit"
+              className="relative overflow-hidden rounded-3xl shadow-xl border border-border/60 aspect-[9/10] object-fit"
               initial={{ opacity: 0, scale: 0.98, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ duration: 0.5, ease: "easeOut" }}

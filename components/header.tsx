@@ -26,7 +26,22 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showAuthMenu, setShowAuthMenu] = useState(false)
-  const [theme, setTheme] = useState<ThemeMode>("light")
+  const [theme, setTheme] = useState<ThemeMode>(() => {
+    if (typeof window === "undefined") {
+      return "light"
+    }
+
+    const storedTheme = window.localStorage.getItem("aurora-theme") as ThemeMode | null
+    if (storedTheme === "light" || storedTheme === "dark") {
+      return storedTheme
+    }
+
+    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      return "dark"
+    }
+
+    return "light"
+  })
 
   const router = useRouter()
   const pathname = usePathname()
@@ -42,18 +57,6 @@ export function Header() {
     ],
     [t],
   )
-
-  useEffect(() => {
-    const storedTheme = window.localStorage.getItem("aurora-theme") as ThemeMode | null
-    if (storedTheme === "light" || storedTheme === "dark") {
-      setTheme(storedTheme)
-      return
-    }
-
-    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      setTheme("dark")
-    }
-  }, [])
 
   useEffect(() => {
     const root = document.documentElement
@@ -101,7 +104,7 @@ export function Header() {
 
   const profileHref = useMemo(() => {
     if (!isAuthenticated) {
-      return "/auth/student-auth"
+      return "/auth"
     }
 
     if (user?.role === "learner") {
@@ -126,7 +129,7 @@ export function Header() {
     <header
       className={`sticky top-0 z-50 w-full border-b border-transparent transition-all ${isScrolled ? "border-border bg-background/85 shadow-sm backdrop-blur-lg" : "bg-background/70"}`}
     >
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-4 transition-all md:px-6">
+      <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 pr-2 pl-4 sm:px-4 py-2 sm:py-4 transition-all md:px-6">
         <div className="flex items-center gap-6">
           <Link
             href="/"
@@ -174,7 +177,39 @@ export function Header() {
           >
             {theme === "dark" ? <Sun className="size-5" /> : <Moon className="size-5" />}
           </Button>
+          {!isAuthenticated ? (
+            <div className="relative block md:hidden auth-menu-container">
+              <Button
+                variant="ghost"
+                className="flex items-center gap-2 rounded-full py-2 text-sm font-medium text-white cursor-pointer transition-all hover:bg-accent/60 hover:text-foreground/90"
+                onClick={() => setShowAuthMenu((prev) => !prev)}
+                aria-expanded={showAuthMenu}
+                aria-haspopup="menu"
+                aria-label={t("header.login")}
+              >
+                <UserIcon className="size-5 text-foreground" />
+              </Button>
 
+              {showAuthMenu && (
+                <div className="absolute right-0 mt-3 w-56 overflow-hidden rounded-xl border border-border bg-background shadow-xl">
+                  <Link
+                    href="/auth/student-auth"
+                    className="flex items-center justify-between px-4 py-3 text-sm text-foreground transition-colors hover:bg-accent/50"
+                    onClick={() => setShowAuthMenu(false)}
+                  >
+                    {t("header.loginStudent")}
+                  </Link>
+                  <Link
+                    href="/auth/speaker-auth"
+                    className="flex items-center justify-between px-4 py-3 text-sm text-foreground transition-colors hover:bg-accent/50"
+                    onClick={() => setShowAuthMenu(false)}
+                  >
+                    {t("header.loginSpeaker")}
+                  </Link>
+                </div>
+              )}
+            </div>
+          ) : null}
           {isAuthenticated ? (
             <>
               <div className="relative user-menu-container md:hidden">
@@ -189,7 +224,7 @@ export function Header() {
                   aria-haspopup="menu"
                   aria-expanded={showUserMenu}
                 >
-                  <UserIcon className="size-5 text-primary" />
+                  <UserIcon className="size-5" />
                 </Button>
 
                 {showUserMenu && (
@@ -225,7 +260,7 @@ export function Header() {
                   aria-haspopup="menu"
                   aria-expanded={showUserMenu}
                 >
-                  <UserIcon className="size-4 text-primary" />
+                  <UserIcon className="size-4" />
                   <span className="ml-2">
                     {user?.firstname || user?.email || t("header.profile")}
                   </span>

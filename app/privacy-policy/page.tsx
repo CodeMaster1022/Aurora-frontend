@@ -7,156 +7,207 @@ export default function PrivacyPolicyPage() {
   const { t } = useTranslation()
   
   return (
-    <div className="min-h-screen bg-[#0F172A] pt-12">
-      <Header />
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        <div className="bg-white rounded-lg shadow-lg p-6 sm:p-8 lg:p-12 space-y-8">
+    <div className="min-h-screen bg-background">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16">
+        <div className="bg-background rounded-lg shadow-lg p-6 sm:p-8 lg:p-12 space-y-8">
           <div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-[#524FD5] mb-4">
-              Aviso de Privacidad – Aurora
+            <h1 className="text-3xl sm:text-4xl font-bold text-base mb-4">
+              {t('privacy.title')}
             </h1>
-            <p className="text-gray-600 text-sm">
-              Última actualización: 19 OCTUBRE 2025
+            <p className="text-primary text-sm">
+              {t('privacy.lastUpdated')}
             </p>
           </div>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-bold text-[#0F172A]">1. Identidad y Contacto del Responsable</h2>
-            <p className="text-gray-700 leading-relaxed">
-              El presente Aviso de Privacidad corresponde a Aurora, una iniciativa digital accesible desde{" "}
-              <a href="https://weareaurora.tech" className="text-[#524FD5] hover:underline" target="_blank" rel="noopener noreferrer">
-                https://weareaurora.tech
+            <h2 className="text-2xl font-bold text-base">
+              {t('privacy.section1.title')}
+            </h2>
+            <p className="text-foreground leading-relaxed">
+              {t('privacy.section1.paragraph1.part1')}{" "}
+              <a
+                href="https://weareaurora.tech"
+                className="secondary-foreground hover:underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t('privacy.section1.paragraph1.link')}
               </a>{" "}
-              (en adelante, "la Plataforma"), dedicada a conectar estudiantes de inglés con adultos mayores para promover la práctica del idioma y la convivencia intergeneracional.
+              {t('privacy.section1.paragraph1.part2')}
             </p>
-            <p className="text-gray-700 leading-relaxed">
-              Aurora actualmente no opera como persona moral constituida, sino como proyecto en desarrollo.
+            <p className="text-foreground leading-relaxed">
+              {t('privacy.section1.paragraph2')}
             </p>
-            <p className="text-gray-700 leading-relaxed">
-              Para cualquier duda o solicitud relacionada con la protección de datos personales, puedes comunicarte al correo:
+            <p className="text-foreground leading-relaxed">
+              {t('privacy.section1.paragraph3')}
             </p>
-            <p className="text-gray-700 leading-relaxed">
-              📩 <a href="mailto:weareaurora.tech@gmail.com" className="text-[#524FD5] hover:underline">weareaurora.tech@gmail.com</a>
+            <p className="text-foreground leading-relaxed">
+              {t('privacy.section1.emailLabel')}{" "}
+              <a
+                href="mailto:weareaurora.tech@gmail.com"
+                className="secondary-foreground hover:underline"
+              >
+                {t('privacy.section1.emailText')}
+              </a>
             </p>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-bold text-[#0F172A]">2. Datos Personales que se Recaban</h2>
-            <p className="text-gray-700 leading-relaxed">
-              Aurora podrá recopilar los siguientes datos personales de los usuarios (estudiantes y adultos mayores):
+            <h2 className="text-2xl font-bold text-base">
+              {t('privacy.section2.title')}
+            </h2>
+            <p className="text-foreground leading-relaxed">
+              {t('privacy.section2.paragraph1')}
             </p>
-            <ul className="list-disc list-inside space-y-2 text-gray-700 ml-4">
-              <li>Nombre y apellido</li>
-              <li>Edad o rango de edad</li>
-              <li>Correo electrónico</li>
-              <li>País o ciudad de residencia</li>
-              <li>Nivel de inglés o idioma nativo</li>
-              <li>Preferencias de horario o intereses</li>
-              <li>Imagen, voz o video (en caso de que se utilicen herramientas de videollamada o grabación)</li>
-              <li>Información técnica (dirección IP, dispositivo, navegador, cookies)</li>
+            <ul className="list-disc list-inside space-y-2 text-foreground ml-4">
+              <li>{t('privacy.section2.item1')}</li>
+              <li>{t('privacy.section2.item2')}</li>
+              <li>{t('privacy.section2.item3')}</li>
+              <li>{t('privacy.section2.item4')}</li>
+              <li>{t('privacy.section2.item5')}</li>
+              <li>{t('privacy.section2.item6')}</li>
+              <li>{t('privacy.section2.item7')}</li>
+              <li>{t('privacy.section2.item8')}</li>
             </ul>
-            <p className="text-gray-700 leading-relaxed font-semibold">
-              Aurora no solicita ni almacena información financiera ni médica.
+            <p className="text-foreground leading-relaxed font-semibold">
+              {t('privacy.section2.note')}
             </p>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-bold text-[#0F172A]">3. Finalidades del Tratamiento</h2>
-            <p className="text-gray-700 leading-relaxed">
-              Los datos personales son utilizados para los siguientes fines:
+            <h2 className="text-2xl font-bold text-base">
+              {t('privacy.section3.title')}
+            </h2>
+            <p className="text-foreground leading-relaxed">
+              {t('privacy.section3.paragraph1')}
             </p>
             <div className="space-y-3">
               <div>
-                <p className="text-gray-700 leading-relaxed font-semibold mb-2">Finalidades principales:</p>
-                <ul className="list-disc list-inside space-y-2 text-gray-700 ml-4">
-                  <li>Permitir el registro y acceso a la Plataforma.</li>
-                  <li>Facilitar la conexión entre estudiantes y adultos mayores.</li>
-                  <li>Administrar y mejorar la experiencia de uso.</li>
-                  <li>Supervisar el cumplimiento de las normas de convivencia.</li>
+                <p className="text-foreground leading-relaxed font-semibold mb-2">
+                  {t('privacy.section3.primaryHeading')}
+                </p>
+                <ul className="list-disc list-inside space-y-2 text-foreground ml-4">
+                  <li>{t('privacy.section3.primaryItem1')}</li>
+                  <li>{t('privacy.section3.primaryItem2')}</li>
+                  <li>{t('privacy.section3.primaryItem3')}</li>
+                  <li>{t('privacy.section3.primaryItem4')}</li>
                 </ul>
               </div>
               <div>
-                <p className="text-gray-700 leading-relaxed font-semibold mb-2">Finalidades secundarias (opcionales):</p>
-                <ul className="list-disc list-inside space-y-2 text-gray-700 ml-4">
-                  <li>Enviar notificaciones sobre mejoras o novedades del proyecto.</li>
-                  <li>Realizar encuestas o análisis de satisfacción.</li>
+                <p className="text-foreground leading-relaxed font-semibold mb-2">
+                  {t('privacy.section3.secondaryHeading')}
+                </p>
+                <ul className="list-disc list-inside space-y-2 text-foreground ml-4">
+                  <li>{t('privacy.section3.secondaryItem1')}</li>
+                  <li>{t('privacy.section3.secondaryItem2')}</li>
                 </ul>
               </div>
             </div>
-            <p className="text-gray-700 leading-relaxed">
-              El usuario podrá oponerse a las finalidades secundarias enviando un correo a{" "}
-              <a href="mailto:contact@weareaurora.tech" className="text-[#524FD5] hover:underline">contact@weareaurora.tech</a>.
+            <p className="text-foreground leading-relaxed">
+              {t('privacy.section3.paragraph2.part1')}{" "}
+              <a
+                href="mailto:contact@weareaurora.tech"
+                className="secondary-foreground hover:underline"
+              >
+                {t('privacy.section3.paragraph2.link')}
+              </a>
+              {t('privacy.section3.paragraph2.part2')}
             </p>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-bold text-[#0F172A]">4. Transferencia de Datos</h2>
-            <p className="text-gray-700 leading-relaxed">
-              Aurora no comparte, vende ni renta datos personales a terceros.
+            <h2 className="text-2xl font-bold text-base">
+              {t('privacy.section4.title')}
+            </h2>
+            <p className="text-foreground leading-relaxed">
+              {t('privacy.section4.paragraph1')}
             </p>
-            <p className="text-gray-700 leading-relaxed">
-              Sin embargo, podrá utilizar proveedores tecnológicos (como servicios de hosting o videollamada) que procesen los datos únicamente con fines operativos y bajo medidas de seguridad adecuadas.
-            </p>
-          </section>
-
-          <section className="space-y-4">
-            <h2 className="text-2xl font-bold text-[#0F172A]">5. Grabaciones y Uso de Imagen</h2>
-            <p className="text-gray-700 leading-relaxed">
-              En caso de que se graben sesiones o videollamadas, el usuario será notificado previamente y podrá otorgar o negar su consentimiento.
-            </p>
-            <p className="text-gray-700 leading-relaxed">
-              Las grabaciones se utilizarán únicamente con fines de mejora, supervisión o evaluación interna y se eliminarán en un plazo razonable.
+            <p className="text-foreground leading-relaxed">
+              {t('privacy.section4.paragraph2')}
             </p>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-bold text-[#0F172A]">6. Derechos ARCO</h2>
-            <p className="text-gray-700 leading-relaxed">
-              El usuario puede ejercer en cualquier momento sus derechos de Acceso, Rectificación, Cancelación y Oposición (ARCO), así como revocar su consentimiento para el tratamiento de sus datos, enviando una solicitud al correo:
+            <h2 className="text-2xl font-bold text-base">
+              {t('privacy.section5.title')}
+            </h2>
+            <p className="text-foreground leading-relaxed">
+              {t('privacy.section5.paragraph1')}
             </p>
-            <p className="text-gray-700 leading-relaxed">
-              📧 <a href="mailto:contact@weareaurora.tech" className="text-[#524FD5] hover:underline">contact@weareaurora.tech</a>
-            </p>
-            <p className="text-gray-700 leading-relaxed">
-              Aurora responderá en un plazo máximo de 20 días hábiles.
-            </p>
-          </section>
-
-          <section className="space-y-4">
-            <h2 className="text-2xl font-bold text-[#0F172A]">7. Seguridad de la Información</h2>
-            <p className="text-gray-700 leading-relaxed">
-              Aurora aplica medidas razonables de seguridad técnica y administrativa para proteger los datos personales contra pérdida, alteración o acceso no autorizado.
-            </p>
-            <p className="text-gray-700 leading-relaxed">
-              Sin embargo, el usuario reconoce que ningún sistema es completamente infalible y utiliza la Plataforma bajo su propio riesgo.
+            <p className="text-foreground leading-relaxed">
+              {t('privacy.section5.paragraph2')}
             </p>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-bold text-[#0F172A]">8. Conservación de los Datos</h2>
-            <p className="text-gray-700 leading-relaxed">
-              Los datos personales se conservarán únicamente durante el tiempo necesario para cumplir con las finalidades descritas o hasta que el usuario solicite su eliminación.
+            <h2 className="text-2xl font-bold text-base">
+              {t('privacy.section6.title')}
+            </h2>
+            <p className="text-foreground leading-relaxed">
+              {t('privacy.section6.paragraph1')}
+            </p>
+            <p className="text-foreground leading-relaxed">
+              {t('privacy.section6.emailLabel')}{" "}
+              <a
+                href="mailto:contact@weareaurora.tech"
+                className="secondary-foreground hover:underline"
+              >
+                {t('privacy.section6.emailText')}
+              </a>
+            </p>
+            <p className="text-foreground leading-relaxed">
+              {t('privacy.section6.paragraph2')}
             </p>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-bold text-[#0F172A]">9. Modificaciones</h2>
-            <p className="text-gray-700 leading-relaxed">
-              Aurora podrá actualizar este Aviso de Privacidad cuando sea necesario.
+            <h2 className="text-2xl font-bold text-base">
+              {t('privacy.section7.title')}
+            </h2>
+            <p className="text-foreground leading-relaxed">
+              {t('privacy.section7.paragraph1')}
             </p>
-            <p className="text-gray-700 leading-relaxed">
-              Las modificaciones se publicarán en{" "}
-              <a href="https://weareaurora.tech" className="text-[#524FD5] hover:underline" target="_blank" rel="noopener noreferrer">
-                https://weareaurora.tech
+            <p className="text-foreground leading-relaxed">
+              {t('privacy.section7.paragraph2')}
+            </p>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-2xl font-bold text-base">
+              {t('privacy.section8.title')}
+            </h2>
+            <p className="text-foreground leading-relaxed">
+              {t('privacy.section8.paragraph1')}
+            </p>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-2xl font-bold text-base">
+              {t('privacy.section9.title')}
+            </h2>
+            <p className="text-foreground leading-relaxed">
+              {t('privacy.section9.paragraph1')}
+            </p>
+            <p className="text-foreground leading-relaxed">
+              {t('privacy.section9.paragraph2.part1')}{" "}
+              <a
+                href="https://weareaurora.tech"
+                className="secondary-foreground hover:underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t('privacy.section9.paragraph2.link')}
               </a>{" "}
-              con la fecha de actualización correspondiente.
+              {t('privacy.section9.paragraph2.part2')}
             </p>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-bold text-[#0F172A]">10. Aceptación</h2>
-            <p className="text-gray-700 leading-relaxed">
-              Al registrarse o utilizar la Plataforma, el usuario reconoce haber leído y aceptado este Aviso de Privacidad.
+            <h2 className="text-2xl font-bold text-base">
+              {t('privacy.section10.title')}
+            </h2>
+            <p className="text-foreground leading-relaxed">
+              {t('privacy.section10.paragraph1')}
             </p>
           </section>
         </div>

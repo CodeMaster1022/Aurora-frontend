@@ -13,6 +13,8 @@ export type TranslationKey =
   | 'header.logout'
   | 'header.discover'
   | 'header.speaker'
+  | 'header.loginStudent'
+  | 'header.loginSpeaker'
   
   // Home Page
   | 'home.badge'
@@ -47,6 +49,20 @@ export type TranslationKey =
   | 'home.becomeSpeaker.point2'
   | 'home.becomeSpeaker.point3'
   | 'home.becomeSpeaker.cta'
+  | 'home.hero.subtitle'
+  | 'home.becomeSpeaker.subtitle'
+  | 'home.becomeSpeaker.steps.step1.label'
+  | 'home.becomeSpeaker.steps.step2.label'
+  | 'home.becomeSpeaker.steps.step3.label'
+  
+  // Speakers Page
+  | 'speakers.title'
+  | 'speakers.subtitle'
+  | 'speakers.search.placeholder'
+  | 'speakers.noResults.title'
+  | 'speakers.noResults.description'
+  | 'speakers.noResults.reset'
+  | 'speakers.card.book'
   | 'home.speakerCard.age'
   | 'home.speakerCard.book'
   | 'home.speakerCard.free'
@@ -92,6 +108,149 @@ export type TranslationKey =
   | 'auth.terms.modal.accept'
   | 'auth.terms.modal.accepting'
   | 'auth.terms.error'
+  | 'auth.common.back'
+  | 'auth.common.continue'
+  | 'auth.common.select'
+  | 'auth.common.fullName'
+  | 'auth.common.fullNamePlaceholder'
+  | 'auth.common.emailPlaceholder'
+  | 'auth.common.passwordPlaceholder'
+  | 'auth.common.passwordCreatePlaceholder'
+  | 'auth.errors.loginFailed'
+  | 'auth.errors.loginUnknown'
+  | 'auth.errors.registerFailed'
+  | 'auth.validation.fullNameRequired'
+  | 'auth.validation.emailRequired'
+  | 'auth.validation.emailInvalid'
+  | 'auth.validation.passwordRequired'
+  | 'auth.validation.gmailRequired'
+  | 'auth.validation.birthDateRequired'
+  | 'auth.validation.cityRequired'
+  | 'auth.validation.bioRequired'
+  | 'auth.validation.photoRequired'
+  
+  // Student Auth Page
+  | 'auth.student.title'
+  | 'auth.student.subtitle'
+  | 'auth.student.login.submitting'
+  | 'auth.student.register.submit'
+  
+  // Speaker Auth Page
+  | 'auth.speaker.title'
+  | 'auth.speaker.subtitle'
+  | 'auth.speaker.login.submitting'
+  | 'auth.speaker.register.step1.emailLabel'
+  | 'auth.speaker.register.step1.emailPlaceholder'
+  | 'auth.speaker.register.step1.emailHint'
+  | 'auth.speaker.register.step1.submit'
+  | 'auth.speaker.register.step2.birthDateLabel'
+  | 'auth.speaker.register.step2.cityLabel'
+  | 'auth.speaker.register.step2.cityPlaceholder'
+  | 'auth.speaker.register.step2.bioLabel'
+  | 'auth.speaker.register.step2.bioPlaceholder'
+  | 'auth.speaker.register.step2.photoLabel'
+  | 'auth.speaker.register.step2.photoUpload'
+  | 'auth.speaker.register.step2.photoHint'
+  | 'auth.speaker.register.step2.photoSelect'
+  | 'auth.speaker.register.step2.back'
+  | 'auth.speaker.register.step2.submit'
+  | 'auth.speaker.register.step2.submitting'
+  
+  // Terms and Conditions Page
+  | 'terms.title'
+  | 'terms.section1.title'
+  | 'terms.section1.paragraph1'
+  | 'terms.section2.title'
+  | 'terms.section2.paragraph1'
+  | 'terms.section2.paragraph2'
+  | 'terms.section3.title'
+  | 'terms.section3.paragraph1'
+  | 'terms.section4.title'
+  | 'terms.section4.intro'
+  | 'terms.section4.item1'
+  | 'terms.section4.item2'
+  | 'terms.section4.item3'
+  | 'terms.section4.paragraph1'
+  | 'terms.section5.title'
+  | 'terms.section5.paragraph1'
+  | 'terms.section5.intro'
+  | 'terms.section5.item1'
+  | 'terms.section5.item2'
+  | 'terms.section5.item3'
+  | 'terms.section5.paragraph2'
+  | 'terms.section6.title'
+  | 'terms.section6.part1'
+  | 'terms.section6.link1'
+  | 'terms.section6.part2'
+  | 'terms.section6.link2'
+  | 'terms.section6.paragraph2'
+  | 'terms.section7.title'
+  | 'terms.section7.paragraph1'
+  | 'terms.section8.title'
+  | 'terms.section8.paragraph1'
+  | 'terms.section9.title'
+  | 'terms.section9.paragraph1'
+  | 'terms.section10.title'
+  | 'terms.section10.paragraph1'
+  
+  // Privacy Policy Page
+  | 'privacy.title'
+  | 'privacy.lastUpdated'
+  | 'privacy.section1.title'
+  | 'privacy.section1.paragraph1.part1'
+  | 'privacy.section1.paragraph1.link'
+  | 'privacy.section1.paragraph1.part2'
+  | 'privacy.section1.paragraph2'
+  | 'privacy.section1.paragraph3'
+  | 'privacy.section1.emailLabel'
+  | 'privacy.section1.emailText'
+  | 'privacy.section2.title'
+  | 'privacy.section2.paragraph1'
+  | 'privacy.section2.item1'
+  | 'privacy.section2.item2'
+  | 'privacy.section2.item3'
+  | 'privacy.section2.item4'
+  | 'privacy.section2.item5'
+  | 'privacy.section2.item6'
+  | 'privacy.section2.item7'
+  | 'privacy.section2.item8'
+  | 'privacy.section2.note'
+  | 'privacy.section3.title'
+  | 'privacy.section3.paragraph1'
+  | 'privacy.section3.primaryHeading'
+  | 'privacy.section3.primaryItem1'
+  | 'privacy.section3.primaryItem2'
+  | 'privacy.section3.primaryItem3'
+  | 'privacy.section3.primaryItem4'
+  | 'privacy.section3.secondaryHeading'
+  | 'privacy.section3.secondaryItem1'
+  | 'privacy.section3.secondaryItem2'
+  | 'privacy.section3.paragraph2.part1'
+  | 'privacy.section3.paragraph2.link'
+  | 'privacy.section3.paragraph2.part2'
+  | 'privacy.section4.title'
+  | 'privacy.section4.paragraph1'
+  | 'privacy.section4.paragraph2'
+  | 'privacy.section5.title'
+  | 'privacy.section5.paragraph1'
+  | 'privacy.section5.paragraph2'
+  | 'privacy.section6.title'
+  | 'privacy.section6.paragraph1'
+  | 'privacy.section6.emailLabel'
+  | 'privacy.section6.emailText'
+  | 'privacy.section6.paragraph2'
+  | 'privacy.section7.title'
+  | 'privacy.section7.paragraph1'
+  | 'privacy.section7.paragraph2'
+  | 'privacy.section8.title'
+  | 'privacy.section8.paragraph1'
+  | 'privacy.section9.title'
+  | 'privacy.section9.paragraph1'
+  | 'privacy.section9.paragraph2.part1'
+  | 'privacy.section9.paragraph2.link'
+  | 'privacy.section9.paragraph2.part2'
+  | 'privacy.section10.title'
+  | 'privacy.section10.paragraph1'
   
   | 'auth.signin.title'
   | 'auth.signin.email'
@@ -100,6 +259,10 @@ export type TranslationKey =
   | 'auth.signin.loading'
   | 'auth.signin.noAccount'
   | 'auth.signin.signup'
+  | 'auth.roleSelection.title'
+  | 'auth.roleSelection.subtitle'
+  | 'auth.roleSelection.student'
+  | 'auth.roleSelection.speaker'
   
   // Speakers Page
   | 'speakers.title'
@@ -124,6 +287,10 @@ export type TranslationKey =
   | 'speakers.card.sessions'
   | 'speakers.noResults'
   | 'speakers.clearFilters'
+  | 'speakers.noResults.title'
+  | 'speakers.noResults.description'
+  | 'speakers.noResults.reset'
+  | 'speakers.card.book'
   
   // Speaker Dashboard
   | 'dashboard.title'
@@ -405,6 +572,8 @@ export const translations: Record<Language, Translations> = {
     'header.logout': 'Logout',
     'header.discover': 'Discover',
     'header.speaker': 'Speaker',
+    'header.loginStudent': 'Student',
+    'header.loginSpeaker': 'Speaker',
     
     // Home Page
     'home.badge': 'Never stop learning',
@@ -439,6 +608,11 @@ export const translations: Record<Language, Translations> = {
     'home.becomeSpeaker.point2': 'Define your available schedules.',
     'home.becomeSpeaker.point3': 'Start conversing and sharing stories.',
     'home.becomeSpeaker.cta': 'BECOME A SPEAKER',
+    'home.hero.subtitle': 'Practice your English by connecting with people who have a lot to share.',
+    'home.becomeSpeaker.subtitle': 'Share your stories, connect with eager learners, and make a meaningful impact.',
+    'home.becomeSpeaker.steps.step1.label': 'Step 1',
+    'home.becomeSpeaker.steps.step2.label': 'Step 2',
+    'home.becomeSpeaker.steps.step3.label': 'Step 3',
     'home.speakerCard.age': 'years old',
     'home.speakerCard.book': 'Book',
     'home.speakerCard.free': 'Free',
@@ -484,6 +658,145 @@ export const translations: Record<Language, Translations> = {
     'auth.terms.modal.accept': 'Accept and Continue',
     'auth.terms.modal.accepting': 'Accepting...',
     'auth.terms.error': 'Failed to accept terms. Please try again.',
+    'auth.common.back': 'Back',
+    'auth.common.continue': 'Continue',
+    'auth.common.select': 'Select',
+    'auth.common.fullName': 'Full Name',
+    'auth.common.fullNamePlaceholder': 'Enter your full name',
+    'auth.common.emailPlaceholder': 'Enter your email address',
+    'auth.common.passwordPlaceholder': 'Enter your password',
+    'auth.common.passwordCreatePlaceholder': 'Create a secure password',
+    'auth.errors.loginFailed': 'We could not sign you in',
+    'auth.errors.loginUnknown': 'Something went wrong while signing in',
+    'auth.errors.registerFailed': 'We could not complete the registration',
+    'auth.validation.fullNameRequired': 'Full name is required',
+    'auth.validation.emailRequired': 'Email is required',
+    'auth.validation.emailInvalid': 'Please enter a valid email address',
+    'auth.validation.passwordRequired': 'Password is required',
+    'auth.validation.gmailRequired': 'Please use a Gmail account (@gmail.com)',
+    'auth.validation.birthDateRequired': 'Birth date is required',
+    'auth.validation.cityRequired': 'City is required',
+    'auth.validation.bioRequired': 'A short description is required',
+    'auth.validation.photoRequired': 'Please upload a photo',
+    'auth.student.title': 'Learner',
+    'auth.student.subtitle': 'Sign in or create your account',
+    'auth.student.login.submitting': 'Signing in...',
+    'auth.student.register.submit': 'Continue',
+    'auth.speaker.title': 'Speaker',
+    'auth.speaker.subtitle': 'Sign in or create your speaker account',
+    'auth.speaker.login.submitting': 'Signing in...',
+    'auth.speaker.register.step1.emailLabel': 'Email (Gmail)',
+    'auth.speaker.register.step1.emailPlaceholder': 'example@gmail.com',
+    'auth.speaker.register.step1.emailHint': 'Must be a Gmail account (@gmail.com)',
+    'auth.speaker.register.step1.submit': 'Continue',
+    'auth.speaker.register.step2.birthDateLabel': 'Birth date',
+    'auth.speaker.register.step2.cityLabel': 'City of residence',
+    'auth.speaker.register.step2.cityPlaceholder': 'e.g. Miami, FL',
+    'auth.speaker.register.step2.bioLabel': 'Short description',
+    'auth.speaker.register.step2.bioPlaceholder': 'Tell us a little about yourself...',
+    'auth.speaker.register.step2.photoLabel': 'Photo',
+    'auth.speaker.register.step2.photoUpload': 'Upload photo',
+    'auth.speaker.register.step2.photoHint': 'JPG or PNG, up to 5MB.',
+    'auth.speaker.register.step2.photoSelect': 'Choose file',
+    'auth.speaker.register.step2.back': 'Back',
+    'auth.speaker.register.step2.submit': 'Create Account',
+    'auth.speaker.register.step2.submitting': 'Creating account...',
+    
+    // Terms and Conditions Page
+    'terms.title': 'Terms and Conditions of Use – Aurora',
+    'terms.section1.title': '1. Acceptance of the Terms',
+    'terms.section1.paragraph1': 'By accessing or using the Aurora platform (hereinafter, “the Platform”), the user agrees to comply with and be legally bound by these Terms and Conditions of Use. If you do not agree, you must refrain from using the Platform.',
+    'terms.section2.title': '2. Description of the Service',
+    'terms.section2.paragraph1': 'Aurora is a digital platform that connects advanced English students with older adults in order to encourage language practice through virtual conversations.',
+    'terms.section2.paragraph2': 'Aurora does not provide formal educational or therapeutic services and does not guarantee academic or personal outcomes.',
+    'terms.section3.title': '3. User Registration',
+    'terms.section3.paragraph1': 'To access the Platform, the user must provide truthful, complete, and updated information. The user is responsible for maintaining the confidentiality of their access credentials and for all activities carried out under their account.',
+    'terms.section4.title': '4. User Conduct',
+    'terms.section4.intro': 'The user agrees to:',
+    'terms.section4.item1': 'Maintain respectful and appropriate behavior during conversations.',
+    'terms.section4.item2': 'Avoid harassing, discriminating, spreading hate, or sharing inappropriate content.',
+    'terms.section4.item3': 'Refrain from using the Platform for commercial, political, religious, or unlawful purposes.',
+    'terms.section4.paragraph1': 'Aurora reserves the right to suspend or delete accounts that violate these rules without prior notice.',
+    'terms.section5.title': '5. Limitation of Liability',
+    'terms.section5.paragraph1': 'Aurora acts solely as a technological intermediary between users.',
+    'terms.section5.intro': 'Aurora is not responsible for:',
+    'terms.section5.item1': 'The content or accuracy of conversations held between users.',
+    'terms.section5.item2': 'Damages, losses, or incidents arising from user interactions inside or outside the Platform.',
+    'terms.section5.item3': 'Technical failures, service interruptions, or data loss.',
+    'terms.section5.paragraph2': 'Use of the Platform is undertaken at the exclusive responsibility of the user.',
+    'terms.section6.title': '6. Protection of Personal Data',
+    'terms.section6.part1': 'Aurora collects and processes personal data in accordance with its',
+    'terms.section6.link1': 'Privacy Notice',
+    'terms.section6.part2': 'available at',
+    'terms.section6.link2': 'this link',
+    'terms.section6.paragraph2': 'The user accepts this processing for operational purposes and to improve the service.',
+    'terms.section7.title': '7. Intellectual Property',
+    'terms.section7.paragraph1': 'All content on the Platform (name, logo, design, text, code, databases, and features) is the exclusive property of Aurora or is used under the appropriate licenses. Copying, modifying, or distributing such content without express authorization is prohibited.',
+    'terms.section8.title': '8. Third-Party Links',
+    'terms.section8.paragraph1': 'Aurora may contain links to third-party sites. We are not responsible for the content, policies, or practices of those external sites.',
+    'terms.section9.title': '9. Modifications',
+    'terms.section9.paragraph1': 'Aurora may modify these Terms and Conditions at any time. Changes will take effect once they are published on the Platform.',
+    'terms.section10.title': '10. Governing Law',
+    'terms.section10.paragraph1': 'These Terms are governed by the laws of the United Mexican States, and any dispute will be submitted to the competent courts of Mexico City, waiving any other jurisdiction that may correspond.',
+    
+    // Privacy Policy Page
+    'privacy.title': 'Privacy Notice – Aurora',
+    'privacy.lastUpdated': 'Last updated: October 19, 2025',
+    'privacy.section1.title': '1. Identity and Contact of the Controller',
+    'privacy.section1.paragraph1.part1': 'This Privacy Notice corresponds to Aurora, a digital initiative accessible from',
+    'privacy.section1.paragraph1.link': 'https://weareaurora.tech',
+    'privacy.section1.paragraph1.part2': '(hereinafter, “the Platform”), dedicated to connecting English learners with older adults to promote language practice and intergenerational connection.',
+    'privacy.section1.paragraph2': 'Aurora is not yet incorporated as a legal entity; it currently operates as a project in development.',
+    'privacy.section1.paragraph3': 'For any question or request related to the protection of personal data, you can contact us at:',
+    'privacy.section1.emailLabel': '📩',
+    'privacy.section1.emailText': 'weareaurora.tech@gmail.com',
+    'privacy.section2.title': '2. Personal Data Collected',
+    'privacy.section2.paragraph1': 'Aurora may collect the following personal data from users (students and older adults):',
+    'privacy.section2.item1': 'First and last name',
+    'privacy.section2.item2': 'Age or age range',
+    'privacy.section2.item3': 'Email address',
+    'privacy.section2.item4': 'Country or city of residence',
+    'privacy.section2.item5': 'English level or native language',
+    'privacy.section2.item6': 'Schedule preferences or interests',
+    'privacy.section2.item7': 'Image, voice, or video (when videoconferencing or recording tools are used)',
+    'privacy.section2.item8': 'Technical information (IP address, device, browser, cookies)',
+    'privacy.section2.note': 'Aurora does not request or store financial or medical information.',
+    'privacy.section3.title': '3. Purposes of Processing',
+    'privacy.section3.paragraph1': 'Personal data are used for the following purposes:',
+    'privacy.section3.primaryHeading': 'Primary purposes:',
+    'privacy.section3.primaryItem1': 'Enable registration and access to the Platform.',
+    'privacy.section3.primaryItem2': 'Facilitate the connection between students and older adults.',
+    'privacy.section3.primaryItem3': 'Manage and improve the user experience.',
+    'privacy.section3.primaryItem4': 'Monitor compliance with community guidelines.',
+    'privacy.section3.secondaryHeading': 'Secondary (optional) purposes:',
+    'privacy.section3.secondaryItem1': 'Send notifications about project updates or improvements.',
+    'privacy.section3.secondaryItem2': 'Conduct satisfaction surveys or analyses.',
+    'privacy.section3.paragraph2.part1': 'Users may object to the secondary purposes by sending an email to',
+    'privacy.section3.paragraph2.link': 'contact@weareaurora.tech',
+    'privacy.section3.paragraph2.part2': '.',
+    'privacy.section4.title': '4. Data Transfers',
+    'privacy.section4.paragraph1': 'Aurora does not share, sell, or rent personal data to third parties.',
+    'privacy.section4.paragraph2': 'However, it may rely on technology providers (such as hosting or videoconferencing services) that process the data solely for operational purposes and under appropriate security measures.',
+    'privacy.section5.title': '5. Recordings and Use of Image',
+    'privacy.section5.paragraph1': 'If sessions or video calls are recorded, users will be notified in advance and may grant or deny their consent.',
+    'privacy.section5.paragraph2': 'Recordings will be used only for improvement, supervision, or internal evaluation purposes and will be deleted within a reasonable period.',
+    'privacy.section6.title': '6. ARCO Rights',
+    'privacy.section6.paragraph1': 'Users may exercise their rights of Access, Rectification, Cancellation, and Opposition (ARCO), as well as revoke their consent for data processing, by sending a request to:',
+    'privacy.section6.emailLabel': '📧',
+    'privacy.section6.emailText': 'contact@weareaurora.tech',
+    'privacy.section6.paragraph2': 'Aurora will respond within a maximum of 20 business days.',
+    'privacy.section7.title': '7. Information Security',
+    'privacy.section7.paragraph1': 'Aurora applies reasonable technical and administrative security measures to protect personal data against loss, alteration, or unauthorized access.',
+    'privacy.section7.paragraph2': 'However, the user acknowledges that no system is completely infallible and uses the Platform at their own risk.',
+    'privacy.section8.title': '8. Data Retention',
+    'privacy.section8.paragraph1': 'Personal data will be kept only for the time necessary to fulfill the described purposes or until the user requests their deletion.',
+    'privacy.section9.title': '9. Modifications',
+    'privacy.section9.paragraph1': 'Aurora may update this Privacy Notice whenever necessary.',
+    'privacy.section9.paragraph2.part1': 'Changes will be published on',
+    'privacy.section9.paragraph2.link': 'https://weareaurora.tech',
+    'privacy.section9.paragraph2.part2': 'with the corresponding update date.',
+    'privacy.section10.title': '10. Acceptance',
+    'privacy.section10.paragraph1': 'By registering for or using the Platform, the user acknowledges having read and accepted this Privacy Notice.',
     
     'auth.signin.title': 'Aurora',
     'auth.signin.email': 'Email Address',
@@ -492,6 +805,10 @@ export const translations: Record<Language, Translations> = {
     'auth.signin.loading': 'Signing in...',
     'auth.signin.noAccount': "Don't have an account?",
     'auth.signin.signup': 'Sign up',
+    'auth.roleSelection.title': 'Sign in to view your profile',
+    'auth.roleSelection.subtitle': 'Create an account or sign in to book sessions, manage your schedule, and connect with speakers.',
+    'auth.roleSelection.student': 'Sign In as Student',
+    'auth.roleSelection.speaker': 'Sign In as Speaker',
     
     // Speakers Page
     'speakers.title': 'Find Your Perfect Speaker',
@@ -516,6 +833,10 @@ export const translations: Record<Language, Translations> = {
     'speakers.card.sessions': 'completed sessions',
     'speakers.noResults': 'No speakers found matching your criteria.',
     'speakers.clearFilters': 'Clear Filters',
+    'speakers.noResults.title': 'No speakers found',
+    'speakers.noResults.description': 'Try adjusting your search or explore other topics to discover more voices.',
+    'speakers.noResults.reset': 'Clear Search',
+    'speakers.card.book': 'Book Session',
     
     // Speaker Dashboard
     'dashboard.title': 'Speaker Dashboard',
@@ -794,6 +1115,8 @@ export const translations: Record<Language, Translations> = {
     'header.logout': 'Cerrar sesión',
     'header.discover': 'Descubrir',
     'header.speaker': 'Speaker',
+    'header.loginStudent': 'Estudiante',
+    'header.loginSpeaker': 'Speaker',
     
     // Home Page
     'home.badge': 'Nunca dejes de aprender',
@@ -828,6 +1151,11 @@ export const translations: Record<Language, Translations> = {
     'home.becomeSpeaker.point2': 'Define tus horarios disponibles.',
     'home.becomeSpeaker.point3': 'Empieza a conversar y compartir historias.',
     'home.becomeSpeaker.cta': 'CONVERTIRME EN SPEAKER',
+    'home.hero.subtitle': 'Practica tu inglés conectando con personas que tienen mucho que compartir.',
+    'home.becomeSpeaker.subtitle': 'Comparte tus historias, conecta con estudiantes motivados y genera un impacto significativo.',
+    'home.becomeSpeaker.steps.step1.label': 'Paso 1',
+    'home.becomeSpeaker.steps.step2.label': 'Paso 2',
+    'home.becomeSpeaker.steps.step3.label': 'Paso 3',
     'home.speakerCard.age': 'años',
     'home.speakerCard.book': 'Agenda',
     'home.speakerCard.free': 'Gratis',
@@ -873,6 +1201,145 @@ export const translations: Record<Language, Translations> = {
     'auth.terms.modal.accept': 'Aceptar y Continuar',
     'auth.terms.modal.accepting': 'Aceptando...',
     'auth.terms.error': 'Error al aceptar los términos. Por favor intenta de nuevo.',
+    'auth.common.back': 'Atrás',
+    'auth.common.continue': 'Continuar',
+    'auth.common.select': 'Seleccionar',
+    'auth.common.fullName': 'Nombre completo',
+    'auth.common.fullNamePlaceholder': 'Ingresa tu nombre completo',
+    'auth.common.emailPlaceholder': 'Ingresa tu correo electrónico',
+    'auth.common.passwordPlaceholder': 'Ingresa tu contraseña',
+    'auth.common.passwordCreatePlaceholder': 'Crea una contraseña segura',
+    'auth.errors.loginFailed': 'No pudimos iniciar sesión',
+    'auth.errors.loginUnknown': 'Ocurrió un problema al iniciar sesión',
+    'auth.errors.registerFailed': 'No pudimos completar el registro',
+    'auth.validation.fullNameRequired': 'El nombre completo es obligatorio',
+    'auth.validation.emailRequired': 'El correo es obligatorio',
+    'auth.validation.emailInvalid': 'Introduce un correo válido',
+    'auth.validation.passwordRequired': 'La contraseña es obligatoria',
+    'auth.validation.gmailRequired': 'Debe ser una cuenta de Gmail (@gmail.com)',
+    'auth.validation.birthDateRequired': 'La fecha de nacimiento es obligatoria',
+    'auth.validation.cityRequired': 'La ciudad es obligatoria',
+    'auth.validation.bioRequired': 'La descripción es obligatoria',
+    'auth.validation.photoRequired': 'Sube una fotografía',
+    'auth.student.title': 'Estudiante',
+    'auth.student.subtitle': 'Inicia sesión o crea tu cuenta',
+    'auth.student.login.submitting': 'Iniciando sesión...',
+    'auth.student.register.submit': 'Continuar',
+    'auth.speaker.title': 'Speaker / Orador',
+    'auth.speaker.subtitle': 'Inicia sesión o crea tu cuenta como orador',
+    'auth.speaker.login.submitting': 'Iniciando sesión...',
+    'auth.speaker.register.step1.emailLabel': 'Correo electrónico (Gmail)',
+    'auth.speaker.register.step1.emailPlaceholder': 'ejemplo@gmail.com',
+    'auth.speaker.register.step1.emailHint': 'Debe ser una cuenta de Gmail (@gmail.com)',
+    'auth.speaker.register.step1.submit': 'Continuar',
+    'auth.speaker.register.step2.birthDateLabel': 'Fecha de nacimiento',
+    'auth.speaker.register.step2.cityLabel': 'Ciudad de residencia',
+    'auth.speaker.register.step2.cityPlaceholder': 'Ej: Miami, FL',
+    'auth.speaker.register.step2.bioLabel': 'Descripción breve',
+    'auth.speaker.register.step2.bioPlaceholder': 'Cuéntanos un poco sobre ti...',
+    'auth.speaker.register.step2.photoLabel': 'Fotografía',
+    'auth.speaker.register.step2.photoUpload': 'Subir foto',
+    'auth.speaker.register.step2.photoHint': 'JPG o PNG, máximo 5MB.',
+    'auth.speaker.register.step2.photoSelect': 'Seleccionar',
+    'auth.speaker.register.step2.back': 'Atrás',
+    'auth.speaker.register.step2.submit': 'Crear Cuenta',
+    'auth.speaker.register.step2.submitting': 'Creando cuenta...',
+    
+    // Terms and Conditions Page
+    'terms.title': 'Términos y Condiciones de Uso – Aurora',
+    'terms.section1.title': '1. Aceptación de los Términos',
+    'terms.section1.paragraph1': 'Al acceder o utilizar la plataforma Aurora (en adelante, "la Plataforma"), el usuario acepta cumplir y quedar legalmente vinculado por los presentes Términos y Condiciones de Uso. Si no está de acuerdo con ellos, deberá abstenerse de usar la Plataforma.',
+    'terms.section2.title': '2. Descripción del Servicio',
+    'terms.section2.paragraph1': 'Aurora es una plataforma digital que conecta estudiantes de inglés de nivel avanzado con personas adultas mayores, con el propósito de fomentar la práctica del idioma a través de conversaciones virtuales.',
+    'terms.section2.paragraph2': 'Aurora no ofrece servicios educativos formales ni terapéuticos, ni garantiza resultados académicos o personales.',
+    'terms.section3.title': '3. Registro de Usuarios',
+    'terms.section3.paragraph1': 'Para acceder a la Plataforma, el usuario debe proporcionar información veraz, completa y actualizada. El usuario es responsable de mantener la confidencialidad de sus credenciales de acceso y de todas las actividades que ocurran bajo su cuenta.',
+    'terms.section4.title': '4. Conducta de los Usuarios',
+    'terms.section4.intro': 'El usuario se compromete a:',
+    'terms.section4.item1': 'Mantener un comportamiento respetuoso y apropiado durante las conversaciones.',
+    'terms.section4.item2': 'No acosar, discriminar, difundir odio, ni compartir contenido inapropiado.',
+    'terms.section4.item3': 'No usar la Plataforma para fines comerciales, políticos, religiosos o ilícitos.',
+    'terms.section4.paragraph1': 'Aurora se reserva el derecho de suspender o eliminar cuentas que incumplan estas normas, sin previo aviso.',
+    'terms.section5.title': '5. Limitación de Responsabilidad',
+    'terms.section5.paragraph1': 'Aurora actúa únicamente como intermediario tecnológico entre los usuarios.',
+    'terms.section5.intro': 'Aurora no se hace responsable de:',
+    'terms.section5.item1': 'El contenido o veracidad de las conversaciones mantenidas entre usuarios.',
+    'terms.section5.item2': 'Daños, perjuicios, pérdidas o incidentes derivados de la interacción entre usuarios dentro o fuera de la Plataforma.',
+    'terms.section5.item3': 'Fallos técnicos, interrupciones del servicio o pérdida de datos.',
+    'terms.section5.paragraph2': 'El uso de la Plataforma se realiza bajo la exclusiva responsabilidad del usuario.',
+    'terms.section6.title': '6. Protección de Datos Personales',
+    'terms.section6.part1': 'Aurora recopila y trata los datos personales conforme a su',
+    'terms.section6.link1': 'Aviso de Privacidad',
+    'terms.section6.part2': 'disponible en',
+    'terms.section6.link2': 'este enlace',
+    'terms.section6.paragraph2': 'El usuario acepta dicho tratamiento para fines operativos y de mejora del servicio.',
+    'terms.section7.title': '7. Propiedad Intelectual',
+    'terms.section7.paragraph1': 'Todo el contenido de la Plataforma (nombre, logotipo, diseño, textos, código, bases de datos y funcionalidades) es propiedad exclusiva de Aurora o cuenta con las licencias correspondientes. Queda prohibida su copia, modificación o distribución sin autorización expresa.',
+    'terms.section8.title': '8. Enlaces a Terceros',
+    'terms.section8.paragraph1': 'Aurora puede contener enlaces a sitios de terceros. No somos responsables del contenido, políticas o prácticas de dichos sitios externos.',
+    'terms.section9.title': '9. Modificaciones',
+    'terms.section9.paragraph1': 'Aurora podrá modificar estos Términos y Condiciones en cualquier momento. Los cambios entrarán en vigor una vez publicados en la Plataforma.',
+    'terms.section10.title': '10. Legislación Aplicable',
+    'terms.section10.paragraph1': 'Estos Términos se rigen por las leyes de los Estados Unidos Mexicanos, y cualquier controversia se someterá a los tribunales competentes de la Ciudad de México, renunciando a cualquier otro fuero que pudiera corresponder.',
+    
+    // Privacy Policy Page
+    'privacy.title': 'Aviso de Privacidad – Aurora',
+    'privacy.lastUpdated': 'Última actualización: 19 OCTUBRE 2025',
+    'privacy.section1.title': '1. Identidad y Contacto del Responsable',
+    'privacy.section1.paragraph1.part1': 'El presente Aviso de Privacidad corresponde a Aurora, una iniciativa digital accesible desde',
+    'privacy.section1.paragraph1.link': 'https://weareaurora.tech',
+    'privacy.section1.paragraph1.part2': '(en adelante, "la Plataforma"), dedicada a conectar estudiantes de inglés con adultos mayores para promover la práctica del idioma y la convivencia intergeneracional.',
+    'privacy.section1.paragraph2': 'Aurora actualmente no opera como persona moral constituida, sino como proyecto en desarrollo.',
+    'privacy.section1.paragraph3': 'Para cualquier duda o solicitud relacionada con la protección de datos personales, puedes comunicarte al correo:',
+    'privacy.section1.emailLabel': '📩',
+    'privacy.section1.emailText': 'weareaurora.tech@gmail.com',
+    'privacy.section2.title': '2. Datos Personales que se Recaban',
+    'privacy.section2.paragraph1': 'Aurora podrá recopilar los siguientes datos personales de los usuarios (estudiantes y adultos mayores):',
+    'privacy.section2.item1': 'Nombre y apellido',
+    'privacy.section2.item2': 'Edad o rango de edad',
+    'privacy.section2.item3': 'Correo electrónico',
+    'privacy.section2.item4': 'País o ciudad de residencia',
+    'privacy.section2.item5': 'Nivel de inglés o idioma nativo',
+    'privacy.section2.item6': 'Preferencias de horario o intereses',
+    'privacy.section2.item7': 'Imagen, voz o video (en caso de que se utilicen herramientas de videollamada o grabación)',
+    'privacy.section2.item8': 'Información técnica (dirección IP, dispositivo, navegador, cookies)',
+    'privacy.section2.note': 'Aurora no solicita ni almacena información financiera ni médica.',
+    'privacy.section3.title': '3. Finalidades del Tratamiento',
+    'privacy.section3.paragraph1': 'Los datos personales son utilizados para los siguientes fines:',
+    'privacy.section3.primaryHeading': 'Finalidades principales:',
+    'privacy.section3.primaryItem1': 'Permitir el registro y acceso a la Plataforma.',
+    'privacy.section3.primaryItem2': 'Facilitar la conexión entre estudiantes y adultos mayores.',
+    'privacy.section3.primaryItem3': 'Administrar y mejorar la experiencia de uso.',
+    'privacy.section3.primaryItem4': 'Supervisar el cumplimiento de las normas de convivencia.',
+    'privacy.section3.secondaryHeading': 'Finalidades secundarias (opcionales):',
+    'privacy.section3.secondaryItem1': 'Enviar notificaciones sobre mejoras o novedades del proyecto.',
+    'privacy.section3.secondaryItem2': 'Realizar encuestas o análisis de satisfacción.',
+    'privacy.section3.paragraph2.part1': 'El usuario podrá oponerse a las finalidades secundarias enviando un correo a',
+    'privacy.section3.paragraph2.link': 'contact@weareaurora.tech',
+    'privacy.section3.paragraph2.part2': '.',
+    'privacy.section4.title': '4. Transferencia de Datos',
+    'privacy.section4.paragraph1': 'Aurora no comparte, vende ni renta datos personales a terceros.',
+    'privacy.section4.paragraph2': 'Sin embargo, podrá utilizar proveedores tecnológicos (como servicios de hosting o videollamada) que procesen los datos únicamente con fines operativos y bajo medidas de seguridad adecuadas.',
+    'privacy.section5.title': '5. Grabaciones y Uso de Imagen',
+    'privacy.section5.paragraph1': 'En caso de que se graben sesiones o videollamadas, el usuario será notificado previamente y podrá otorgar o negar su consentimiento.',
+    'privacy.section5.paragraph2': 'Las grabaciones se utilizarán únicamente con fines de mejora, supervisión o evaluación interna y se eliminarán en un plazo razonable.',
+    'privacy.section6.title': '6. Derechos ARCO',
+    'privacy.section6.paragraph1': 'El usuario puede ejercer en cualquier momento sus derechos de Acceso, Rectificación, Cancelación y Oposición (ARCO), así como revocar su consentimiento para el tratamiento de sus datos, enviando una solicitud al correo:',
+    'privacy.section6.emailLabel': '📧',
+    'privacy.section6.emailText': 'contact@weareaurora.tech',
+    'privacy.section6.paragraph2': 'Aurora responderá en un plazo máximo de 20 días hábiles.',
+    'privacy.section7.title': '7. Seguridad de la Información',
+    'privacy.section7.paragraph1': 'Aurora aplica medidas razonables de seguridad técnica y administrativa para proteger los datos personales contra pérdida, alteración o acceso no autorizado.',
+    'privacy.section7.paragraph2': 'Sin embargo, el usuario reconoce que ningún sistema es completamente infalible y utiliza la Plataforma bajo su propio riesgo.',
+    'privacy.section8.title': '8. Conservación de los Datos',
+    'privacy.section8.paragraph1': 'Los datos personales se conservarán únicamente durante el tiempo necesario para cumplir con las finalidades descritas o hasta que el usuario solicite su eliminación.',
+    'privacy.section9.title': '9. Modificaciones',
+    'privacy.section9.paragraph1': 'Aurora podrá actualizar este Aviso de Privacidad cuando sea necesario.',
+    'privacy.section9.paragraph2.part1': 'Las modificaciones se publicarán en',
+    'privacy.section9.paragraph2.link': 'https://weareaurora.tech',
+    'privacy.section9.paragraph2.part2': 'con la fecha de actualización correspondiente.',
+    'privacy.section10.title': '10. Aceptación',
+    'privacy.section10.paragraph1': 'Al registrarse o utilizar la Plataforma, el usuario reconoce haber leído y aceptado este Aviso de Privacidad.',
     
     'auth.signin.title': 'Aurora',
     'auth.signin.email': 'Correo Electrónico',
@@ -881,6 +1348,10 @@ export const translations: Record<Language, Translations> = {
     'auth.signin.loading': 'Iniciando sesión...',
     'auth.signin.noAccount': '¿No tienes una cuenta?',
     'auth.signin.signup': 'Regístrate',
+    'auth.roleSelection.title': 'Inicia sesión para ver tu perfil',
+    'auth.roleSelection.subtitle': 'Crea una cuenta o inicia sesión para agendar sesiones, gestionar tu agenda y conectar con speakers.',
+    'auth.roleSelection.student': 'Iniciar como Estudiante',
+    'auth.roleSelection.speaker': 'Iniciar como Speaker',
     
     // Speakers Page
     'speakers.title': 'Encuentra tu Speaker Perfecto',
@@ -905,6 +1376,10 @@ export const translations: Record<Language, Translations> = {
     'speakers.card.sessions': 'sesiones completadas',
     'speakers.noResults': 'No se encontraron speakers que coincidan con tus criterios.',
     'speakers.clearFilters': 'Limpiar Filtros',
+    'speakers.noResults.title': 'No se encontraron speakers',
+    'speakers.noResults.description': 'Intenta ajustar tu búsqueda o explora otros temas para descubrir más voces.',
+    'speakers.noResults.reset': 'Limpiar búsqueda',
+    'speakers.card.book': 'Agendar sesión',
     
     // Speaker Dashboard
     'dashboard.title': 'Panel de Speaker',

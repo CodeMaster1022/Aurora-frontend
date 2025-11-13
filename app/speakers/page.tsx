@@ -114,6 +114,9 @@ export default function SpeakersPage() {
   const [speakers, setSpeakers] = useState<FilteredSpeaker[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
+  const [currentPage, setCurrentPage] = useState(1)
+
+  const SPEAKERS_PER_PAGE = 6
 
   useEffect(() => {
     const fetchSpeakers = async () => {
@@ -147,20 +150,41 @@ export default function SpeakersPage() {
     })
   }, [searchQuery, speakers])
 
+  const totalPages = useMemo(() => {
+    return Math.max(1, Math.ceil(filteredSpeakers.length / SPEAKERS_PER_PAGE))
+  }, [filteredSpeakers.length])
+
+  const paginatedSpeakers = useMemo(() => {
+    const startIndex = (currentPage - 1) * SPEAKERS_PER_PAGE
+    return filteredSpeakers.slice(startIndex, startIndex + SPEAKERS_PER_PAGE)
+  }, [filteredSpeakers, currentPage])
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages)
+    }
+  }, [currentPage, totalPages])
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery])
+
   return (
-    <div className="min-h-screen bg-muted/40 py-16">
+    <div className="min-h-screen bg-muted/40 py-8 sm:py-16">
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="mb-10 space-y-4 text-center">
-          <h1 className="text-3xl font-bold text-foreground sm:text-4xl">Find Your Speaker</h1>
+          <h1 className="text-3xl font-bold text-foreground sm:text-4xl">
+            {t("speakers.title")}
+          </h1>
           <p className="text-sm text-muted-foreground sm:text-base">
-            Search by name or explore topics to meet the perfect person for your next conversation.
+            {t("speakers.subtitle")}
           </p>
           <div className="mx-auto flex max-w-xl items-center gap-3 rounded-full border border-border bg-background px-4 py-2 shadow-sm">
             <Search className="size-4 text-muted-foreground" />
             <Input
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search by name or topic..."
+              placeholder={t("speakers.search.placeholder")}
               className="h-9 border-0 bg-transparent text-sm focus-visible:ring-0"
             />
           </div>
@@ -172,17 +196,20 @@ export default function SpeakersPage() {
           </div>
         ) : filteredSpeakers.length === 0 ? (
           <div className="rounded-3xl border border-border/40 bg-card p-12 text-center shadow-sm">
-            <h2 className="text-lg font-semibold text-foreground">No speakers found</h2>
+            <h2 className="text-lg font-semibold text-foreground">
+              {t("speakers.noResults.title")}
+            </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Try adjusting your search or explore other topics to discover more voices.
+              {t("speakers.noResults.description")}
             </p>
             <Button className="mt-6 rounded-full" onClick={() => setSearchQuery("")}>
-              Clear Search
+              {t("speakers.noResults.reset")}
             </Button>
           </div>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            {filteredSpeakers.map((speaker) => {
+          <div className="space-y-8">
+            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+              {paginatedSpeakers.map((speaker) => {
               const key = speaker._id ?? speaker.id ?? `${speaker.firstname}-${speaker.lastname}`
               const rating = speaker.rating ?? 4.9
               const ratingCount = speaker.ratingCount ?? 120
@@ -191,7 +218,7 @@ export default function SpeakersPage() {
               return (
                 <Card
                   key={key}
-                  className="relative flex h-full flex-col gap-4 border border-border/60 bg-background p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+                  className="relative flex min-h-[225px] flex-col gap-4 border border-border/60 bg-background p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
                 >
                   <div className="flex items-start gap-4">
                     <div className="relative size-16 overflow-hidden rounded-full border border-border/60 bg-muted">
@@ -240,10 +267,7 @@ export default function SpeakersPage() {
                     </div>
                   )}
 
-                  <div className="flex items-center justify-between gap-4 rounded-xl bg-primary/5 px-4 py-3">
-                    <div className="text-sm font-semibold text-primary">
-                      {speaker.cost && speaker.cost > 0 ? `$${speaker.cost}` : "Free"}
-                    </div>
+                  <div className="mt-auto flex items-center justify-between gap-4 rounded-xl">
                     <BookSessionDialog
                       speaker={{
                         _id: speaker._id,
@@ -252,15 +276,50 @@ export default function SpeakersPage() {
                         availability: (speaker as any)?.availability,
                       }}
                       trigger={
-                        <Button className="rounded-full px-5 cursor-pointer bg-[#59248F] text-white">
-                          Book Session
+                        <Button className="w-full rounded-lg px-5 cursor-pointer bg-[#59248F] text-white">
+                          {t("speakers.card.book")}
                         </Button>
                       }
                     />
                   </div>
                 </Card>
               )
-            })}
+              })}
+            </div>
+            {filteredSpeakers.length > SPEAKERS_PER_PAGE && (
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <Button
+                  variant="outline"
+                  className="rounded-full px-4"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((page) => Math.max(page - 1, 1))}
+                >
+                  Previous
+                </Button>
+                {Array.from({ length: totalPages }).map((_, index) => {
+                  const pageNumber = index + 1
+                  const isActive = pageNumber === currentPage
+                  return (
+                    <Button
+                      key={pageNumber}
+                      variant={isActive ? "default" : "outline"}
+                      className={`size-10 rounded-full px-0 ${isActive ? "" : "bg-background"}`}
+                      onClick={() => setCurrentPage(pageNumber)}
+                    >
+                      {pageNumber}
+                    </Button>
+                  )
+                })}
+                <Button
+                  variant="outline"
+                  className="rounded-full px-4"
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((page) => Math.min(page + 1, totalPages))}
+                >
+                  Next
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>

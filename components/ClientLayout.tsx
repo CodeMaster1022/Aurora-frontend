@@ -11,7 +11,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
    children: React.ReactNode
  }) {
    const pathname = usePathname()
-  const publicPaths = new Set<string>(["/", "/privacy-policy", "/terms-and-conditions", "/about", "/speakers"]) 
+  const publicPaths = new Set<string>(["/", "/privacy-policy", "/terms-and-conditions", "/about", "/speakers", "/home"]) 
    const isAuthSection = pathname?.startsWith('/auth')
    const isPublic = isAuthSection || (pathname ? publicPaths.has(pathname) : true)
   const shouldShowFooter = !pathname?.startsWith('/auth')

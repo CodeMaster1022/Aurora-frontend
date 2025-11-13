@@ -9,7 +9,7 @@ import studentImage from "@/public/image/student.png"
 import grandmother1 from "@/public/image/1.jpeg"
 import grandmother2 from "@/public/image/2.jpeg"
 import grandmother3 from "@/public/image/3.jpeg"
-
+import SpeakersPage from "./speakers/page"
 import grandfatherImage from "@/public/image/grandfather.png"
 import { useTranslation } from "@/lib/hooks/useTranslation"
 import { useRouter } from "next/navigation"
@@ -54,26 +54,10 @@ const DEFAULT_SPEAKERS = [
 ] as const
 
 const HOW_IT_WORKS_STEPS = [
-  {
-    icon: Search,
-    title: "Choose your speaker",
-    description: "Explore their profiles and find someone whose interests match yours.",
-  },
-  {
-    icon: Calendar,
-    title: "Select date and time",
-    description: "Pick a time that works for you from their available slots.",
-  },
-  {
-    icon: MessageCircle,
-    title: "Practice and connect",
-    description: "Enjoy an authentic conversation about topics you both love.",
-  },
-  {
-    icon: Heart,
-    title: "Favorite topics",
-    description: "Speakers have chosen their favorite topics to guide the conversation.",
-  },
+  { icon: Search, key: "home.howItWorks.step1" },
+  { icon: Calendar, key: "home.howItWorks.step2" },
+  { icon: MessageCircle, key: "home.howItWorks.step3" },
+  { icon: Heart, key: "home.howItWorks.step4" },
 ] as const
 
 const WHY_DIFFERENT_CARDS = [
@@ -85,18 +69,18 @@ const WHY_DIFFERENT_CARDS = [
 const BECOME_SPEAKER_STEPS = [
   {
     icon: UserPlus,
-    label: "Step 1",
-    description: "Register as a speaker",
+    labelKey: "home.becomeSpeaker.steps.step1.label",
+    descriptionKey: "home.becomeSpeaker.point1",
   },
   {
     icon: Calendar,
-    label: "Step 2",
-    description: "Set your availability",
+    labelKey: "home.becomeSpeaker.steps.step2.label",
+    descriptionKey: "home.becomeSpeaker.point2",
   },
   {
     icon: Share2,
-    label: "Step 3",
-    description: "Start connecting and sharing stories",
+    labelKey: "home.becomeSpeaker.steps.step3.label",
+    descriptionKey: "home.becomeSpeaker.point3",
   },
 ] as const
 
@@ -124,26 +108,33 @@ export default function HomePage() {
     }
   }
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* <Header /> */}
-      <main className="relative overflow-hidden"> 
+    <>
+      <div className="sm:hidden">
+        <SpeakersPage />
+      </div>
+      <div className="hidden sm:block">
+        <div className="min-h-screen relative overflow-hidden">
+          {/* <Header /> */}
+          <main className="relative overflow-hidden"> 
         <section className="relative isolate overflow-hidden  py-24 transition-colors dark:from-[hsl(220deg_20.41%_19.09%)] dark:via-[hsl(220deg_23%_15%)] dark:to-[hsl(220deg_26%_10%)] sm:py-28">
           <div className="absolute inset-0 -z-10 opacity-40 blur-3xl filter">
             <div className="mx-auto h-full w-full max-w-5xl rounded-full bg-primary/30 dark:bg-primary/20" />
           </div>
           <div className="mx-auto flex max-w-4xl flex-col items-center gap-8 px-6 text-center sm:px-8">
-            {/* <span className="inline-flex items-center rounded-full bg-primary/10 px-4 py-1 text-sm font-semibold text-primary dark:bg-primary/20">
+            <span className="text-sm font-semibold uppercase tracking-[0.4em] text-primary">
               {t("home.badge")}
-            </span> */}
+            </span>
             <h1 className="text-4xl font-bold leading-tight text-foreground sm:text-5xl lg:text-6xl">
-            {t("home.badge")}
+              <span className="block">{t("home.title.line1")}</span>
+              <span className="block">{t("home.title.line2")}</span>
+              <span className="block">{t("home.title.line3")}</span>
             </h1>
             <p className="max-w-2xl text-base text-muted-foreground sm:text-lg lg:text-xl">
-              Practice your English by connecting with people who have a lot to share.
+              {t("home.hero.subtitle")}
             </p>
             <Button
               size="lg"
-              className="mt-2 text-white rounded-full px-8 shadow-lg shadow-primary/25 bg-[#72309F] transition hover:shadow-primary/35"
+              className="mt-2 text-white rounded-lg px-8 shadow-lg shadow-primary/25 bg-[#72309F] transition hover:shadow-primary/35"
               asChild
             >
               <Link href="/speakers">
@@ -288,7 +279,7 @@ export default function HomePage() {
 
                 <div className="mt-12 text-center">
                   <Button
-                    className="bg-[#72309F] text-white rounded-full px-8 py-2 text-base font-semibold shadow-[0_12px_30px_rgba(115,87,245,0.35)] hover:bg-primary/90"
+                    className="bg-[#72309F] text-white rounded-lg px-8 py-2 text-base font-semibold shadow-[0_12px_30px_rgba(115,87,245,0.35)] hover:bg-primary/90"
                     asChild
                   >
                     <Link href="/speakers">
@@ -307,18 +298,20 @@ export default function HomePage() {
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-5xl rounded-[2.5rem] border border-border/40 bg-card/90 p-10 text-center shadow-[0_25px_80px_rgba(115,87,245,0.08)] backdrop-blur">
               <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
-                Practice your speaking
+                {t("home.howItWorks.badge")}
               </h2>
               <p className="mt-3 text-base text-muted-foreground">
-                How does it work?
+                {t("home.howItWorks.title")}
               </p>
 
               <div className="mt-12 grid gap-10 text-left sm:grid-cols-2 lg:grid-cols-4">
-                {HOW_IT_WORKS_STEPS.map((step) => {
-                  const Icon = step.icon
+                {HOW_IT_WORKS_STEPS.map(({ icon: Icon, key }) => {
+                  const copy = t(key)
+                  const [headline, ...rest] = copy.split(":")
+                  const description = rest.join(":").trim()
                   return (
                     <div
-                      key={step.title}
+                      key={key}
                       className="flex flex-col items-center gap-4 text-center"
                     >
                       <span className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary shadow-inner">
@@ -326,11 +319,13 @@ export default function HomePage() {
                       </span>
                       <div className="space-y-2">
                         <h3 className="text-lg font-semibold text-foreground">
-                          {step.title}
+                          {headline.trim()}
                         </h3>
-                        <p className="text-sm leading-6 text-muted-foreground">
-                          {step.description}
-                        </p>
+                        {description && (
+                          <p className="text-sm leading-6 text-muted-foreground">
+                            {description}
+                          </p>
+                        )}
                       </div>
                     </div>
                   )
@@ -389,21 +384,22 @@ export default function HomePage() {
             <div className="rounded-[2.5rem] bg-[#5E2792]">
               <div className="rounded-[2.5rem] bg-primary/5 px-6 py-8 text-center sm:px-12 dark:bg-black/20">
                 <h2 className="text-3xl font-bold text-white sm:text-4xl">
-                  Become a Speaker
+                  <span>{t("home.becomeSpeaker.title")}</span>{" "}
+                  <span className="sm:inline-block">{t("home.becomeSpeaker.titleSpeaker")}</span>
                 </h2>
                 <p className="mt-3 text-base text-white/80">
-                  Share your stories, connect with eager learners, and make a meaningful impact.
+                  {t("home.becomeSpeaker.subtitle")}
                 </p>
 
                 <div className="mt-12 grid gap-10 text-left sm:grid-cols-3">
-                  {BECOME_SPEAKER_STEPS.map(({ icon: Icon, label, description }) => (
-                    <div key={label} className="flex flex-col items-center gap-4 text-center text-white">
+                  {BECOME_SPEAKER_STEPS.map(({ icon: Icon, labelKey, descriptionKey }) => (
+                    <div key={labelKey} className="flex flex-col items-center gap-4 text-center text-white">
                       <span className="flex size-16 items-center justify-center rounded-full border border-white/40 bg-white/10">
                         <Icon className="size-7" />
                       </span>
                       <div className="space-y-2">
-                        <p className="text-sm font-medium text-white/70">{label}</p>
-                        <h3 className="text-base font-semibold">{description}</h3>
+                        <p className="text-sm font-medium text-white/70">{t(labelKey)}</p>
+                        <h3 className="text-base font-semibold">{t(descriptionKey)}</h3>
                       </div>
                     </div>
                   ))}
@@ -425,7 +421,9 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-      </main>
-    </div>
+          </main>
+        </div>
+      </div>
+    </>
   )
 }
