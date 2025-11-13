@@ -878,7 +878,7 @@ export default function SpeakerDashboardPage() {
                       <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                         Location
                       </Label>
-                      <p className="mt-3 text-sm font-medium text-foreground bg-foreground p-1 rounded-lg">{location}</p>
+                      <p className="mt-3 text-sm font-medium text-foreground p-1 rounded-lg">{location}</p>
                     </div>
                   ) : (
                     <div className="rounded-xl border border-dashed border-border/70 bg-muted/10 p-5 text-sm text-muted-foreground">
