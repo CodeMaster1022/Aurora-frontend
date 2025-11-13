@@ -15,7 +15,7 @@ interface ProtectedRouteProps {
 export function ProtectedRoute({ 
   children, 
   requireAuth = true, 
-  redirectTo = '/auth/signin' 
+  redirectTo = '/auth/student-auth' 
 }: ProtectedRouteProps) {
   const router = useRouter();
   const dispatch = useAppDispatch();

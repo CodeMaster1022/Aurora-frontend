@@ -356,6 +356,12 @@ export type TranslationKey =
   | 'about.mission.point1'
   | 'about.mission.point2'
   | 'about.mission.point3'
+  | 'about.mission.cards.warm.title'
+  | 'about.mission.cards.warm.description'
+  | 'about.mission.cards.diverse.title'
+  | 'about.mission.cards.diverse.description'
+  | 'about.mission.cards.flexible.title'
+  | 'about.mission.cards.flexible.description'
   | 'about.community.badge'
   | 'about.community.title'
   | 'about.community.subtitle'
@@ -742,6 +748,12 @@ export const translations: Record<Language, Translations> = {
     'about.mission.point1': 'Warm, one‑to‑one sessions that build confidence',
     'about.mission.point2': 'Diverse speakers with real‑world experience',
     'about.mission.point3': 'Flexible scheduling that fits real life',
+    'about.mission.cards.warm.title': 'Warm, Human Sessions',
+    'about.mission.cards.warm.description': 'One-to-one conversations designed to build confidence in a friendly, supportive space.',
+    'about.mission.cards.diverse.title': 'Diverse Speakers',
+    'about.mission.cards.diverse.description': 'Learn from seniors with rich life experience and perspectives from around the world.',
+    'about.mission.cards.flexible.title': 'Flexible Scheduling',
+    'about.mission.cards.flexible.description': 'Pick times that fit your life, with sessions available across time zones.',
     'about.community.badge': 'Our Community',
     'about.community.title': 'Join Thousands of Learners',
     'about.community.subtitle': 'Connect with passionate speakers and embark on your English learning journey',
@@ -1125,6 +1137,12 @@ export const translations: Record<Language, Translations> = {
     'about.mission.point1': 'Sesiones cálidas de uno a uno que construyen confianza',
     'about.mission.point2': 'Hablantes diversos con experiencia en el mundo real',
     'about.mission.point3': 'Programación flexible que se adapta a la vida real',
+    'about.mission.cards.warm.title': 'Sesiones cálidas y humanas',
+    'about.mission.cards.warm.description': 'Conversaciones uno a uno diseñadas para darte confianza en un espacio amable y seguro.',
+    'about.mission.cards.diverse.title': 'Speakers diversos',
+    'about.mission.cards.diverse.description': 'Aprende de personas con gran experiencia de vida y perspectivas de todo el mundo.',
+    'about.mission.cards.flexible.title': 'Horarios flexibles',
+    'about.mission.cards.flexible.description': 'Elige horarios que se adapten a tu vida, con sesiones disponibles en distintos husos horarios.',
     'about.community.badge': 'Nuestra Comunidad',
     'about.community.title': 'Únete a Miles de Aprendices',
     'about.community.subtitle': 'Conéctate con hablantes apasionados y comienza tu viaje de aprendizaje de inglés',

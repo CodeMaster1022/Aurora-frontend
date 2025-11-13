@@ -1,347 +1,320 @@
 "use client"
 
+import Link from "next/link"
+import { usePathname, useRouter } from "next/navigation"
+import { useEffect, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Menu, X, User, LogOut, Settings, Globe } from "lucide-react"
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { useAppSelector, useAppDispatch } from "@/lib/hooks/redux"
+import {
+  Globe,
+  Home,
+  LogOut,
+  Moon,
+  Settings,
+  Sun,
+  User as UserIcon,
+  Info,
+  ChevronDown,
+} from "lucide-react"
+import { useAppDispatch, useAppSelector } from "@/lib/hooks/redux"
 import { logoutUser } from "@/lib/store/authSlice"
 import { setLanguage } from "@/lib/store/languageSlice"
 import { useTranslation } from "@/lib/hooks/useTranslation"
-import Link from "next/link"
-import Image from "next/image"
+
+type ThemeMode = "light" | "dark"
 
 export function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const [showAuthMenu, setShowAuthMenu] = useState(false)
+  const [theme, setTheme] = useState<ThemeMode>("light")
+
   const router = useRouter()
+  const pathname = usePathname()
   const dispatch = useAppDispatch()
   const { user, isAuthenticated } = useAppSelector((state) => state.auth)
   const { t, language } = useTranslation()
 
-  const toggleLanguage = () => {
-    const newLanguage = language === 'en' ? 'es' : 'en'
-    dispatch(setLanguage(newLanguage))
-  }
-  // Add scroll effect for header
+  const navLinks = useMemo(
+    () => [
+      { href: "/", label: t("header.home") },
+      { href: "/speakers", label: t("header.speakers") },
+      { href: "/about", label: t("header.nosotros") },
+    ],
+    [t],
+  )
+
+  useEffect(() => {
+    const storedTheme = window.localStorage.getItem("aurora-theme") as ThemeMode | null
+    if (storedTheme === "light" || storedTheme === "dark") {
+      setTheme(storedTheme)
+      return
+    }
+
+    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      setTheme("dark")
+    }
+  }, [])
+
+  useEffect(() => {
+    const root = document.documentElement
+    root.classList.remove("light", "dark")
+    root.classList.add(theme)
+    window.localStorage.setItem("aurora-theme", theme)
+  }, [theme])
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20)
     }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    handleScroll()
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  // Prevent body scroll when mobile menu is open
-  useEffect(() => {
-    if (isMenuOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'unset'
-    }
-    return () => {
-      document.body.style.overflow = 'unset'
-    }
-  }, [isMenuOpen])
-
-  // Close user menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (showUserMenu && !(event.target as Element).closest('.user-menu-container')) {
+      if (
+        showUserMenu &&
+        !(event.target as Element).closest(".user-menu-container")
+      ) {
         setShowUserMenu(false)
       }
+      if (
+        showAuthMenu &&
+        !(event.target as Element).closest(".auth-menu-container")
+      ) {
+        setShowAuthMenu(false)
+      }
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [showUserMenu])
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [showUserMenu, showAuthMenu])
+
+  const toggleLanguage = () => {
+    const newLanguage = language === "en" ? "es" : "en"
+    dispatch(setLanguage(newLanguage))
+  }
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "light" ? "dark" : "light"))
+  }
+
+  const profileHref = useMemo(() => {
+    if (!isAuthenticated) {
+      return "/auth/student-auth"
+    }
+
+    if (user?.role === "learner") {
+      return "/learners/profile"
+    }
+
+    if (user?.role === "speaker") {
+      return "/speakers/profile"
+    }
+
+    return "/"
+  }, [isAuthenticated, user?.role])
 
   const handleLogout = async () => {
     setShowUserMenu(false)
-    setIsMenuOpen(false)
     await dispatch(logoutUser())
-    router.push('/')
+    router.push("/")
   }
 
   return (
-    <header className={`w-full fixed top-0 z-50 transition-all duration-300 ${
-      isScrolled 
-        ? 'bg-white/10 backdrop-blur-lg shadow-lg' 
-        : ''
-    }`}>
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 cursor-pointer">
-            <Image 
-              src="/image/logo.png" 
-              alt="Aurora Logo" 
-              width={120} 
-              height={140}
-              className="rounded-lg"
-            />
+    <>
+    <header
+      className={`sticky top-0 z-50 w-full border-b border-transparent transition-all ${isScrolled ? "border-border bg-background/85 shadow-sm backdrop-blur-lg" : "bg-background/70"}`}
+    >
+      <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-4 transition-all md:px-6">
+        <div className="flex items-center gap-6">
+          <Link
+            href="/"
+            className="flex items-center gap-2 font-semibold text-primary transition-colors hover:text-primary/80"
+          >
+            <span className="text-xl">Aurora</span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center justify-end flex-1 px-8">
-            <div className="flex items-center space-x-12 xl:space-x-16">
-              {isAuthenticated ? (
-                <>
-                  {user?.role === 'speaker' ? (
-                    <>
-                      <Link href="/" className="text-gray-300  hover:text-orange-400 transition-colors text-lg font-medium">
-                        {t('header.home')}
-                      </Link>
-                      <Link href="/speakers/dashboard" className="text-gray-300 px-2 py-2 rounded-xl hover:text-orange-400 transition-colors text-lg font-medium">
-                        {t('header.speakerDashboard')}
-                      </Link>
-                    </>
-                  ) : (
-                    <>
-                      <Link href="/learners/dashboard" className="text-gray-300  hover:text-orange-400 transition-colors text-lg font-medium">
-                        {t('header.home')}
-                      </Link>
-                      <Link href="/learners/dashboard" className="text-gray-300  hover:text-orange-400 transition-colors text-lg font-medium">
-                        {t('header.dashboard')}
-                      </Link>
-                      <Link href="/speakers" className="text-gray-300  hover:text-orange-400 transition-colors text-lg font-medium">
-                        {t('header.speakers')}
-                      </Link>
-                    </>
-                  )}
-                </>
-              ) : (
-                <>
-                      <Link href="/" className="text-gray-300  hover:text-orange-400 transition-colors text-lg font-medium">
-                        {t('header.home')}
-                      </Link>
-                      <Link href="/about" className="text-gray-300  hover:text-orange-400 transition-colors text-lg font-medium">
-                        {t('header.nosotros')}
-                      </Link>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Auth Buttons */}
-          <div className="hidden md:flex items-center gap-3">
-            {/* Language Switcher */}
-            <button
-              onClick={toggleLanguage}
-              className="p-2 text-gray-300 hover:text-orange-400 transition-colors rounded-full hover:bg-white/20"
-              aria-label={`Switch to ${language === 'en' ? 'Español' : 'English'}`}
-              title={`Switch to ${language === 'en' ? 'Español' : 'English'}`}
+          <nav className="hidden items-center gap-6 text-sm font-medium text-foreground/80 md:flex">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`transition-colors hover:text-primary ${pathname === link.href ? "text-primary" : ""}`}
+              >
+                {link.label}
+              </Link>
+            ))}
+            <Link
+              href={profileHref}
+              className={`transition-colors hover:text-primary ${pathname?.startsWith("/speakers/profile") || pathname?.startsWith("/learners/profile") ? "text-primary" : ""}`}
             >
-              <Globe className="w-5 h-5" />
-            </button>
-            {isAuthenticated ? (
-              <div className="relative user-menu-container">
-                <button 
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-full text-white border-2 border-white/30 hover:border-white hover:bg-white hover:text-[#49BBBD] font-semibold transition-all duration-300"
-                  onClick={() => setShowUserMenu(!showUserMenu)}
+              {t("header.profile")}
+            </Link>
+          </nav>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            size="icon"
+            variant="ghost"
+            className="rounded-full"
+            onClick={toggleLanguage}
+            aria-label={language === "en" ? "Switch to Spanish" : "Cambiar a inglés"}
+          >
+            <Globe className="size-5" />
+          </Button>
+
+          <Button
+            size="icon"
+            variant="ghost"
+            className="rounded-full"
+            onClick={toggleTheme}
+            aria-label={theme === "dark" ? "Activate light mode" : "Activate dark mode"}
+          >
+            {theme === "dark" ? <Sun className="size-5" /> : <Moon className="size-5" />}
+          </Button>
+
+          {isAuthenticated ? (
+            <>
+              <div className="relative user-menu-container md:hidden">
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="rounded-full"
+                  onClick={() => {
+                    setShowUserMenu((prev) => !prev)
+                    setShowAuthMenu(false)
+                  }}
+                  aria-haspopup="menu"
+                  aria-expanded={showUserMenu}
                 >
-                  <User className="w-4 h-4" />
-                  {user?.firstname ? `${user.firstname} ${user.lastname}` : 'User'}
-                </button>
-                
+                  <UserIcon className="size-5 text-primary" />
+                </Button>
+
                 {showUserMenu && (
-                  <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border overflow-hidden z-50">
-                    {/* {user?.role === 'speaker' && (
-                      <button
-                        onClick={() => {
-                          router.push('/dashboard/speaker')
-                          setShowUserMenu(false)
-                        }}
-                        className="w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2"
-                      >
-                        <Settings className="w-4 h-4" />
-                        {t('header.dashboard')}
-                      </button>
-                    )} */}
-                    {/* <button
-                      onClick={() => {
-                        router.push('/profile')
-                        setShowUserMenu(false)
-                      }}
-                      className="w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2"
+                  <div className="absolute right-0 mt-3 w-48 overflow-hidden rounded-xl border border-border bg-background shadow-xl">
+                    <Link
+                      href={profileHref}
+                      className="flex items-center gap-2 px-4 py-3 text-sm text-foreground transition-colors hover:bg-accent/50"
+                      onClick={() => setShowUserMenu(false)}
                     >
-                      <Settings className="w-4 h-4" />
-                      {t('header.profile')}
-                    </button> */}
+                      <Settings className="size-4" />
+                      {t("header.profile")}
+                    </Link>
                     <button
+                      type="button"
+                      className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-destructive transition-colors hover:bg-destructive/10"
                       onClick={handleLogout}
-                      className="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
                     >
-                      <LogOut className="w-4 h-4" />
-                      {t('header.logout')}
+                      <LogOut className="size-4" />
+                      {t("header.logout")}
                     </button>
                   </div>
                 )}
               </div>
-            ) : (
-                  <>
-                    <button className="px-6 py-2.5 rounded-lg text-gray-300 border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-100 hover:text-[#49BBBD] font-semibold transition-all duration-300" onClick={() => router.push('/auth/signin')}>
-                      {t('header.login')}
-                    </button>
-                    <button className="px-6 py-2.5 rounded-lg bg-[#524FD5] text-white hover:bg-orange-400 hover:text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5" onClick={() => router.push('/auth/speaker/signup')}>
-                      {t('header.speaker')}
-                    </button>
-                  </>
-            )}
-          </div>
 
-          {/* Mobile Menu Button */}
-          <button 
-            className="md:hidden relative w-10 h-10 text-white focus:outline-none"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            <span className="sr-only">Open main menu</span>
-            <div className="absolute inset-0 flex items-center justify-center">
-              {isMenuOpen ? (
-                <X className="w-6 h-6 animate-spin-once" />
-              ) : (
-                <Menu className="w-6 h-6" />
+              <div className="relative user-menu-container hidden md:block">
+                <Button
+                  variant="outline"
+                  className="rounded-full border-border/60 bg-background/60 px-4 py-2 text-sm font-medium text-foreground transition-all hover:bg-accent/60 hover:text-foreground/90"
+                  onClick={() => {
+                    setShowUserMenu((prev) => !prev)
+                    setShowAuthMenu(false)
+                  }}
+                  aria-haspopup="menu"
+                  aria-expanded={showUserMenu}
+                >
+                  <UserIcon className="size-4 text-primary" />
+                  <span className="ml-2">
+                    {user?.firstname || user?.email || t("header.profile")}
+                  </span>
+                </Button>
+
+                {showUserMenu && (
+                  <div className="absolute right-0 mt-3 w-52 overflow-hidden rounded-xl border border-border bg-background shadow-xl">
+                    <Link
+                      href={profileHref}
+                      className="flex items-center gap-2 px-4 py-3 text-sm text-foreground transition-colors hover:bg-accent/50"
+                      onClick={() => setShowUserMenu(false)}
+                    >
+                      <Settings className="size-4" />
+                      {t("header.profile")}
+                    </Link>
+                    <button
+                      type="button"
+                      className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-destructive transition-colors hover:bg-destructive/10"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="size-4" />
+                      {t("header.logout")}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="relative hidden md:block auth-menu-container">
+              <Button
+                variant="outline"
+                className="flex items-center gap-2 rounded-full border-border/60 bg-background/60 px-4 py-2 text-sm font-medium text-foreground transition-all hover:bg-accent/60 hover:text-foreground/90"
+                onClick={() => setShowAuthMenu((prev) => !prev)}
+                aria-expanded={showAuthMenu}
+                aria-haspopup="menu"
+              >
+                {t("header.login")}
+                <ChevronDown className="size-4" />
+              </Button>
+
+              {showAuthMenu && (
+                <div className="absolute right-0 mt-3 w-56 overflow-hidden rounded-xl border border-border bg-background shadow-xl">
+                  <Link
+                    href="/auth/student-auth"
+                    className="flex items-center justify-between px-4 py-3 text-sm text-foreground transition-colors hover:bg-accent/50"
+                    onClick={() => setShowAuthMenu(false)}
+                  >
+                    Estudiante
+                  </Link>
+                  <Link
+                    href="/auth/speaker-auth"
+                    className="flex items-center justify-between px-4 py-3 text-sm text-foreground transition-colors hover:bg-accent/50"
+                    onClick={() => setShowAuthMenu(false)}
+                  >
+                    Speaker / Orador
+                  </Link>
+                </div>
               )}
             </div>
-          </button>
+          )}
+
         </div>
-      </nav>
-
-      {/* Mobile Menu Overlay */}
-      {isMenuOpen && (
-        <div className="fixed inset-0 z-40 md:hidden">
-          {/* Backdrop */}
-          <div 
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setIsMenuOpen(false)}
-          />
-          
-          {/* Menu Panel */}
-          <div className="fixed right-0 top-0 h-full w-[280px] bg-gradient-to-br from-[#49BBBD] to-[#3FA9AB] shadow-2xl transform transition-transform duration-300 ease-in-out">
-            {/* Menu Header */}
-            <div className="flex items-center justify-between p-4 border-b border-white/20">
-              <Link href="/" className="flex items-center gap-2 cursor-pointer" onClick={() => setIsMenuOpen(false)}>
-                <Image 
-                  src="/image/logo.png" 
-                  alt="Aurora Logo" 
-                  width={32} 
-                  height={32}
-                  className="rounded-lg"
-                />
-                <span className="text-xl font-bold text-white">Aurora</span>
-              </Link>
-              <button
-                onClick={() => setIsMenuOpen(false)}
-                className="w-8 h-8 flex items-center justify-center text-white hover:bg-white/20 rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Menu Items */}
-            <div className="flex flex-col p-4">
-              {/* Language Switcher - Mobile */}
-              <div className="mb-4 pb-4 border-b border-white/20">
-                <button
-                  onClick={toggleLanguage}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-colors"
-                  aria-label={`Switch to ${language === 'en' ? 'Español' : 'English'}`}
-                >
-                  <Globe className="w-5 h-5" />
-                  <span className="text-lg font-medium">
-                    {language === 'en' ? 'Español' : 'English'}
-                  </span>
-                </button>
-              </div>
-              <nav className="space-y-2">
-                {isAuthenticated ? (
-                  <>
-                    {user?.role === 'speaker' ? (
-                      <>
-                        <Link href="/speakers/dashboard" className="block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-colors text-lg font-medium shadow-lg">
-                          {t('header.home')}
-                        </Link>
-                        <Link href="/speakers/dashboard" className="block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-colors text-lg font-medium shadow-lg">
-                          {t('header.speakerDashboard')}
-                        </Link>
-                      </>
-                    ) : (
-                      <>
-                        <Link href="/speakers/dashboard" className="block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-colors text-lg font-medium shadow-lg">
-                          {t('header.home')}
-                        </Link>
-                        <Link href="/dashboard" className="block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-colors text-lg font-medium">
-                          {t('header.dashboard')}
-                        </Link>
-                      </>
-                    )}
-                    {/* <Link href="/discover" className="block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-colors text-lg font-medium">
-                      {t('header.discover')}
-                    </Link> */}
-                  </>
-                ) : (
-                  <>
-                    <Link href="/" className="block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-colors text-lg font-medium">
-                      {t('header.home')}
-                    </Link>
-                    <Link href="/about" className="block px-4 py-3 text-white hover:bg-white/20 rounded-lg transition-colors text-lg font-medium">
-                      {t('header.nosotros')}
-                    </Link>
-                  </>
-                )}
-              </nav>
-
-              {/* Mobile Auth Buttons */}
-              <div className="mt-8 space-y-3">
-                {isAuthenticated ? (
-                  <>
-                    <div className="px-4 py-3 bg-white/20 rounded-lg text-center">
-                      <p className="text-white font-medium">Welcome, {user?.firstname} {user?.lastname}!</p>
-                    </div>
-                    {/* <button 
-                      className="w-full px-6 py-3 rounded-full text-white border-2 border-white/30 hover:border-white hover:bg-white hover:text-[#49BBBD] font-semibold transition-all duration-300 flex items-center justify-center gap-2" 
-                      onClick={() => {
-                        router.push('/profile')
-                        setIsMenuOpen(false)
-                      }}
-                    >
-                      <Settings className="w-4 h-4" />
-                      {t('header.profile')}
-                    </button> */}
-                    <button 
-                      className="w-full px-6 py-3 rounded-full bg-red-500 text-white hover:bg-red-600 font-semibold transition-all duration-300 shadow-lg flex items-center justify-center gap-2" 
-                      onClick={() => {
-                        handleLogout()
-                        setIsMenuOpen(false)
-                      }}
-                    >
-                      <LogOut className="w-4 h-4" />
-                      {t('header.logout')}
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button className="w-full px-6 py-3 rounded-full text-white border-2 border-white/30 hover:border-white hover:bg-white hover:text-[#49BBBD] font-semibold transition-all duration-300" onClick={() => router.push('/auth')}>
-                      {t('header.login')}
-                    </button>
-                    <button className="w-full px-6 py-3 rounded-full bg-white text-[#49BBBD] hover:bg-orange-400 hover:text-white font-semibold transition-all duration-300 shadow-lg" onClick={() => router.push('/auth')}>
-                      {t('header.signup')}
-                    </button>
-                  </>
-                )}
-              </div>
-
-              {/* Mobile Menu Footer */}
-              <div className="mt-auto pt-8 text-center">
-                <p className="text-white/70 text-sm">
-                  © 2024 Aurora. All rights reserved.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      </div>
     </header>
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/60 bg-background/95 px-6 py-3 shadow-lg backdrop-blur md:hidden">
+      <div className="mx-auto flex w-full max-w-md items-center justify-around text-xs font-medium text-foreground/70">
+        <Link
+          href="/home"
+          className={`flex flex-col items-center gap-1 transition-colors ${pathname === "/" ? "text-primary" : "hover:text-primary/80"}`}
+        >
+          <Home className="size-5" />
+          <span>{t("header.home")}</span>
+        </Link>
+        <Link
+          href="/about"
+          className={`flex flex-col items-center gap-1 transition-colors ${pathname === "/about" ? "text-primary" : "hover:text-primary/80"}`}
+        >
+          <Info className="size-5" />
+          <span>{t("header.nosotros")}</span>
+        </Link>
+        <Link
+          href={profileHref}
+          className={`flex flex-col items-center gap-1 transition-colors ${pathname?.startsWith("/speakers/profile") || pathname?.startsWith("/learners/profile") ? "text-primary" : "hover:text-primary/80"}`}
+        >
+          <UserIcon className="size-5" />
+          <span>{t("header.profile")}</span>
+        </Link>
+      </div>
+    </nav>
+    </>
   )
 }

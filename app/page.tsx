@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Header } from "@/components/header"
 import { FloatingCards } from "@/components/floating-cards"
-import { Play, ArrowRight, BookOpen, Users, Award, FileText, Calendar, UserCheck, Grid3X3, Square, Eye, CheckCircle, X, Send, Star, Download, Volume2, MessageCircle, CalendarDays, FastForward, Loader2 } from "lucide-react"
+import { Play, ArrowRight, BookOpen, Users, Award, FileText, Calendar, UserCheck, Grid3X3, Square, Eye, CheckCircle, X, Send, Star, Download, Volume2, MessageCircle, CalendarDays, FastForward, Loader2, Search, Heart, UserPlus, Share2 } from "lucide-react"
 import Image from "next/image"
 import studentImage from "@/public/image/student.png"
 import grandmother1 from "@/public/image/1.jpeg"
@@ -15,39 +15,107 @@ import { useTranslation } from "@/lib/hooks/useTranslation"
 import { useRouter } from "next/navigation"
 import { learnerService } from "@/lib/services/learnerService"
 import Link from "next/link"
+import { Button } from "@/components/ui/button"
+
+const DEFAULT_SPEAKERS = [
+  {
+    id: "default-1",
+    name: "Margaret Thompson",
+    age: 68,
+    location: "Boston, MA",
+    rating: 4.9,
+    ratingCount: 127,
+    bio: "Retired history teacher with stories from 40 years in education.",
+    tags: ["Travel", "History", "Cooking", "Culture"],
+    avatar: grandmother1,
+  },
+  {
+    id: "default-2",
+    name: "Robert Williams",
+    age: 72,
+    location: "Seattle, WA",
+    rating: 5,
+    ratingCount: 89,
+    bio: "Former engineer who loves sharing knowledge about the world.",
+    tags: ["Technology", "Science", "Nature", "Music"],
+    avatar: grandfatherImage,
+  },
+  {
+    id: "default-3",
+    name: "Dorothy Martinez",
+    age: 65,
+    location: "Austin, TX",
+    rating: 4.8,
+    ratingCount: 156,
+    bio: "Retired librarian passionate about books and storytelling.",
+    tags: ["Art", "Literature", "Gardening", "Family"],
+    avatar: grandmother2,
+  },
+] as const
+
+const HOW_IT_WORKS_STEPS = [
+  {
+    icon: Search,
+    title: "Choose your speaker",
+    description: "Explore their profiles and find someone whose interests match yours.",
+  },
+  {
+    icon: Calendar,
+    title: "Select date and time",
+    description: "Pick a time that works for you from their available slots.",
+  },
+  {
+    icon: MessageCircle,
+    title: "Practice and connect",
+    description: "Enjoy an authentic conversation about topics you both love.",
+  },
+  {
+    icon: Heart,
+    title: "Favorite topics",
+    description: "Speakers have chosen their favorite topics to guide the conversation.",
+  },
+] as const
+
+const WHY_DIFFERENT_CARDS = [
+  { icon: Heart, key: "home.whyDifferent.point1" },
+  { icon: MessageCircle, key: "home.whyDifferent.point2" },
+  { icon: Users, key: "home.whyDifferent.point3" },
+] as const
+
+const BECOME_SPEAKER_STEPS = [
+  {
+    icon: UserPlus,
+    label: "Step 1",
+    description: "Register as a speaker",
+  },
+  {
+    icon: Calendar,
+    label: "Step 2",
+    description: "Set your availability",
+  },
+  {
+    icon: Share2,
+    label: "Step 3",
+    description: "Start connecting and sharing stories",
+  },
+] as const
 
 export default function HomePage() {
   const router = useRouter()
   const { t } = useTranslation()
-  const [speakers, setSpeakers] = useState<any[]>([])
-  const [filteredSpeakers, setFilteredSpeakers] = useState<any[]>([])
-  const [selectedFilter, setSelectedFilter] = useState<string>("all")
+  const [featuredSpeakers, setFeaturedSpeakers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-
-  // Map filter keys to topic names
-  const filterMap: Record<string, string> = {
-    "all": "",
-    "literature": "Literature",
-    "architecture": "Architecture",
-    "engineering": "Engineering",
-    "business": "Business",
-    "cooking": "Food"
-  }
 
   useEffect(() => {
     fetchSpeakers()
   }, [])
-
-  useEffect(() => {
-    filterSpeakers()
-  }, [selectedFilter, speakers])
 
   const fetchSpeakers = async () => {
     try {
       setIsLoading(true)
       const response = await learnerService.getSpeakers()
       if (response.success) {
-        setSpeakers(response.data.speakers)
+        setFeaturedSpeakers(response.data.speakers.slice(0, 3))
       }
     } catch (error) {
       console.error("Error fetching speakers:", error)
@@ -55,549 +123,308 @@ export default function HomePage() {
       setIsLoading(false)
     }
   }
-
-  const filterSpeakers = () => {
-    let filtered = [...speakers]
-
-    // Apply topic filter
-    if (selectedFilter && selectedFilter !== "all") {
-      const topic = filterMap[selectedFilter]
-      if (topic) {
-        filtered = filtered.filter(speaker => 
-          speaker.interests?.includes(topic)
-        )
-      }
-    }
-
-    // Limit to 4 speakers for homepage
-    setFilteredSpeakers(filtered.slice(0, 4))
-  }
   return (
     <div className="min-h-screen relative overflow-hidden">
-      <Header />
+      {/* <Header /> */}
       <main className="relative overflow-hidden"> 
-        <div className="bg-gradient-to-b from-[#7196FF] to-[#22B569] relative overflow-hidden min-h-screen flex items-center">
-          <div className="max-w-7xl mx-auto px-4 sm:px-3 py-4 sm:py-8 lg:py-12 relative z-10 w-full">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-              <div className="space-y-6 sm:space-y-8 order-2 lg:order-1 text-center lg:text-left">
-                <div className="space-y-4">
-                  {/* "Never stop learning" badge */}
-                  <div className="inline-block bg-white text-[#7357F5] px-4 py-2 rounded-md text-sm font-medium">
-                    {t('home.badge')}
-                  </div>
-                  
-                  {/* Main headline - 3 lines */}
-                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight">
-                    <span className="text-[#524FD5] block">{t('home.title.line1')}</span>
-                    <span className="text-[#524FD5] block">{t('home.title.line2')}</span>
-                    <span className="text-[#524FD5] block">{t('home.title.line3')}</span>
-                  </h1>
-                </div>
-
-                {/* CTA Section with Reviews */}
-                <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-                  <div className="flex items-center gap-0 rounded-2xl pr-6 py-4">
-                    <button className="group bg-[#524FD5] text-white font-semibold hover:bg-[#4240C5] px-6 py-5 text-base rounded-xl rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 uppercase tracking-wide">
-                      {t('home.cta.explore')}
-                    </button>
-                    
-                    {/* Profile Pictures */}
-                    <div className="flex items-center -ml-4">
-                      <div className="w-14 h-14 rounded-full border-2 border-white overflow-hidden relative z-10">
-                        <Image
-                          src="https://i.pravatar.cc/150?img=5"
-                          alt="User avatar"
-                          width={56}
-                          height={56}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="w-14 h-14 rounded-full border-2 border-white overflow-hidden -ml-2">
-                        <Image
-                          src="https://i.pravatar.cc/150?img=8"
-                          alt="User avatar"
-                          width={56}
-                          height={56}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="w-14 h-14 rounded-full border-2 border-white overflow-hidden -ml-2">
-                        <Image
-                          src="https://i.pravatar.cc/150?img=12"
-                          alt="User avatar"
-                          width={56}
-                          height={56}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <div className="flex items-center gap-1 ml-3">
-                        {[...Array(4)].map((_, i) => (
-                          <Star key={i} className="w-5 h-5 fill-black text-black" />
-                        ))}
-                        <Star className="w-5 h-5 fill-black text-black" style={{ clipPath: 'inset(0 50% 0 0)' }} />
-                      </div>
-                      <p className="text-sm text-black font-medium whitespace-nowrap px-3">{t('home.reviews')}</p>
-                    </div>
-                  </div>
-                </div>
-         
-              </div>
-
-              {/* Right Content - Image Section */}
-              <div className="relative order-1 lg:order-2 flex items-center justify-center">
-                <div className="relative w-full max-w-[400px] sm:max-w-[500px] md:max-w-[650px] lg:max-w-[750px] xl:max-w-[850px] 2xl:max-w-[950px] mx-auto h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px] xl:h-[800px]">
-                  <div className="relative z-10 w-full h-full flex items-end">
-                  <Image
-                    src={studentImage}
-                      alt="Graduate student in cap and gown"
-                      className="w-full h-[80vh] drop-shadow-2xl"
-                      width={600}
-                      height={700}
-                    priority
-                      sizes="(max-width: 640px) 400px, (max-width: 768px) 500px, (max-width: 1024px) 650px, (max-width: 1280px) 750px, (max-width: 1536px) 850px, 950px"
-                      style={{
-                        maxHeight: '80vh',
-                        objectFit: 'cover',
-                        objectPosition: 'center bottom',
-                        width: '100%',
-                        height: '100%',
-                        maskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
-                        WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)'
-                      }}
-                    />
-                  </div>
-
-                  {/* Decorative Elements - Hidden on Small Mobile */}
-                  <div className="hidden sm:block">
-                    {/* Top Right Decoration */}
-                    <div className="absolute -top-4 -right-4 w-20 h-20 bg-orange-400/20 rounded-full blur-2xl animate-pulse"></div>
-                    
-                    {/* Bottom Left Decoration */}
-                    <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-white/20 rounded-full blur-xl animate-pulse delay-700"></div>
-                    
-                    {/* Small Dots */}
-                    <div className="absolute top-10 right-10 w-3 h-3 bg-orange-400 rounded-full animate-bounce"></div>
-                    <div className="absolute bottom-20 left-10 w-2 h-2 bg-white rounded-full animate-bounce delay-300"></div>
-                  </div>
-                </div>
-
-                {/* Floating UI Cards - Responsive Positioning */}
-                <FloatingCards />
-              </div>
-            </div>
+        <section className="relative isolate overflow-hidden  py-24 transition-colors dark:from-[hsl(220deg_20.41%_19.09%)] dark:via-[hsl(220deg_23%_15%)] dark:to-[hsl(220deg_26%_10%)] sm:py-28">
+          <div className="absolute inset-0 -z-10 opacity-40 blur-3xl filter">
+            <div className="mx-auto h-full w-full max-w-5xl rounded-full bg-primary/30 dark:bg-primary/20" />
           </div>
-        </div>   
-
-
+          <div className="mx-auto flex max-w-4xl flex-col items-center gap-8 px-6 text-center sm:px-8">
+            {/* <span className="inline-flex items-center rounded-full bg-primary/10 px-4 py-1 text-sm font-semibold text-primary dark:bg-primary/20">
+              {t("home.badge")}
+            </span> */}
+            <h1 className="text-4xl font-bold leading-tight text-foreground sm:text-5xl lg:text-6xl">
+            {t("home.badge")}
+            </h1>
+            <p className="max-w-2xl text-base text-muted-foreground sm:text-lg lg:text-xl">
+              Practice your English by connecting with people who have a lot to share.
+            </p>
+            <Button
+              size="lg"
+              className="mt-2 rounded-full px-8 shadow-lg shadow-primary/25 transition hover:shadow-primary/35"
+              asChild
+            >
+              <Link href="/speakers">
+                {t("home.cta.explore")}
+                <ArrowRight className="ml-2 size-4" />
+              </Link>
+            </Button>
+          </div>
+        </section>
         {/* Popular Speakers Section */}
-        <section className="bg-[#0F172A] py-16 sm:py-20 lg:py-24 -mt-1">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Section Header */}
-            <div className="text-center mb-12 sm:mb-16">
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
-                {t('home.popularSpeakers')}
+        <section className="relative -mt-1 bg-muted py-20 transition-colors dark:bg-[hsl(220deg_20.41%_19.09%)] sm:py-24">
+          <div className="absolute inset-x-0 top-0 -z-10 h-40 bg-gradient-to-b from-white/70 to-transparent dark:from-white/5" />
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto mb-12 max-w-3xl text-center sm:mb-16">
+              <h2 className="text-3xl font-bold text-foreground sm:text-4xl lg:text-[2.75rem]">
+                {t("home.popularSpeakers")}
               </h2>
-              <p className="text-lg sm:text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
-                {t('home.popularSpeakersDesc')}
+              <p className="mt-4 text-base text-muted-foreground sm:text-lg lg:text-xl">
+                {t("home.popularSpeakersDesc")}
               </p>
             </div>
 
-            {/* Filter Buttons */}
-            <div className="flex flex-wrap justify-center gap-3 mb-12">
-              <button 
-                onClick={() => setSelectedFilter("all")}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  selectedFilter === "all"
-                    ? "bg-[#524FD5] text-white"
-                    : "bg-transparent text-white border border-white hover:bg-white/10"
-                }`}
-              >
-                {t('home.filter.all')}
-              </button>
-              <button 
-                onClick={() => setSelectedFilter("literature")}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  selectedFilter === "literature"
-                    ? "bg-[#524FD5] text-white"
-                    : "bg-transparent text-white border border-white hover:bg-white/10"
-                }`}
-              >
-                {t('home.filter.literature')}
-              </button>
-              <button 
-                onClick={() => setSelectedFilter("architecture")}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  selectedFilter === "architecture"
-                    ? "bg-[#524FD5] text-white"
-                    : "bg-transparent text-white border border-white hover:bg-white/10"
-                }`}
-              >
-                {t('home.filter.architecture')}
-              </button>
-              <button 
-                onClick={() => setSelectedFilter("engineering")}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  selectedFilter === "engineering"
-                    ? "bg-[#524FD5] text-white"
-                    : "bg-transparent text-white border border-white hover:bg-white/10"
-                }`}
-              >
-                {t('home.filter.engineering')}
-              </button>
-              <button 
-                onClick={() => setSelectedFilter("business")}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  selectedFilter === "business"
-                    ? "bg-[#524FD5] text-white"
-                    : "bg-transparent text-white border border-white hover:bg-white/10"
-                }`}
-              >
-                {t('home.filter.business')}
-              </button>
-              <button 
-                onClick={() => setSelectedFilter("cooking")}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  selectedFilter === "cooking"
-                    ? "bg-[#524FD5] text-white"
-                    : "bg-transparent text-white border border-white hover:bg-white/10"
-                }`}
-              >
-                {t('home.filter.cooking')}
-              </button>
-            </div>
-
-            {/* Speaker Cards Grid */}
             {isLoading ? (
-              <div className="flex justify-center items-center py-20">
-                <Loader2 className="h-8 w-8 animate-spin text-[#524FD5]" />
-              </div>
-            ) : filteredSpeakers.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-                {filteredSpeakers.map((speaker) => (
-                  <div key={speaker._id} className="bg-[#1B2335] rounded-2xl overflow-hidden flex flex-col h-full">
-                    {/* Image */}
-                    <div className="relative w-full h-48 bg-gray-200 overflow-hidden">
-                      {speaker.avatar ? (
-                        <Image
-                          src={speaker.avatar}
-                          alt={`${speaker.firstname || ''} ${speaker.lastname || ''}`}
-                          fill
-                          className="object-cover"
-                          unoptimized
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-[#524FD5] to-[#22B569] flex items-center justify-center">
-                          <span className="text-white text-4xl font-bold">
-                            {speaker.firstname?.[0] || ''}{speaker.lastname?.[0] || ''}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    {/* Content */}
-                    <div className="p-4 flesx-1 flex flex-col">
-                      {speaker.age && (
-                        <p className="text-gray-400 text-sm mb-2">
-                          {speaker.age} {t('home.speakerCard.age')}
-                        </p>
-                      )}
-                      <h3 className="text-white font-bold text-lg mb-3">
-                        {speaker.firstname} {speaker.lastname}
-                      </h3>
-                      <p className="text-gray-400 text-sm mb-4 flex-1 line-clamp-3">
-                        {speaker.bio || 'No description available'}
-                      </p>
-                      {/* Tags */}
-                      {speaker.interests && speaker.interests.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {speaker.interests.slice(0, 2).map((interest: string, idx: number) => (
-                            <span 
-                              key={idx}
-                              className="text-white text-xs border border-white px-2 py-1 rounded"
-                            >
-                              {interest}
-                            </span>
-                          ))}
-                          {speaker.interests.length > 2 && (
-                            <span className="text-gray-400 text-xs border border-gray-500 px-2 py-1 rounded">
-                              +{speaker.interests.length - 2}
-                            </span>
-                          )}
-                        </div>
-                      )}
-                      <div className="flex items-center justify-between">
-                        <div className="">
-                          <span className="text-white font-bold mr-2">
-                            {speaker.cost && speaker.cost > 0 ? `$${speaker.cost}` : t('home.speakerCard.free')}
-                          </span>
-                          {speaker.cost && speaker.cost > 0 && (
-                            <span className="text-gray-500 text-sm line-through">$300</span>
-                          )}
-                        </div>
-                        {/* Button */}
-                        <Link href={`/speakers/${speaker._id}`}>
-                          <button className="px-3 cursor-pointer bg-[#524FD5] text-white py-2 rounded-md font-medium hover:bg-[#4240C5] transition-colors">
-                            {t('home.speakerCard.book')}
-                          </button>
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : (
-              <div className="text-center py-20">
-                <p className="text-gray-400 text-lg">
-                  {selectedFilter && selectedFilter !== "all" 
-                    ? "No speakers found for this filter."
-                    : "No speakers available at the moment."}
-                </p>
-              </div>
-            )}
+              <>
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {(featuredSpeakers.length > 0 ? featuredSpeakers : DEFAULT_SPEAKERS).map((speaker: any, idx: number) => {
+                    const isApiSpeaker = featuredSpeakers.length > 0
+                    const fullName = isApiSpeaker
+                      ? `${speaker.firstname ?? ""} ${speaker.lastname ?? ""}`.trim() || speaker.email
+                      : speaker.name
+                    const age = isApiSpeaker ? speaker.age : speaker.age
+                    const location = isApiSpeaker
+                      ? [speaker.city, speaker.country].filter(Boolean).join(", ") ||
+                        speaker.location ||
+                        ""
+                      : speaker.location
+                    const ratingValue = isApiSpeaker ? speaker.rating ?? null : speaker.rating
+                    const ratingCount = isApiSpeaker
+                      ? speaker.reviewsCount ?? speaker.ratingCount ?? speaker.reviews?.length ?? null
+                      : speaker.ratingCount
+                    const bio = isApiSpeaker
+                      ? speaker.bio || "This speaker loves connecting through meaningful conversations."
+                      : speaker.bio
+                    const tags = isApiSpeaker
+                      ? (speaker.interests && speaker.interests.length > 0
+                          ? speaker.interests.slice(0, 4)
+                          : [])
+                      : speaker.tags
+                    const avatarSrc = isApiSpeaker ? speaker.avatar : speaker.avatar
+                    const initials = fullName
+                      .split(" ")
+                      .filter(Boolean)
+                      .map((part: string) => part[0])
+                      .join("")
+                      .slice(0, 2)
 
-            {/* Ver todos Button */}
-            <div className="text-center">
-              <Link href="/speakers">
-                <button className="bg-white text-[#524FD5] px-8 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors cursor-pointer">
-                  {t('home.viewAll')}
-                </button>
-              </Link>
-            </div>
+                    return (
+                      <div
+                        key={isApiSpeaker ? speaker._id ?? idx : speaker.id}
+                        className="flex h-full flex-col justify-between rounded-3xl border border-border/60 bg-card p-6 shadow-[0_20px_60px_rgba(116,108,255,0.08)] transition hover:-translate-y-1 hover:shadow-[0_25px_65px_rgba(116,108,255,0.12)]"
+                      >
+                        <div className="flex flex-col gap-6">
+                          <div className="flex items-center gap-4">
+                            <div className="relative h-16 w-16 overflow-hidden rounded-full border-4 border-border/40 bg-muted">
+                              {avatarSrc ? (
+                                <Image
+                                  src={avatarSrc}
+                                  alt={fullName}
+                                  fill
+                                  className="object-cover"
+                                  sizes="64px"
+                                  priority={idx === 0}
+                                />
+                              ) : (
+                                <span className="flex h-full w-full items-center justify-center text-lg font-semibold text-primary">
+                                  {initials}
+                                </span>
+                              )}
+                            </div>
+                            <div>
+                              <h3 className="text-lg font-semibold text-foreground">
+                                {fullName}
+                              </h3>
+                              <p className="text-sm text-muted-foreground">
+                                {[age ? `${age} ${t("home.speakerCard.age")}` : null, location]
+                                  .filter(Boolean)
+                                  .join(" • ")}
+                              </p>
+                              {ratingValue && (
+                                <div className="mt-2 flex items-center gap-1 text-sm font-medium text-primary">
+                                  <Star className="h-4 w-4 fill-current" />
+                                  <span>
+                                    {Number(ratingValue).toFixed(1)}
+                                    {ratingCount ? (
+                                      <span className="ml-1 text-xs font-normal text-muted-foreground/80">
+                                        ({ratingCount})
+                                      </span>
+                                    ) : null}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          <p className="text-sm leading-relaxed text-muted-foreground">
+                            {bio}
+                          </p>
+
+                          {tags && tags.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                              {tags.map((tag: string, tagIdx: number) => (
+                                <span
+                                  key={`${tag}-${tagIdx}`}
+                                  className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="mt-6">
+                            <Button
+                              variant="outline"
+                              className="w-full justify-center rounded-xl"
+                              asChild
+                            >
+                              <Link href={isApiSpeaker && speaker._id ? `/speakers/${speaker._id}` : "/speakers"}>
+                                {t("home.speakerCard.book")}
+                              </Link>
+                            </Button>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+
+                <div className="mt-12 text-center">
+                  <Button
+                    className="rounded-full px-8 py-6 text-base font-semibold shadow-[0_12px_30px_rgba(115,87,245,0.35)] hover:bg-primary/90"
+                    asChild
+                  >
+                    <Link href="/speakers">
+                      {t("home.viewAll")}
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </section>
 
         {/* How It Works Section */}
-        <section className="bg-[#0F172A] py-16 sm:py-20 lg:py-8">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-              {/* Left Column - How It Works */}
-              <div>
-                {/* Header Badge */}
-                <div className="inline-block bg-[#F5F5F5] text-[#7357F5] px-4 py-2 rounded-xl text-sm font-medium mb-6">
-                  {t('home.howItWorks.badge')}
-                </div>
-                {/* Title */}
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#524FD5] mb-12">
-                  {t('home.howItWorks.title')}
-                </h2>
-                {/* Steps */}
-                <div className="space-y-8">
-                  {/* Step 1 */}
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-14 h-14 bg-white rounded-full flex items-center justify-center">
-                      <span className="text-[#0F172A] font-bold text-lg">1</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-white text-lg">
-                        {t('home.howItWorks.step1')}
-                      </p>
-                    </div>
-                  </div>
-                  {/* Step 2 */}
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-14 h-14 bg-[#F5F5F5] rounded-full flex items-center justify-center">
-                      <span className="text-[#0F172A] font-bold text-lg">2</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-white text-lg">
-                        {t('home.howItWorks.step2')}
-                      </p>
-                    </div>
-                  </div>
-                  {/* Step 3 */}
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-14 h-14 bg-white rounded-full flex items-center justify-center">
-                      <span className="text-[#0F172A] font-bold text-lg">3</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-white text-lg pt-3">
-                        {t('home.howItWorks.step3')}
-                      </p>
-                    </div>
-                  </div>
+        <section className="py-20 sm:py-24">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-5xl rounded-[2.5rem] border border-border/40 bg-card/90 p-10 text-center shadow-[0_25px_80px_rgba(115,87,245,0.08)] backdrop-blur">
+              <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
+                Practice your speaking
+              </h2>
+              <p className="mt-3 text-base text-muted-foreground">
+                How does it work?
+              </p>
 
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-14 h-14 bg-white rounded-full flex items-center justify-center">
-                      <span className="text-[#0F172A] font-bold text-lg">4</span>
+              <div className="mt-12 grid gap-10 text-left sm:grid-cols-2 lg:grid-cols-4">
+                {HOW_IT_WORKS_STEPS.map((step) => {
+                  const Icon = step.icon
+                  return (
+                    <div
+                      key={step.title}
+                      className="flex flex-col items-center gap-4 text-center"
+                    >
+                      <span className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary shadow-inner">
+                        <Icon className="size-7" />
+                      </span>
+                      <div className="space-y-2">
+                        <h3 className="text-lg font-semibold text-foreground">
+                          {step.title}
+                        </h3>
+                        <p className="text-sm leading-6 text-muted-foreground">
+                          {step.description}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex-1 items-center">
-                      <p className="text-white text-lg pt-3">
-                        {t('home.howItWorks.step4')}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Column - Why Aurora is Different */}
-            </div>
-          </div>
-        </section>
-        <section className="bg-[#0F172A] py-16 sm:py-20 lg:py-8">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-              <div></div>
-              <div>
-                {/* Header Badge */}
-                <div className="inline-block bg-white text-[#7357F5] px-4 py-2 rounded-xl text-sm font-medium mb-6">
-                  {t('home.whyDifferent.badge')}
-                </div>
-                {/* Title */}
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#524FD5] mb-12">
-                  {t('home.whyDifferent.title')}
-                </h2>
-                {/* Points */}
-                <div className="space-y-8">
-                  {/* Point 1 */}
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-14 h-14 bg-white rounded-full flex items-center justify-center">
-                      <span className="text-[#0F172A] font-bold text-lg">1</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-white text-lg">
-                        {t('home.whyDifferent.point1')}
-                      </p>
-                    </div>
-                  </div>
-                  {/* Point 2 */}
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-14 h-14 bg-white rounded-full flex items-center justify-center">
-                      <span className="text-[#0F172A] font-bold text-lg">2</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-white text-lg">
-                        {t('home.whyDifferent.point2')}
-                      </p>
-                    </div>
-                  </div>
-                  {/* Point 3 */}
-                  <div className="flex gap-4">
-                    <div className="flex-shrink-0 w-14 h-14 bg-white rounded-full flex items-center justify-center">
-                      <span className="text-[#0F172A] font-bold text-lg">3</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-white text-lg">
-                        {t('home.whyDifferent.point3')}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                  )
+                })}
               </div>
             </div>
           </div>
         </section>
-        {/* Become a Speaker Section */}
-        <section className="py-4 px-4 sm:px-6 lg:px-8 sm:py-8 lg:pt-12 lg:pb-48">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#7357F5] to-[#22B569] rounded-lg">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-              {/* Left Content - Text */}
-              <div className="space-y-8 text-center lg:text-left order-2 lg:order-1">
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight">
-                  {t('home.becomeSpeaker.title')}<br />
-                  <span className="text-white">{t('home.becomeSpeaker.titleSpeaker')}</span>
+
+        {/* Why Aurora Is Different */}
+        <section className="bg-background py-20 sm:py-24">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <h2 className="text-3xl font-bold text-foreground sm:text-4xl">
+                {t("home.whyDifferent.title")}
+              </h2>
+              <p className="mt-3 text-base text-muted-foreground">
+                {t("home.whyDifferent.badge")}
+              </p>
+            </div>
+
+            <div className="mt-12 grid gap-6 md:grid-cols-3">
+              {WHY_DIFFERENT_CARDS.map(({ icon: Icon, key }) => {
+                const copy = t(key)
+                const [headline, ...rest] = copy.split(":")
+                const description = rest.join(":").trim()
+
+                return (
+                  <div
+                    key={key}
+                    className="flex flex-col items-center gap-4 rounded-3xl border border-border/60 bg-card p-8 text-center shadow-[0_15px_40px_rgba(115,87,245,0.08)]"
+                  >
+                    <span className="flex size-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-inner">
+                      <Icon className="size-7" />
+                    </span>
+                    <div className="space-y-3">
+                      <h3 className="text-lg font-semibold text-foreground">
+                        {headline.trim()}
+                      </h3>
+                      {description && (
+                        <p className="text-sm leading-6 text-muted-foreground">
+                          {description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* Become a Speaker */}
+        <section className="py-24">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div className="rounded-[2.5rem] bg-[#5E2792]">
+              <div className="rounded-[2.5rem] bg-primary/5 px-6 py-8 text-center sm:px-12 dark:bg-black/20">
+                <h2 className="text-3xl font-bold text-white sm:text-4xl">
+                  Become a Speaker
                 </h2>
-                
-                {/* Bullet Points */}
-                <div className="space-y-4 text-white">
-                  <div className="flex items-start gap-3">
-                    <Star className="w-6 h-6 fill-white text-white flex-shrink-0 mt-1" />
-                    <p className="text-lg">{t('home.becomeSpeaker.point1')}</p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Star className="w-6 h-6 fill-white text-white flex-shrink-0 mt-1" />
-                    <p className="text-lg">{t('home.becomeSpeaker.point2')}</p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Star className="w-6 h-6 fill-white text-white flex-shrink-0 mt-1" />
-                    <p className="text-lg">{t('home.becomeSpeaker.point3')}</p>
-                  </div>
+                <p className="mt-3 text-base text-white/80">
+                  Share your stories, connect with eager learners, and make a meaningful impact.
+                </p>
+
+                <div className="mt-12 grid gap-10 text-left sm:grid-cols-3">
+                  {BECOME_SPEAKER_STEPS.map(({ icon: Icon, label, description }) => (
+                    <div key={label} className="flex flex-col items-center gap-4 text-center text-white">
+                      <span className="flex size-16 items-center justify-center rounded-full border border-white/40 bg-white/10">
+                        <Icon className="size-7" />
+                      </span>
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium text-white/70">{label}</p>
+                        <h3 className="text-base font-semibold">{description}</h3>
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
-                {/* CTA Button */}
-                <div className="flex justify-center lg:justify-start">
-                  <button 
-                    onClick={() => router.push('/auth/speaker/signup')}
-                    className="bg-white cursor-pointer text-[#7357F5] font-semibold hover:bg-[#24B86D] px-8 py-4 text-base rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 uppercase tracking-wide">
-                    {t('home.becomeSpeaker.cta')}
-                  </button>
-                </div>
-              </div>
-
-              {/* Right Content - Image */}
-              <div className="relative order-1 lg:order-2 flex items-center justify-center">
-                <div className="relative w-full max-w-[300px] sm:max-w-[350px] md:max-w-[400px] lg:max-w-[450px] mx-auto h-[300px] sm:h-[350px] md:h-[400px] lg:h-[450px]">
-                  <div className="relative z-10 w-full h-full flex items-end">
-                    <Image
-                      src={grandfatherImage}
-                      alt="Speaker grandfather"
-                      className="w-full h-full object-cover rounded-2xl drop-shadow-2xl"
-                      width={450}
-                      height={450}
-                      priority
-                      sizes="(max-width: 640px) 300px, (max-width: 768px) 350px, (max-width: 1024px) 400px, 450px"
-                    />
-                  </div>
-
-                  {/* Decorative Elements */}
-                  <div className="hidden sm:block">
-                    <div className="absolute -top-4 -right-4 w-20 h-20 bg-white/20 rounded-full blur-2xl animate-pulse"></div>
-                    <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-white/20 rounded-full blur-xl animate-pulse delay-700"></div>
-                  </div>
+                <div className="mt-8 flex justify-center">
+                  <Button
+                    variant="secondary"
+                    className="rounded-full cursor-pointer bg-white px-8 py-5 text-sm font-semibold text-primary shadow-lg hover:bg-white/90 dark:bg-white/90 dark:text-primary"
+                    asChild
+                  >
+                    <Link href="/auth/speaker-auth">
+                      {t("home.becomeSpeaker.cta")}
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
                 </div>
               </div>
             </div>
           </div>
         </section>
-        <footer className="relative w-full">
-
-          {/* Main Gradient Section */}
-          <div 
-            className="w-full relative"
-            style={{
-              background: 'linear-gradient(to right, rgb(51, 204, 153), rgb(102, 178, 255))',
-              paddingTop: '2rem',
-              paddingBottom: '2rem'
-            }}
-          >
-            <div className="container mx-auto px-4 max-w-7xl">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
-                {/* Left Side - Links Section */}
-                <div className="space-y-2 py-24">
-                  <h3 className="text-lg font-bold text-[#4B0082] mb-3">{t('home.footer.links')}</h3>
-                  <div className="space-y-1">
-                    <a href="/terms-and-conditions" target="_blank" rel="noopener noreferrer" className="block text-[#4B0082] hover:underline text-base">
-                      {t('home.footer.terms')}
-                    </a>
-                    <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="block text-[#4B0082] hover:underline text-base">
-                      {t('home.footer.privacy')}
-                    </a>
-                  </div>
-                </div>
-              </div>
-              <div className="text-[#4B0082] text-base w-full mx-auto text-center">
-                <p>{t('home.footer.copyright')}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom Dark Band */}
-          <div className="bg-[#1A1D21] w-full h-8"></div>
-        </footer>
-        {/* <div className="absolute bottom-0 left-0 right-0 pointer-events-none">
-          <svg 
-            viewBox="0 0 1440 120" 
-            className="w-full h-auto"
-            preserveAspectRatio="none"
-          >
-            <path 
-              d="M0,40 C480,100 960,100 1440,40 L1440,120 L0,120 Z" 
-              fill="white" 
-              fillOpacity="0.1"
-            />
-          </svg>
-        </div> */}
       </main>
     </div>
   )

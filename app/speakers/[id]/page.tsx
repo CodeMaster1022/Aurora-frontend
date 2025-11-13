@@ -206,7 +206,7 @@ export default function SpeakerProfilePage({ params }: { params: { id: string } 
       // Close dialog after 2 seconds and redirect to dashboard
       setTimeout(() => {
         setIsBookingDialogOpen(false)
-        router.push("/learners/dashboard")
+        router.push("/learners/profile")
       }, 2000)
     } catch (error: any) {
       console.error("Error booking session:", error)

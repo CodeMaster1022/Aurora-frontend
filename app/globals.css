@@ -1,44 +1,84 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-:root {
-  /* Light mode - Updated color scheme to match Aurora turquoise theme */
-  --background: #0F172A; 
-  --foreground: oklch(0.145 0 0); /* Dark text */
-  --card: #FEFEFE; /* Light card backgrounds */
-  --card-foreground: oklch(0.145 0 0); /* Dark text on cards */
-  --popover: #FFFFFF;
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.75 0.15 195); /* Turquoise primary */
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.6 0.2 250); /* Blue accent */
-  --secondary-foreground: oklch(1 0 0);
-  --muted: oklch(0.95 0 0);
-  --muted-foreground: #8d6666;
-  --accent: oklch(0.6 0.2 250); /* Blue accent for interactions */
-  --accent-foreground: oklch(1 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.9 0 0);
-  --input: oklch(0.98 0 0);
-  --input-foreground: oklch(0.145 0 0);
-  --ring: oklch(0.6 0.2 250 / 0.5);
-  --chart-1: oklch(0.6 0.2 250);
-  --chart-2: oklch(0.75 0.15 195);
-  --chart-3: oklch(0.25 0 0);
-  --chart-4: oklch(0.7 0.25 35);
-  --chart-5: oklch(0.6 0.25 280);
+:root,
+.light {
+  color-scheme: light;
+  --background: #f7f8ff;
+  --foreground: #1f2933;
+  --card: #ffffff;
+  --card-foreground: #1f2933;
+  --popover: #ffffff;
+  --popover-foreground: #1f2933;
+  --primary: #7357f5;
+  --primary-foreground: #ffffff;
+  --secondary: #9ca3ff;
+  --secondary-foreground: #1f1b4b;
+  --muted: #e4e7ff;
+  --muted-foreground: #4b5563;
+  --accent: #e4e7ff;
+  --accent-foreground: #1f2933;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #e2e8f0;
+  --input: #ffffff;
+  --input-foreground: #1f2933;
+  --ring: rgba(115, 87, 245, 0.4);
+  --chart-1: #7357f5;
+  --chart-2: #49bbbd;
+  --chart-3: #ffb347;
+  --chart-4: #f97316;
+  --chart-5: #1d4ed8;
   --radius: 0.625rem;
-  --sidebar: oklch(0.98 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.145 0 0);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.6 0.2 250);
-  --sidebar-accent-foreground: oklch(1 0 0);
-  --sidebar-border: oklch(0.9 0 0);
-  --sidebar-ring: oklch(0.6 0.2 250 / 0.5);
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1f2933;
+  --sidebar-primary: #7357f5;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e4e7ff;
+  --sidebar-accent-foreground: #1f2933;
+  --sidebar-border: #e2e8f0;
+  --sidebar-ring: rgba(115, 87, 245, 0.4);
   --text-color: #696984;
-  --text-color-title: #7357F5;
+  --text-color-title: #7357f5;
+}
+
+.dark {
+  color-scheme: dark;
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --card: #111827;
+  --card-foreground: #e2e8f0;
+  --popover: #111827;
+  --popover-foreground: #f8fafc;
+  --primary: #a78bfa;
+  --primary-foreground: #0f172a;
+  --secondary: #60a5fa;
+  --secondary-foreground: #0f172a;
+  --muted: #1e293b;
+  --muted-foreground: #cbd5f5;
+  --accent: #1e293b;
+  --accent-foreground: #f8fafc;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #1f2937;
+  --input: #1f2937;
+  --input-foreground: #f8fafc;
+  --ring: rgba(167, 139, 250, 0.45);
+  --chart-1: #a78bfa;
+  --chart-2: #38bdf8;
+  --chart-3: #fcd34d;
+  --chart-4: #f472b6;
+  --chart-5: #34d399;
+  --sidebar: #0f172a;
+  --sidebar-foreground: #f8fafc;
+  --sidebar-primary: #a78bfa;
+  --sidebar-primary-foreground: #0f172a;
+  --sidebar-accent: #1e293b;
+  --sidebar-accent-foreground: #f8fafc;
+  --sidebar-border: #1f2937;
+  --sidebar-ring: rgba(167, 139, 250, 0.45);
+  --text-color: #cbd5f5;
+  --text-color-title: #c4c6ff;
 }
 
 @theme inline {
