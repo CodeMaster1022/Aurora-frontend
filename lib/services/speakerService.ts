@@ -50,6 +50,7 @@ export interface SpeakerAvailability {
 export interface SpeakerProfile {
   _id: string;
   bio?: string;
+  location?: string;
   age?: number;
   cost?: number;
   availability: SpeakerAvailability[];
@@ -117,15 +118,25 @@ class SpeakerService {
   }
 
   // Update speaker profile
-  async updateProfile(profileData: Partial<SpeakerProfile>): Promise<SpeakerProfile> {
-    const response = await this.makeRequest<{
+  async updateProfile(profileData: {
+    bio?: string;
+    age?: number;
+    cost?: number;
+    location?: string;
+    availability?: SpeakerAvailability[];
+  }): Promise<{
+    success: boolean;
+    message: string;
+    data: { user: any };
+  }> {
+    return this.makeRequest<{
       success: boolean;
-      data: { profile: SpeakerProfile };
+      message: string;
+      data: { user: any };
     }>('/speaker/profile', {
       method: 'PUT',
       body: JSON.stringify(profileData),
     });
-    return response.data.profile;
   }
 
   // Update interests

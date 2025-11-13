@@ -26,7 +26,8 @@ import {
   Unlink,
   CheckCircle2,
   Trash2,
-  AlertTriangle
+  AlertTriangle,
+  MapPin
 } from "lucide-react"
 import { speakerService, Session, Review, SpeakerAvailability } from "@/lib/services/speakerService"
 import { useAppSelector, useAppDispatch } from "@/lib/hooks/redux"
@@ -54,6 +55,7 @@ export default function SpeakerDashboardPage() {
   const [isEditingProfile, setIsEditingProfile] = useState(false)
   const [bio, setBio] = useState("")
   const [age, setAge] = useState<string>("")
+  const [location, setLocation] = useState<string>("")
   const [cost, setCost] = useState<string>("")
   const [interests, setInterests] = useState<string[]>([])
   const [availability, setAvailability] = useState<SpeakerAvailability[]>([])
@@ -64,6 +66,7 @@ export default function SpeakerDashboardPage() {
     bio: string
     age: string
     cost: string
+    location: string
     interests: string[]
     avatar: string | null
   } | null>(null)
@@ -296,8 +299,13 @@ export default function SpeakerDashboardPage() {
         
         // Update profile data
         if (profile) {
+          const fallbackLocation =
+            user && typeof user === "object" && "location" in user
+              ? ((user as { location?: string }).location ?? "")
+              : ""
           setBio(profile.bio || "")
           setAge(profile.age ? profile.age.toString() : "")
+          setLocation(profile.location || fallbackLocation)
           setCost(profile.cost ? profile.cost.toString() : "")
           setInterests(user?.interests || [])
           // Normalize availability to ensure all 7 days are present
@@ -310,6 +318,11 @@ export default function SpeakerDashboardPage() {
           // If no profile data, initialize with default availability
           console.log('No profile data, initializing with defaults')
           setAvailability(getDefaultAvailability())
+          const fallbackLocation =
+            user && typeof user === "object" && "location" in user
+              ? ((user as { location?: string }).location ?? "")
+              : ""
+          setLocation(fallbackLocation)
           setInterests(user?.interests || [])
         }
       }
@@ -336,6 +349,7 @@ export default function SpeakerDashboardPage() {
         bio, 
         age: age ? Number(age) : undefined,
         cost: cost ? Number(cost) : undefined,
+        location: location ? location.trim() : "",
         availability 
       })
       await speakerService.updateAvailability(availability)
@@ -354,6 +368,7 @@ export default function SpeakerDashboardPage() {
       bio,
       age,
       cost,
+      location,
       interests: [...interests],
       avatar: avatarPreview
     }
@@ -366,6 +381,7 @@ export default function SpeakerDashboardPage() {
       setBio(snapshot.bio)
       setAge(snapshot.age)
       setCost(snapshot.cost)
+      setLocation(snapshot.location)
       setInterests(snapshot.interests)
       setAvatarPreview(snapshot.avatar)
     }
@@ -679,6 +695,12 @@ export default function SpeakerDashboardPage() {
                     <Badge variant="secondary" className="rounded-full px-3 py-1 text-xs font-medium">
                       {roleLabel}
                     </Badge>
+                    {location && (
+                      <div className="inline-flex items-center gap-1 rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm">
+                        <MapPin className="h-3.5 w-3.5" />
+                        <span>{location}</span>
+                      </div>
+                    )}
                     {age && (
                       <div className="rounded-xl border border-border bg-primary/10 p-1 text-center shadow-sm">
                         <p className="text-foreground text-xs font-semibold">{age} age</p>
@@ -806,6 +828,19 @@ export default function SpeakerDashboardPage() {
                       Optional. Helps learners understand who they will be working with.
                     </p>
                   </div>
+                  <div className="rounded-xl border border-border bg-muted/30 p-5 shadow-sm">
+                    <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Location</Label>
+                    <Input
+                      type="text"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      placeholder="Where are you based?"
+                      className="mt-3 text-foreground"
+                    />
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Share your city or timezone to help learners plan sessions.
+                    </p>
+                  </div>
                 </div>
               </div>
             ) : (
@@ -838,36 +873,23 @@ export default function SpeakerDashboardPage() {
                       <p className="mt-3 text-sm text-muted-foreground">No interests added yet.</p>
                     )}
                   </div>
+                  {location ? (
+                    <div className="rounded-xl border border-border bg-muted/30 p-5 shadow-sm">
+                      <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Location
+                      </Label>
+                      <p className="mt-3 text-sm font-medium text-foreground bg-foreground p-1 rounded-lg">{location}</p>
+                    </div>
+                  ) : (
+                    <div className="rounded-xl border border-dashed border-border/70 bg-muted/10 p-5 text-sm text-muted-foreground">
+                      Let learners know where you’re based by adding a location to your profile.
+                    </div>
+                  )}
                 </div>
               </div>
             )}
           </CardContent>
         </div>
-
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Card className="shadow-sm">
-            <CardContent className="p-5">
-              <p className="text-sm font-medium text-muted-foreground">Total Sessions</p>
-              <p className="mt-2 text-2xl font-semibold">{totalSessions}</p>
-            </CardContent>
-          </Card>
-          <Card className="shadow-sm">
-            <CardContent className="p-5">
-              <p className="text-sm font-medium text-muted-foreground">Hours Practiced</p>
-              <p className="mt-2 text-2xl font-semibold">{formattedHoursPracticed}</p>
-            </CardContent>
-          </Card>
-          <Card className="shadow-sm">
-            <CardContent className="flex items-center justify-between p-5">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Average Rating</p>
-                <p className="mt-2 text-2xl font-semibold">{formattedAverageRating}</p>
-              </div>
-              <Star className="h-8 w-8 text-yellow-500" />
-            </CardContent>
-          </Card>
-        </div>
-
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <Card className="shadow-sm">
             <CardHeader>

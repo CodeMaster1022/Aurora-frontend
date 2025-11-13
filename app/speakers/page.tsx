@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
-import { Search, Star, Loader2 } from "lucide-react"
+import { Search, Star, Loader2, MapPin } from "lucide-react"
 import { learnerService } from "@/lib/services/learnerService"
 import { useTranslation } from "@/lib/hooks/useTranslation"
 import { BookSessionDialog } from "@/components/speakers/BookSessionDialog"
@@ -97,6 +97,7 @@ type Speaker = {
   firstname: string
   lastname: string
   age?: number
+  location?: string
   city?: string
   state?: string
   interests?: string[]
@@ -213,8 +214,9 @@ export default function SpeakersPage() {
               const key = speaker._id ?? speaker.id ?? `${speaker.firstname}-${speaker.lastname}`
               const rating = speaker.rating ?? 4.9
               const ratingCount = speaker.ratingCount ?? 120
-              const locationParts = [speaker.city, speaker.state].filter(Boolean)
-              const location = locationParts.join(", ")
+              const location = (speaker as any)?.location as string | undefined
+              const fallbackLocation = [speaker.city, speaker.state].filter(Boolean).join(", ")
+              const locationLabel = location || fallbackLocation
               return (
                 <Card
                   key={key}
@@ -230,29 +232,37 @@ export default function SpeakersPage() {
                         </div>
                       )}
                     </div>
-                    <div className="flex flex-1 flex-col gap-1">
-                      <div className="flex items-center justify-between gap-4">
-                        <div>
-                          <h3 className="text-lg font-semibold text-foreground">
-                            {speaker.firstname} {speaker.lastname}
-                          </h3>
-                          <p className="text-xs text-muted-foreground">
-                            {speaker.age ? `${speaker.age} • ` : ""}
-                            {location || "Remote"}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-1 text-xs font-semibold text-primary">
-                          <Star className="size-3" />
-                          <span>{rating.toFixed(1)}</span>
-                          <span className="text-muted-foreground">({ratingCount})</span>
+                    <div className="flex flex-1 flex-col gap-2">
+                      <div className="flex w-full items-start justify-between gap-3">
+                        <div className="space-y-1 w-full">
+                          <div className="flex w-full justify-between items-center gap-2">
+                            <h3 className="text-lg font-semibold text-foreground">
+                              {speaker.firstname} {speaker.lastname}
+                            </h3>
+                            <div className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
+                              <Star className="size-3 fill-current" />
+                              <span>{rating.toFixed(1)}</span>
+                          {/* <span className="font-medium text-muted-foreground">({ratingCount})</span> */}
+                            </div>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                            {speaker.age ? (
+                              <span className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-muted/40 px-2 py-0.5 font-medium text-foreground/80">
+                                {speaker.age} {t("speakers.card.ageLabel")}
+                              </span>
+                            ) : null}
+                            <span className="inline-flex items-center gap-1 text-muted-foreground">
+                              <MapPin className="size-3 text-primary" />
+                              {locationLabel || t("speakers.card.remote")}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {speaker.bio ?? "Self introduction coming soon."}
-                      </p>
                     </div>
                   </div>
-
+                  <p className="text-sm text-muted-foreground line-clamp-2">
+                    {speaker.bio ?? "Self introduction coming soon."}
+                  </p>
                   {speaker.interests && speaker.interests.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       {speaker.interests.slice(0, 4).map((interest, index) => (

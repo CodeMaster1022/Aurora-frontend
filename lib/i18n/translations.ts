@@ -63,6 +63,7 @@ export type TranslationKey =
   | 'speakers.noResults.description'
   | 'speakers.noResults.reset'
   | 'speakers.card.book'
+  | 'speakers.card.remote'
   | 'home.speakerCard.age'
   | 'home.speakerCard.book'
   | 'home.speakerCard.free'
@@ -285,6 +286,8 @@ export type TranslationKey =
   | 'speakers.card.new'
   | 'speakers.card.reviews'
   | 'speakers.card.sessions'
+  | 'speakers.card.ageLabel'
+  | 'speakers.card.remote'
   | 'speakers.noResults'
   | 'speakers.clearFilters'
   | 'speakers.noResults.title'
@@ -669,7 +672,7 @@ export const translations: Record<Language, Translations> = {
     'home.becomeSpeaker.steps.step1.label': 'Step 1',
     'home.becomeSpeaker.steps.step2.label': 'Step 2',
     'home.becomeSpeaker.steps.step3.label': 'Step 3',
-    'home.speakerCard.age': 'years old',
+    'home.speakerCard.age': 'yrs',
     'home.speakerCard.book': 'Book',
     'home.speakerCard.free': 'Free',
     'home.footer.links': 'Links',
@@ -893,6 +896,8 @@ export const translations: Record<Language, Translations> = {
     'speakers.noResults.description': 'Try adjusting your search or explore other topics to discover more voices.',
     'speakers.noResults.reset': 'Clear Search',
     'speakers.card.book': 'Book Session',
+    'speakers.card.ageLabel': 'yrs',
+    'speakers.card.remote': 'Remote',
     
     // Speaker Dashboard
     'dashboard.title': 'Speaker Dashboard',
@@ -1492,6 +1497,8 @@ export const translations: Record<Language, Translations> = {
     'speakers.noResults.description': 'Intenta ajustar tu búsqueda o explora otros temas para descubrir más voces.',
     'speakers.noResults.reset': 'Limpiar búsqueda',
     'speakers.card.book': 'Agendar sesión',
+    'speakers.card.ageLabel': 'años',
+    'speakers.card.remote': 'Remoto',
     
     // Speaker Dashboard
     'dashboard.title': 'Panel de Speaker',

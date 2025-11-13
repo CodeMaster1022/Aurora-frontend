@@ -36,7 +36,7 @@ export default function SpeakerAuthPage() {
   const [registerEmail, setRegisterEmail] = useState("")
   const [registerPassword, setRegisterPassword] = useState("")
   const [birthDate, setBirthDate] = useState("")
-  const [city, setCity] = useState("")
+  const [location, setLocation] = useState("")
   const [bio, setBio] = useState("")
   const [photo, setPhoto] = useState<File | null>(null)
   const [photoName, setPhotoName] = useState("")
@@ -45,7 +45,7 @@ export default function SpeakerAuthPage() {
     email: "",
     password: "",
     birthDate: "",
-    city: "",
+    location: "",
     bio: "",
     photo: "",
   })
@@ -111,7 +111,7 @@ export default function SpeakerAuthPage() {
   const validateStepTwo = () => {
     const errors = {
       birthDate: birthDate ? "" : t("auth.validation.birthDateRequired"),
-      city: city.trim() ? "" : t("auth.validation.cityRequired"),
+      location: location.trim() ? "" : t("auth.validation.cityRequired"),
       bio: bio.trim() ? "" : t("auth.validation.bioRequired"),
       photo: photo ? "" : t("auth.validation.photoRequired"),
     }
@@ -136,7 +136,7 @@ export default function SpeakerAuthPage() {
       const [firstName = "", ...rest] = fullName.trim().split(" ")
       const lastName = rest.join(" ") || firstName
       const ageValue = birthDate ? Math.max(18, Math.floor((Date.now() - new Date(birthDate).getTime()) / (1000 * 60 * 60 * 24 * 365.25))) : undefined
-      const meetingPreference = [city, bio].filter(Boolean).join(" | ") || undefined
+      const meetingPreference = bio ? bio : undefined
 
       const response = await authService.registerSpeaker({
         firstName,
@@ -146,7 +146,9 @@ export default function SpeakerAuthPage() {
         confirmPassword: registerPassword,
         interests: [],
         meetingPreference,
+        location: location || undefined,
         age: ageValue,
+        bio: bio || undefined,
         avatar: photo ?? undefined,
         termsAccepted: true,
         privacyAccepted: true,
@@ -181,11 +183,11 @@ export default function SpeakerAuthPage() {
     setRegisterEmail("")
     setRegisterPassword("")
     setBirthDate("")
-    setCity("")
+    setLocation("")
     setBio("")
     setPhoto(null)
     setPhotoName("")
-    setRegisterErrors({ fullName: "", email: "", password: "", birthDate: "", city: "", bio: "", photo: "" })
+    setRegisterErrors({ fullName: "", email: "", password: "", birthDate: "", location: "", bio: "", photo: "" })
     setRegisterError("")
   }
 
@@ -370,13 +372,13 @@ export default function SpeakerAuthPage() {
                         <Input
                           type="text"
                           placeholder={t("auth.speaker.register.step2.cityPlaceholder")}
-                          value={city}
-                          onChange={(event) => setCity(event.target.value)}
+                          value={location}
+                          onChange={(event) => setLocation(event.target.value)}
                           className={`h-10 rounded-lg border border-border/70 bg-background text-base ${
-                            registerErrors.city ? "border-red-500 focus-visible:border-red-500" : "focus-visible:border-primary"
+                            registerErrors.location ? "border-red-500 focus-visible:border-red-500" : "focus-visible:border-primary"
                           }`}
                         />
-                        {registerErrors.city && <p className="text-xs text-red-500">{registerErrors.city}</p>}
+                        {registerErrors.location && <p className="text-xs text-red-500">{registerErrors.location}</p>}
                       </div>
                     </div>
 
