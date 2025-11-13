@@ -135,7 +135,7 @@ export function Header() {
             href="/"
             className="flex items-center gap-2 font-semibold text-primary transition-colors hover:text-primary/80"
           >
-            <span className="text-xl ">Aurora</span>
+            <span className="text-xl">Aurora</span>
           </Link>
 
           <nav className="hidden items-center gap-6 text-sm font-medium text-foreground/80 md:flex">

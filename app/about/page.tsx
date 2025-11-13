@@ -85,11 +85,10 @@ export default function AboutPage() {
   return (
     <main className="min-h-screen bg-background text-foreground transition-colors duration-500">
       {/* Hero */}
-      <section className="relative overflow-hidden pt-28 md:pt-36 pb-16">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute inset-0 bg-gradient-to-b from-indigo-100/70 via-transparent to-transparent dark:from-indigo-900/60" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(73,187,189,0.18),transparent_60%)] dark:bg-[radial-gradient(circle_at_top,_rgba(73,187,189,0.25),transparent_65%)]" />
-        </div>
+      <section className="relative isolate overflow-hidden  py-24 transition-colors dark:from-[hsl(220deg_20.41%_19.09%)] dark:via-[hsl(220deg_23%_15%)] dark:to-[hsl(220deg_26%_10%)] sm:py-28">
+          <div className="absolute inset-0 -z-10 opacity-40 blur-3xl filter">
+            <div className="mx-auto h-full w-full max-w-5xl rounded-full bg-primary/30 dark:bg-primary/20" />
+          </div>
         <div className="relative max-w-6xl mx-auto px-4">
           <motion.div
             className="flex flex-col items-center text-center gap-6"
@@ -97,7 +96,7 @@ export default function AboutPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
           >
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#49BBBD] dark:text-[#7ae2e4]">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground">
               {t('about.hero.title')}
             </h1>
             <p className="max-w-3xl text-base md:text-lg lg:text-xl text-muted-foreground leading-relaxed">
