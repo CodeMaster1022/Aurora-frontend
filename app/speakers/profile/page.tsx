@@ -46,6 +46,7 @@ export default function SpeakerDashboardPage() {
   const [upcomingSessions, setUpcomingSessions] = useState<Session[]>([])
   const [pastSessions, setPastSessions] = useState<Session[]>([])
   const [reviews, setReviews] = useState<ReviewWithType[]>([])
+  const [unreviews, setUnReviews] = useState<ReviewWithType[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState("")
   
@@ -277,7 +278,7 @@ export default function SpeakerDashboardPage() {
       
       if (response.success && response.data) {
         const { upcomingSessions, pastSessions, reviews, profile } = response.data
-        
+        console.log(reviews, "======================>>>>")
         // Update sessions
         setUpcomingSessions(upcomingSessions || [])
         setPastSessions((pastSessions as Session[]) || [])
@@ -441,9 +442,22 @@ export default function SpeakerDashboardPage() {
     return givenReviews.some(review => review.session === sessionId)
   }
 
-  // Check if a session has received any reviews (from anyone)
+  // Determine if the current speaker has already submitted a review for the session
   const hasReceivedReviews = (sessionId: string) => {
-    return reviews.some(review => review.session === sessionId)
+    if (!user?._id) return false
+    console.log(reviews, 'reviews')
+    return reviews.some(review => {
+      if (review.session !== sessionId) {
+        return false
+      }
+
+      const reviewerId =
+        typeof review.from === "string"
+          ? review.from
+          : review.from?._id
+
+      return reviewerId === user._id
+    })
   }
 
   // Check if a session has ended (date + time + duration has passed)
@@ -574,6 +588,29 @@ export default function SpeakerDashboardPage() {
     : 0
   const formattedAverageRating = Number.isFinite(averageRating) ? averageRating.toFixed(1) : "0.0"
 
+  const profileHighlights = [
+    {
+      label: "Average Rating",
+      value: formattedAverageRating,
+      helper: `${receivedReviews.length || 0} review${receivedReviews.length === 1 ? "" : "s"}`,
+      icon: Star
+    },
+    {
+      label: "Sessions Hosted",
+      value: `${totalSessions}`,
+      helper: upcomingSessions.length
+        ? `${upcomingSessions.length} upcoming`
+        : "No upcoming sessions",
+      icon: Calendar
+    },
+    {
+      label: "Hours Facilitated",
+      value: formattedHoursPracticed,
+      helper: "Based on completed sessions",
+      icon: Clock
+    }
+  ]
+
   const userFullName = [user?.firstname, user?.lastname].filter(Boolean).join(" ")
   const roleLabel = user?.role ? `${user.role.charAt(0).toUpperCase()}${user.role.slice(1)}` : "Speaker"
 
@@ -599,27 +636,29 @@ export default function SpeakerDashboardPage() {
           </div>
         )}
 
-        <Card className="shadow-sm">
-          <CardContent className="flex flex-col gap-6 p-6">
+        <div className="overflow-hidden border border-border shadow-lg">
+          <CardHeader className="relative space-y-6 border-b border-border bg-gradient-to-br from-primary/10 via-primary/5 to-background p-6">
             <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
               <div className="flex items-start gap-4 sm:gap-6">
-                <div className="relative h-20 w-20 overflow-hidden rounded-full bg-muted sm:h-24 sm:w-24">
-                  {avatarPreview ? (
-                    <Image
-                      src={avatarPreview}
-                      alt={userFullName || "Avatar"}
-                      fill
-                      className="object-cover"
-                      sizes="96px"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center">
-                      <User className="h-10 w-10 text-muted-foreground" />
-                    </div>
-                  )}
+                <div className="relative">
+                  <div className="relative h-20 w-20 overflow-hidden rounded-full border-4 border-background/80 bg-muted shadow-sm sm:h-24 sm:w-24">
+                    {avatarPreview ? (
+                      <Image
+                        src={avatarPreview}
+                        alt={userFullName || "Avatar"}
+                        fill
+                        className="object-cover"
+                        sizes="96px"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-muted/60">
+                        <User className="h-10 w-10 text-muted-foreground" />
+                      </div>
+                    )}
+                  </div>
                   {isEditingProfile && (
-                    <label className="absolute bottom-2 right-2 inline-flex cursor-pointer items-center rounded-full bg-primary px-2 py-1 text-xs font-medium text-primary-foreground shadow-sm hover:bg-primary/90">
-                      <Camera className="mr-1 h-3.5 w-3.5" />
+                    <label className="absolute -bottom-2 right-0 inline-flex cursor-pointer items-center gap-1 rounded-full border border-primary bg-background px-3 py-1 text-xs font-medium text-primary shadow-sm transition hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                      <Camera className="h-3.5 w-3.5" />
                       Upload
                       <input
                         type="file"
@@ -633,15 +672,22 @@ export default function SpeakerDashboardPage() {
                 </div>
                 <div className="space-y-2">
                   <div>
-                    <h2 className="text-2xl font-semibold leading-tight">{userFullName || user?.email}</h2>
-                    <p className="text-sm text-muted-foreground">{user?.email}</p>
+                    <CardTitle className="text-2xl font-semibold">{userFullName || user?.email}</CardTitle>
+                    <CardDescription>{user?.email}</CardDescription>
                   </div>
-                  <div className="inline-flex items-center rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground">
-                    {roleLabel}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant="secondary" className="rounded-full px-3 py-1 text-xs font-medium">
+                      {roleLabel}
+                    </Badge>
+                    {age && (
+                      <div className="rounded-xl border border-border bg-primary/10 p-1 text-center shadow-sm">
+                        <p className="text-foreground text-xs font-semibold">{age} age</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2 self-end md:self-auto">
+              <div className="flex flex-wrap items-center gap-2 self-end md:self-auto">
                 {isEditingProfile ? (
                   <>
                     <Button
@@ -678,22 +724,48 @@ export default function SpeakerDashboardPage() {
                 )}
               </div>
             </div>
-
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {profileHighlights.map(({ label, value, helper, icon: Icon }) => (
+                <div
+                  key={label}
+                  className="flex items-start gap-3 rounded-xl border border-border bg-muted/20 p-4 shadow-sm transition-all hover:border-primary/60 hover:shadow-md"
+                >
+                  <div className="rounded-full bg-primary/10 p-2 text-primary">
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
+                    <p className="mt-1 text-lg font-semibold">{value}</p>
+                    {helper && <p className="text-xs text-muted-foreground">{helper}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-8 p-6">
             {isEditingProfile ? (
-              <div className="space-y-6">
-                <div className="grid gap-6 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>{t('dashboard.profile.bio')}</Label>
+              <div className="space-y-8">
+                <div className="grid gap-6 lg:grid-cols-2">
+                  <div className="rounded-xl border border-border bg-muted/30 p-5 shadow-sm">
+                    <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      {t('dashboard.profile.bio')}
+                    </Label>
                     <Textarea
                       value={bio}
                       onChange={(e) => setBio(e.target.value)}
-                      rows={4}
+                      rows={5}
                       placeholder={t('dashboard.profile.bioPlaceholder')}
+                      className="mt-3 min-h-[140px] resize-none text-base text-foreground"
                     />
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Share what makes your sessions unique and the outcomes learners can expect.
+                    </p>
                   </div>
-                  <div className="space-y-2">
-                    <Label>Topics & Interests</Label>
-                    <div className="flex flex-wrap gap-2">
+                  <div className="rounded-xl border border-border bg-muted/30 p-5 shadow-sm">
+                    <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      Topics & Interests
+                    </Label>
+                    <div className="mt-3 flex flex-wrap gap-2">
                       {availableTopics.map((topic) => {
                         const selected = interests.includes(topic)
                         const disabled = !selected && interests.length >= 4
@@ -705,7 +777,7 @@ export default function SpeakerDashboardPage() {
                             disabled={disabled}
                             className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
                               selected
-                                ? "border-transparent bg-primary text-primary-foreground"
+                                ? "border-transparent bg-primary text-primary-foreground shadow-sm"
                                 : "border-border bg-background text-muted-foreground hover:bg-muted"
                             } ${disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
                           >
@@ -714,13 +786,13 @@ export default function SpeakerDashboardPage() {
                         )
                       })}
                     </div>
-                    <p className="text-xs text-muted-foreground">Selected {interests.length}/4</p>
+                    <p className="mt-3 text-xs text-muted-foreground">Selected {interests.length}/4</p>
                   </div>
                 </div>
 
-                <div className="grid gap-6 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>Age</Label>
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="rounded-xl border border-border bg-muted/30 p-5 shadow-sm">
+                    <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Age</Label>
                     <Input
                       type="number"
                       value={age}
@@ -728,66 +800,49 @@ export default function SpeakerDashboardPage() {
                       min={18}
                       max={120}
                       placeholder="Enter your age"
+                      className="mt-3"
                     />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Cost per Session (USD)</Label>
-                    <Input
-                      type="number"
-                      value={cost}
-                      onChange={(e) => setCost(e.target.value)}
-                      min={0}
-                      step="0.01"
-                      placeholder="Enter hourly rate"
-                    />
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Optional. Helps learners understand who they will be working with.
+                    </p>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="grid gap-6 md:grid-cols-2">
-                <div className="space-y-3">
-                  <Label className="text-xs uppercase text-muted-foreground">{t('dashboard.profile.bio')}</Label>
-                  <p className="rounded-lg border border-border bg-muted/40 p-4 text-sm leading-relaxed text-muted-foreground">
+              <div className="grid gap-6 lg:grid-cols-3">
+                <div className="rounded-xl border border-border bg-muted/30 p-5 shadow-sm">
+                  <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    {t('dashboard.profile.bio')}
+                  </Label>
+                  <p className="mt-3 rounded-lg border border-border bg-background p-4 text-sm leading-relaxed text-muted-foreground">
                     {bio || t('dashboard.profile.noBio')}
                   </p>
                 </div>
-                <div className="grid gap-4">
-                  <div className="space-y-2">
-                    <Label className="text-xs uppercase text-muted-foreground">Topics & Interests</Label>
+                <div className="space-y-4">
+                  <div className="rounded-xl border border-border bg-muted/30 p-5 shadow-sm">
+                    <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      Topics & Interests
+                    </Label>
                     {interests.length > 0 ? (
-                      <div className="flex flex-wrap gap-2">
+                      <div className="mt-3 flex flex-wrap gap-2">
                         {interests.map((interest, index) => (
                           <div
                             key={`${interest}-${index}`}
-                            className="inline-flex items-center rounded-full border border-border bg-muted/60 px-3 py-1 text-xs font-medium text-muted-foreground"
+                            className="inline-flex items-center rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-muted-foreground"
                           >
                             {interest}
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-sm text-muted-foreground">No interests added yet.</p>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap gap-3">
-                    {age && (
-                      <div className="rounded-lg border border-border bg-muted/40 px-4 py-3">
-                        <p className="text-xs uppercase tracking-wide text-muted-foreground">Age</p>
-                        <p className="text-base font-semibold">{age}</p>
-                      </div>
-                    )}
-                    {cost && (
-                      <div className="rounded-lg border border-border bg-muted/40 px-4 py-3">
-                        <p className="text-xs uppercase tracking-wide text-muted-foreground">Cost</p>
-                        <p className="text-base font-semibold">${cost}</p>
-                      </div>
+                      <p className="mt-3 text-sm text-muted-foreground">No interests added yet.</p>
                     )}
                   </div>
                 </div>
               </div>
             )}
           </CardContent>
-        </Card>
+        </div>
 
         <div className="grid gap-4 sm:grid-cols-3">
           <Card className="shadow-sm">
@@ -1219,22 +1274,22 @@ export default function SpeakerDashboardPage() {
 
       {/* Cancellation Modal */}
       <Dialog open={cancelModalOpen} onOpenChange={setCancelModalOpen}>
-        <DialogContent className="bg-gray-900 border-gray-700 text-white">
+        <DialogContent className="bg-card border-border text-card-foreground">
           <DialogHeader>
-              <DialogTitle className="text-white flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-yellow-500" />
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-destructive" />
               {t('dashboard.cancel.title')}
             </DialogTitle>
-            <DialogDescription className="text-gray-400">
+            <DialogDescription className="text-muted-foreground">
               {selectedSessionForCancellation && (
                 <>
                   {t('dashboard.cancel.confirm')}
                   <div className="mt-4 space-y-2 text-sm">
-                    <div className="bg-white/5 p-3 rounded-lg">
-                      <p className="font-semibold text-white mb-1">
+                    <div className="rounded-lg border border-border bg-muted/50 p-3">
+                      <p className="mb-1 font-semibold">
                         {selectedSessionForCancellation.title}
                       </p>
-                      <p className="text-gray-300 mb-2">
+                      <p className="mb-2 text-muted-foreground">
                         {t('dashboard.sessions.with')}{" "}
                         <span className="font-medium">
                           {typeof selectedSessionForCancellation.learner === 'object'
@@ -1242,21 +1297,23 @@ export default function SpeakerDashboardPage() {
                             : selectedSessionForCancellation.learner}
                         </span>
                       </p>
-                      <div className="flex items-center gap-4 text-xs text-gray-400">
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
                         <span>
                           {formatDate(selectedSessionForCancellation.date)} at{" "}
                           {selectedSessionForCancellation.time}
                         </span>
                       </div>
                     </div>
-                    <div className="bg-yellow-500/10 border border-yellow-500/20 p-3 rounded-lg">
-                      <p className="text-yellow-400 text-xs font-semibold mb-1">{t('dashboard.cancel.policy')}</p>
-                      <ul className="text-xs text-yellow-300/80 space-y-1 list-disc list-inside">
+                    <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-3">
+                      <p className="mb-1 text-xs font-semibold text-yellow-600 dark:text-yellow-400">
+                        {t('dashboard.cancel.policy')}
+                      </p>
+                      <ul className="list-inside list-disc space-y-1 text-xs text-yellow-700/80 dark:text-yellow-300/80">
                         <li>{t('dashboard.cancel.policy24h')}</li>
                         <li>{t('dashboard.cancel.policyNotify')}</li>
                         <li>{t('dashboard.cancel.policyAvailable')}</li>
                         {getHoursUntilSession(selectedSessionForCancellation) < 24 && (
-                          <li className="text-red-400 font-semibold">
+                          <li className="font-semibold text-destructive">
                             {t('dashboard.cancel.warning')}
                           </li>
                         )}
@@ -1269,8 +1326,8 @@ export default function SpeakerDashboardPage() {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <Label htmlFor="cancellation-reason" className="text-white mb-2 block">
-                {t('dashboard.cancel.reasonLabel')} <span className="text-gray-500 text-xs">{t('dashboard.cancel.reasonOptional')}</span>
+              <Label htmlFor="cancellation-reason" className="mb-2 block">
+                {t('dashboard.cancel.reasonLabel')} <span className="text-xs text-muted-foreground">{t('dashboard.cancel.reasonOptional')}</span>
               </Label>
               <textarea
                 id="cancellation-reason"
@@ -1278,11 +1335,11 @@ export default function SpeakerDashboardPage() {
                 onChange={(e) => setCancellationReason(e.target.value)}
                 placeholder={t('dashboard.cancel.reasonPlaceholder')}
                 rows={4}
-                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-md text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full rounded-md border text-base text-foreground border-input bg-background px-3 py-2 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>
             {error && (
-              <div className="bg-red-500/10 border border-red-500/30 text-red-300 p-3 rounded-md text-sm">
+              <div className="rounded-md border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
                 {error}
               </div>
             )}
@@ -1297,7 +1354,7 @@ export default function SpeakerDashboardPage() {
                 setError("")
               }}
               disabled={isCancelling}
-              className="cursor-pointer bg-white/10 border-white/20 text-white hover:bg-white/20"
+              className="cursor-pointer"
             >
               {t('dashboard.cancel.keep')}
             </Button>
@@ -1305,7 +1362,7 @@ export default function SpeakerDashboardPage() {
               variant="destructive"
               onClick={handleConfirmCancellation}
               disabled={isCancelling}
-              className="bg-red-500 hover:bg-red-600 text-white"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {isCancelling ? (
                 <>

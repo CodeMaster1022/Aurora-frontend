@@ -690,26 +690,28 @@ export default function LearnerProfilePage() {
       )}
 
       <Dialog open={cancelModalOpen} onOpenChange={setCancelModalOpen}>
-        <DialogContent>
+        <DialogContent className="bg-card border-border text-card-foreground">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
-              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              <AlertTriangle className="h-5 w-5 text-destructive" />
               {t("learnerProfile.modals.cancelSession.title")}
             </DialogTitle>
-            <DialogDescription>{t("learnerProfile.modals.cancelSession.description")}</DialogDescription>
+            <DialogDescription className="text-muted-foreground">
+              {t("learnerProfile.modals.cancelSession.description")}
+            </DialogDescription>
           </DialogHeader>
           {selectedSessionForCancellation && (
             <div className="space-y-4">
-              <div className="rounded-lg border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
-                <p className="font-medium text-foreground">{selectedSessionForCancellation.title}</p>
-                <p>
+              <div className="rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
+                <p className="font-medium text-card-foreground">{selectedSessionForCancellation.title}</p>
+                <p className="text-muted-foreground">
                   {`${t("learnerProfile.sessions.with")} ${
                     typeof selectedSessionForCancellation.speaker === "object"
                       ? `${(selectedSessionForCancellation.speaker as any).firstname} ${(selectedSessionForCancellation.speaker as any).lastname}`
                       : selectedSessionForCancellation.speaker
                   }`}
                 </p>
-                <p>
+                <p className="text-muted-foreground">
                   {formatDate(selectedSessionForCancellation.date)} {t("learnerProfile.sessions.at")}{" "}
                   {formatTime(selectedSessionForCancellation.time)}
                 </p>
@@ -737,6 +739,7 @@ export default function LearnerProfilePage() {
                   onChange={(event) => setCancellationReason(event.target.value)}
                   placeholder={t("learnerProfile.modals.cancelSession.reasonPlaceholder")}
                   rows={4}
+                  className="border border-input bg-background text-foreground placeholder:text-muted-foreground focus-visible:ring-primary/30"
                 />
               </div>
             </div>
