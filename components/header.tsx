@@ -132,7 +132,7 @@ export function Header() {
             href="/"
             className="flex items-center gap-2 font-semibold text-primary transition-colors hover:text-primary/80"
           >
-            <span className="text-xl">Aurora</span>
+            <span className="text-xl ">Aurora</span>
           </Link>
 
           <nav className="hidden items-center gap-6 text-sm font-medium text-foreground/80 md:flex">
@@ -257,7 +257,7 @@ export function Header() {
             <div className="relative hidden md:block auth-menu-container">
               <Button
                 variant="outline"
-                className="flex items-center gap-2 rounded-full border-border/60 bg-background/60 px-4 py-2 text-sm font-medium text-foreground transition-all hover:bg-accent/60 hover:text-foreground/90"
+                className="flex items-center gap-2 rounded-full border-border/60 bg-[#72309F] px-4 py-2 text-sm font-medium text-white cursor-pointer transition-all hover:bg-accent/60 hover:text-foreground/90"
                 onClick={() => setShowAuthMenu((prev) => !prev)}
                 aria-expanded={showAuthMenu}
                 aria-haspopup="menu"

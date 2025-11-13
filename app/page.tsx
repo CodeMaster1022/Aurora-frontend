@@ -143,7 +143,7 @@ export default function HomePage() {
             </p>
             <Button
               size="lg"
-              className="mt-2 rounded-full px-8 shadow-lg shadow-primary/25 transition hover:shadow-primary/35"
+              className="mt-2 text-white rounded-full px-8 shadow-lg shadow-primary/25 bg-[#72309F] transition hover:shadow-primary/35"
               asChild
             >
               <Link href="/speakers">
@@ -288,7 +288,7 @@ export default function HomePage() {
 
                 <div className="mt-12 text-center">
                   <Button
-                    className="rounded-full px-8 py-6 text-base font-semibold shadow-[0_12px_30px_rgba(115,87,245,0.35)] hover:bg-primary/90"
+                    className="bg-[#72309F] text-white rounded-full px-8 py-2 text-base font-semibold shadow-[0_12px_30px_rgba(115,87,245,0.35)] hover:bg-primary/90"
                     asChild
                   >
                     <Link href="/speakers">

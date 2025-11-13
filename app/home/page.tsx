@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Image from "next/image"
-import Link from "next/link"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -10,6 +9,7 @@ import { Card } from "@/components/ui/card"
 import { Search, Star, Loader2 } from "lucide-react"
 import { learnerService } from "@/lib/services/learnerService"
 import { useTranslation } from "@/lib/hooks/useTranslation"
+import { BookSessionDialog } from "@/components/speakers/BookSessionDialog"
 
 const FALLBACK_SPEAKERS = [
   {
@@ -244,11 +244,19 @@ export default function SpeakersPage() {
                     <div className="text-sm font-semibold text-primary">
                       {speaker.cost && speaker.cost > 0 ? `$${speaker.cost}` : "Free"}
                     </div>
-                    <Button className="rounded-full px-5 cursor-pointer bg-[#59248F] text-white" asChild>
-                      <Link href={speaker._id ? `/speakers/${speaker._id}` : "/speakers"}>
-                        Book Session
-                      </Link>
-                    </Button>
+                    <BookSessionDialog
+                      speaker={{
+                        _id: speaker._id,
+                        firstname: speaker.firstname,
+                        lastname: speaker.lastname,
+                        availability: (speaker as any)?.availability,
+                      }}
+                      trigger={
+                        <Button className="rounded-full px-5 cursor-pointer bg-[#59248F] text-white">
+                          Book Session
+                        </Button>
+                      }
+                    />
                   </div>
                 </Card>
               )
