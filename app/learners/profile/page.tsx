@@ -34,6 +34,7 @@ import { useAppDispatch, useAppSelector } from "@/lib/hooks/redux"
 import { getCurrentUser } from "@/lib/store/authSlice"
 import { LearnerRatingModal } from "@/components/LearnerRatingModal"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { useTranslation } from "@/lib/hooks/useTranslation"
 
 interface ReviewWithSession extends Review {
   sessionDetails?: {
@@ -53,6 +54,7 @@ type ProfileSnapshot = {
 export default function LearnerProfilePage() {
   const dispatch = useAppDispatch()
   const { user, isAuthenticated, isLoading: authLoading } = useAppSelector((state) => state.auth)
+  const { t } = useTranslation()
 
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState("")
@@ -121,7 +123,7 @@ export default function LearnerProfilePage() {
 
     if (!isAuthenticated) {
       setIsLoading(false)
-      setError("You must be logged in to view this page.")
+      setError(t("learnerProfile.errors.loginRequired"))
       return
     }
 
@@ -155,7 +157,7 @@ export default function LearnerProfilePage() {
       }
     } catch (err) {
       console.error("Error loading learner profile:", err)
-      setError(err instanceof Error ? err.message : "Unable to load data")
+      setError(err instanceof Error ? err.message : t("learnerProfile.errors.loadFailed"))
     } finally {
       setIsLoading(false)
     }
@@ -199,7 +201,7 @@ export default function LearnerProfilePage() {
       dispatch(getCurrentUser())
     } catch (err) {
       console.error("Error updating profile:", err)
-      setError(err instanceof Error ? err.message : "Failed to update profile")
+      setError(err instanceof Error ? err.message : t("learnerProfile.errors.updateFailed"))
     } finally {
       setIsSavingProfile(false)
     }
@@ -217,7 +219,7 @@ export default function LearnerProfilePage() {
       dispatch(getCurrentUser())
     } catch (err) {
       console.error("Error uploading avatar:", err)
-      setError(err instanceof Error ? err.message : "Failed to upload avatar")
+      setError(err instanceof Error ? err.message : t("learnerProfile.errors.avatarFailed"))
     } finally {
       setIsUploadingAvatar(false)
     }
@@ -254,7 +256,7 @@ export default function LearnerProfilePage() {
       fetchDashboardData()
     } catch (err) {
       console.error("Error cancelling session:", err)
-      setError(err instanceof Error ? err.message : "Unable to cancel session")
+      setError(err instanceof Error ? err.message : t("learnerProfile.errors.cancelFailed"))
     } finally {
       setIsCancelling(false)
     }
@@ -293,7 +295,7 @@ export default function LearnerProfilePage() {
       }
     } catch (err) {
       console.error("Error creating donation session:", err)
-      setError(err instanceof Error ? err.message : "Unable to start donation checkout")
+      setError(err instanceof Error ? err.message : t("learnerProfile.errors.donationFailed"))
     } finally {
       setIsCreatingDonation(false)
     }
@@ -311,10 +313,8 @@ export default function LearnerProfilePage() {
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 pb-16 pt-8 sm:px-6 lg:px-8">
         <header className="flex flex-col gap-2">
-          <h1 className="text-3xl font-semibold sm:text-4xl">Learner Profile</h1>
-          <p className="text-muted-foreground">
-            Manage your personal details, review your sessions, and keep track of your learning journey.
-          </p>
+          <h1 className="text-3xl font-semibold sm:text-4xl">{t("learnerProfile.title")}</h1>
+          <p className="text-muted-foreground">{t("learnerProfile.subtitle")}</p>
         </header>
 
         {error && (
@@ -329,13 +329,7 @@ export default function LearnerProfilePage() {
               <div className="flex items-start gap-4 sm:gap-6">
                 <div className="relative h-20 w-20 overflow-hidden rounded-full bg-muted sm:h-24 sm:w-24">
                   {avatarPreview ? (
-                    <Image
-                      src={avatarPreview}
-                      alt="Avatar"
-                      fill
-                      className="object-cover"
-                      sizes="96px"
-                    />
+                    <Image src={avatarPreview} alt={t("learnerProfile.avatarAlt")} fill className="object-cover" sizes="96px" />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center">
                       <User className="h-10 w-10 text-muted-foreground" />
@@ -344,7 +338,7 @@ export default function LearnerProfilePage() {
                   {isEditingProfile && (
                     <label className="absolute bottom-2 right-2 inline-flex cursor-pointer items-center rounded-full bg-primary px-2 py-1 text-xs font-medium text-primary-foreground shadow-sm hover:bg-primary/90">
                       <Camera className="mr-1 h-3.5 w-3.5" />
-                      Upload
+                      {t("learnerProfile.buttons.upload")}
                       <input
                         type="file"
                         accept="image/*"
@@ -358,12 +352,12 @@ export default function LearnerProfilePage() {
                 <div className="space-y-2">
                   <div>
                     <h2 className="text-2xl font-semibold leading-tight">
-                      {[firstname, lastname].filter(Boolean).join(" ") || user?.email || "Learner"}
+                      {[firstname, lastname].filter(Boolean).join(" ") || user?.email || t("learnerProfile.fallbackName")}
                     </h2>
                     <p className="text-sm text-muted-foreground">{user?.email}</p>
                   </div>
                   <Badge variant="outline" className="text-xs uppercase">
-                    Learner
+                    {t("learnerProfile.roleBadge")}
                   </Badge>
                 </div>
               </div>
@@ -376,7 +370,7 @@ export default function LearnerProfilePage() {
                       onClick={handleCancelEditProfile}
                       disabled={isSavingProfile}
                     >
-                      Cancel
+                      {t("learnerProfile.buttons.cancel")}
                     </Button>
                     <Button
                       className="cursor-pointer"
@@ -386,12 +380,12 @@ export default function LearnerProfilePage() {
                       {isSavingProfile ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Saving
+                          {t("learnerProfile.buttons.saving")}
                         </>
                       ) : (
                         <>
                           <Save className="mr-2 h-4 w-4" />
-                          Save Profile
+                          {t("learnerProfile.buttons.saveProfile")}
                         </>
                       )}
                     </Button>
@@ -399,7 +393,7 @@ export default function LearnerProfilePage() {
                 ) : (
                   <Button variant="outline" className="cursor-pointer" onClick={handleStartEditProfile}>
                     <Edit className="mr-2 h-4 w-4" />
-                    Edit Profile
+                    {t("learnerProfile.buttons.editProfile")}
                   </Button>
                 )}
               </div>
@@ -408,29 +402,29 @@ export default function LearnerProfilePage() {
             {isEditingProfile ? (
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>First Name</Label>
+                  <Label>{t("learnerProfile.labels.firstName")}</Label>
                   <Input value={firstname} onChange={(event) => setFirstname(event.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Last Name</Label>
+                  <Label>{t("learnerProfile.labels.lastName")}</Label>
                   <Input value={lastname} onChange={(event) => setLastname(event.target.value)} />
                 </div>
                 <div className="md:col-span-2 space-y-2">
-                  <Label>Bio</Label>
+                  <Label>{t("learnerProfile.labels.bio")}</Label>
                   <Textarea
                     value={bio}
                     onChange={(event) => setBio(event.target.value)}
                     rows={4}
-                    placeholder="Share a little bit about your goals and interests."
+                    placeholder={t("learnerProfile.placeholders.bio")}
                   />
                 </div>
               </div>
             ) : (
               <div className="space-y-4">
                 <div>
-                  <Label className="text-xs uppercase text-muted-foreground">About</Label>
+                  <Label className="text-xs uppercase text-muted-foreground">{t("learnerProfile.labels.about")}</Label>
                   <p className="mt-2 rounded-lg border border-border bg-muted/40 p-4 text-sm leading-relaxed text-muted-foreground">
-                    {bio || "You haven't added a bio yet. Tell speakers about yourself and your goals."}
+                    {bio || t("learnerProfile.placeholders.noBio")}
                   </p>
                 </div>
               </div>
@@ -441,25 +435,25 @@ export default function LearnerProfilePage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Card className="shadow-sm">
             <CardContent className="p-5">
-              <p className="text-sm font-medium text-muted-foreground">Total Sessions</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("learnerProfile.stats.total")}</p>
               <p className="mt-2 text-2xl font-semibold">{totalSessionsCount}</p>
             </CardContent>
           </Card>
           <Card className="shadow-sm">
             <CardContent className="p-5">
-              <p className="text-sm font-medium text-muted-foreground">Completed</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("learnerProfile.stats.completed")}</p>
               <p className="mt-2 text-2xl font-semibold">{completedSessionsCount}</p>
             </CardContent>
           </Card>
           <Card className="shadow-sm">
             <CardContent className="p-5">
-              <p className="text-sm font-medium text-muted-foreground">Upcoming</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("learnerProfile.stats.upcoming")}</p>
               <p className="mt-2 text-2xl font-semibold">{upcomingSessionsCount}</p>
             </CardContent>
           </Card>
           <Card className="shadow-sm">
             <CardContent className="p-5">
-              <p className="text-sm font-medium text-muted-foreground">Completion Rate</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("learnerProfile.stats.completionRate")}</p>
               <p className="mt-2 text-2xl font-semibold">{completionRate}</p>
             </CardContent>
           </Card>
@@ -470,11 +464,9 @@ export default function LearnerProfilePage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg font-semibold">
                 <Calendar className="h-5 w-5" />
-                Upcoming Sessions
+                {t("learnerProfile.upcomingSessions.title")}
               </CardTitle>
-              <CardDescription>
-                Stay prepared for your next conversations with Aurora speakers.
-              </CardDescription>
+              <CardDescription>{t("learnerProfile.upcomingSessions.description")}</CardDescription>
             </CardHeader>
             <CardContent>
               {upcomingSessions.length > 0 ? (
@@ -488,9 +480,11 @@ export default function LearnerProfilePage() {
                         <div className="space-y-2">
                           <h3 className="text-base font-semibold">{session.title}</h3>
                           <p className="text-sm text-muted-foreground">
-                            with {typeof session.speaker === "object"
-                              ? `${(session.speaker as any).firstname} ${(session.speaker as any).lastname}`
-                              : session.speaker}
+                            {`${t("learnerProfile.sessions.with")} ${
+                              typeof session.speaker === "object"
+                                ? `${(session.speaker as any).firstname} ${(session.speaker as any).lastname}`
+                                : session.speaker
+                            }`}
                           </p>
                           <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                             <span className="inline-flex items-center gap-2">
@@ -509,7 +503,7 @@ export default function LearnerProfilePage() {
                               rel="noopener noreferrer"
                               className="text-sm font-medium text-primary hover:underline"
                             >
-                              Join meeting →
+                              {t("learnerProfile.buttons.joinMeeting")}
                             </a>
                           )}
                         </div>
@@ -523,7 +517,7 @@ export default function LearnerProfilePage() {
                             className="cursor-pointer"
                             onClick={() => handleCancelSession(session)}
                           >
-                            Cancel
+                            {t("learnerProfile.buttons.cancel")}
                           </Button>
                         </div>
                       </div>
@@ -532,7 +526,7 @@ export default function LearnerProfilePage() {
                 </div>
               ) : (
                 <div className="rounded-lg border border-dashed border-border bg-muted/20 py-12 text-center text-sm text-muted-foreground">
-                  No upcoming sessions scheduled yet.
+                  {t("learnerProfile.upcomingSessions.empty")}
                 </div>
               )}
             </CardContent>
@@ -542,9 +536,9 @@ export default function LearnerProfilePage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg font-semibold">
                 <Clock className="h-5 w-5" />
-                Past Sessions
+                {t("learnerProfile.pastSessions.title")}
               </CardTitle>
-              <CardDescription>Review your progress and share feedback with your speakers.</CardDescription>
+              <CardDescription>{t("learnerProfile.pastSessions.description")}</CardDescription>
             </CardHeader>
             <CardContent>
               {pastSessions.length > 0 ? (
@@ -558,9 +552,11 @@ export default function LearnerProfilePage() {
                         <div className="space-y-2">
                           <h3 className="text-base font-semibold">{session.title}</h3>
                           <p className="text-sm text-muted-foreground">
-                            with {typeof session.speaker === "object"
-                              ? `${(session.speaker as any).firstname} ${(session.speaker as any).lastname}`
-                              : session.speaker}
+                            {`${t("learnerProfile.sessions.with")} ${
+                              typeof session.speaker === "object"
+                                ? `${(session.speaker as any).firstname} ${(session.speaker as any).lastname}`
+                                : session.speaker
+                            }`}
                           </p>
                           <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                             <span className="inline-flex items-center gap-2">
@@ -592,7 +588,7 @@ export default function LearnerProfilePage() {
                               onClick={() => handleRateSession(session)}
                             >
                               <Star className="mr-2 h-4 w-4" />
-                              Rate & Review
+                              {t("learnerProfile.buttons.rateReview")}
                             </Button>
                           )}
                         </div>
@@ -602,7 +598,7 @@ export default function LearnerProfilePage() {
                 </div>
               ) : (
                 <div className="rounded-lg border border-dashed border-border bg-muted/20 py-12 text-center text-sm text-muted-foreground">
-                  You haven&apos;t completed any sessions yet.
+                  {t("learnerProfile.pastSessions.empty")}
                 </div>
               )}
             </CardContent>
@@ -613,11 +609,9 @@ export default function LearnerProfilePage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg font-semibold">
               <MessageSquare className="h-5 w-5" />
-              Reviews You&apos;ve Shared
+              {t("learnerProfile.reviews.title")}
             </CardTitle>
-            <CardDescription>
-              Your feedback helps our speakers grow and tailor sessions for future learners.
-            </CardDescription>
+            <CardDescription>{t("learnerProfile.reviews.description")}</CardDescription>
           </CardHeader>
           <CardContent>
             {reviews.length > 0 ? (
@@ -632,7 +626,7 @@ export default function LearnerProfilePage() {
                         />
                       ))}
                     </div>
-                    <p className="mt-3 text-sm text-foreground">{review.comment || "No comment provided."}</p>
+                    <p className="mt-3 text-sm text-foreground">{review.comment || t("learnerProfile.reviews.noComment")}</p>
                     <div className="mt-2 text-xs text-muted-foreground">
                       <span>
                         {typeof review.to === "object"
@@ -642,7 +636,8 @@ export default function LearnerProfilePage() {
                       {review.sessionDetails && (
                         <span>
                           {" • "}
-                          {review.sessionDetails.title} — {formatDate(review.sessionDetails.date)} at {formatTime(review.sessionDetails.time)}
+                          {review.sessionDetails.title} — {formatDate(review.sessionDetails.date)} {t("learnerProfile.sessions.at")}{" "}
+                          {formatTime(review.sessionDetails.time)}
                         </span>
                       )}
                     </div>
@@ -651,7 +646,7 @@ export default function LearnerProfilePage() {
               </div>
             ) : (
               <div className="rounded-lg border border-dashed border-border bg-muted/20 py-12 text-center text-sm text-muted-foreground">
-                You haven&apos;t left any reviews yet.
+                {t("learnerProfile.reviews.empty")}
               </div>
             )}
           </CardContent>
@@ -660,10 +655,8 @@ export default function LearnerProfilePage() {
         <Card className="shadow-sm">
           <CardContent className="flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between">
             <div className="space-y-2">
-              <h3 className="text-xl font-semibold">Support the Aurora Community</h3>
-              <p className="text-sm text-muted-foreground">
-                Your contributions help us provide scholarships and keep conversations accessible to learners worldwide.
-              </p>
+              <h3 className="text-xl font-semibold">{t("learnerProfile.support.title")}</h3>
+              <p className="text-sm text-muted-foreground">{t("learnerProfile.support.description")}</p>
             </div>
             <Button
               className="inline-flex items-center gap-2"
@@ -675,7 +668,7 @@ export default function LearnerProfilePage() {
               ) : (
                 <Heart className="h-4 w-4" />
               )}
-              {isCreatingDonation ? "Preparing checkout..." : "Donate"}
+              {isCreatingDonation ? t("learnerProfile.buttons.preparingCheckout") : t("learnerProfile.buttons.donate")}
               <ArrowRight className="h-4 w-4" />
             </Button>
           </CardContent>
@@ -701,44 +694,48 @@ export default function LearnerProfilePage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
               <AlertTriangle className="h-5 w-5 text-amber-500" />
-              Cancel Session
+              {t("learnerProfile.modals.cancelSession.title")}
             </DialogTitle>
-            <DialogDescription>
-              We&apos;ll notify your speaker and free up the slot for other learners.
-            </DialogDescription>
+            <DialogDescription>{t("learnerProfile.modals.cancelSession.description")}</DialogDescription>
           </DialogHeader>
           {selectedSessionForCancellation && (
             <div className="space-y-4">
               <div className="rounded-lg border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
                 <p className="font-medium text-foreground">{selectedSessionForCancellation.title}</p>
                 <p>
-                  with {typeof selectedSessionForCancellation.speaker === "object"
-                    ? `${(selectedSessionForCancellation.speaker as any).firstname} ${(selectedSessionForCancellation.speaker as any).lastname}`
-                    : selectedSessionForCancellation.speaker}
+                  {`${t("learnerProfile.sessions.with")} ${
+                    typeof selectedSessionForCancellation.speaker === "object"
+                      ? `${(selectedSessionForCancellation.speaker as any).firstname} ${(selectedSessionForCancellation.speaker as any).lastname}`
+                      : selectedSessionForCancellation.speaker
+                  }`}
                 </p>
                 <p>
-                  {formatDate(selectedSessionForCancellation.date)} at {formatTime(selectedSessionForCancellation.time)}
+                  {formatDate(selectedSessionForCancellation.date)} {t("learnerProfile.sessions.at")}{" "}
+                  {formatTime(selectedSessionForCancellation.time)}
                 </p>
                 <p className="text-xs text-muted-foreground/80">
                   {(() => {
                     const hoursUntil = getHoursUntilSession(selectedSessionForCancellation)
                     if (hoursUntil < 0) {
-                      return "This session time has already passed."
+                      return t("learnerProfile.modals.cancelSession.alreadyPassed")
                     }
-                    return `This session starts in approximately ${Math.round(hoursUntil)} hour(s).`
+                    return t("learnerProfile.modals.cancelSession.startsInHours").replace(
+                      "{hours}",
+                      Math.round(hoursUntil).toString()
+                    )
                   })()}
                 </p>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="cancellation-reason" className="text-sm font-medium">
-                  Reason for cancellation (optional)
+                  {t("learnerProfile.modals.cancelSession.reasonLabel")}
                 </Label>
                 <Textarea
                   id="cancellation-reason"
                   value={cancellationReason}
                   onChange={(event) => setCancellationReason(event.target.value)}
-                  placeholder="Let your speaker know why you&apos;re cancelling."
+                  placeholder={t("learnerProfile.modals.cancelSession.reasonPlaceholder")}
                   rows={4}
                 />
               </div>
@@ -754,7 +751,7 @@ export default function LearnerProfilePage() {
               }}
               disabled={isCancelling}
             >
-              Keep session
+              {t("learnerProfile.buttons.keepSession")}
             </Button>
             <Button
               variant="destructive"
@@ -764,10 +761,10 @@ export default function LearnerProfilePage() {
               {isCancelling ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Cancelling...
+                  {t("learnerProfile.buttons.cancelling")}
                 </>
               ) : (
-                "Confirm cancellation"
+                t("learnerProfile.buttons.confirmCancellation")
               )}
             </Button>
           </DialogFooter>

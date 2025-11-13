@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "@/lib/hooks/redux"
-import { loginUser } from "@/lib/store/authSlice"
+import { loginUser, registerUser } from "@/lib/store/authSlice"
 import { Header } from "@/components/header"
 import { useTranslation } from "@/lib/hooks/useTranslation"
 
@@ -31,6 +31,7 @@ export default function StudentAuthPage() {
   const [registerEmail, setRegisterEmail] = useState("")
   const [registerPassword, setRegisterPassword] = useState("")
   const [registerErrors, setRegisterErrors] = useState({ fullName: "", email: "", password: "" })
+  const [registerSubmitError, setRegisterSubmitError] = useState("")
 
   const isLoading = isSubmitting || authLoading
   const displayError = activeTab === "login" ? localError || authError || "" : ""
@@ -89,7 +90,7 @@ export default function StudentAuthPage() {
     }
   }
 
-  const handleRegisterSubmit = (event: React.FormEvent) => {
+  const handleRegisterSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
 
     const errors = {
@@ -103,9 +104,38 @@ export default function StudentAuthPage() {
     }
 
     setRegisterErrors(errors)
+    setRegisterSubmitError("")
 
     if (Object.values(errors).every((error) => error === "")) {
-      router.push("/")
+      const [firstName = "", ...rest] = fullName.trim().split(" ")
+      const lastName = rest.join(" ") || firstName
+
+      setIsSubmitting(true)
+      try {
+        const result = await dispatch(
+          registerUser({
+            firstname: firstName,
+            lastname: lastName,
+            email: registerEmail,
+            password: registerPassword,
+            confirmPassword: registerPassword,
+            role: "learner",
+            termsAccepted: true,
+            privacyAccepted: true,
+          })
+        )
+
+        if (registerUser.fulfilled.match(result)) {
+          router.push("/learners/profile")
+        } else if (registerUser.rejected.match(result)) {
+          setRegisterSubmitError((result.payload as string) || t("auth.errors.registerFailed"))
+        }
+      } catch (error) {
+        console.error("Register error", error)
+        setRegisterSubmitError(error instanceof Error ? error.message : t("auth.errors.registerFailed"))
+      } finally {
+        setIsSubmitting(false)
+      }
     }
   }
 
@@ -113,6 +143,7 @@ export default function StudentAuthPage() {
     setActiveTab(tab)
     setLocalError("")
     setValidationErrors({ email: "", password: "" })
+    setRegisterSubmitError("")
   }
 
   return (
@@ -150,6 +181,12 @@ export default function StudentAuthPage() {
             {displayError && (
               <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-600">
                 {displayError}
+              </div>
+            )}
+
+            {activeTab === "register" && registerSubmitError && (
+              <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+                {registerSubmitError}
               </div>
             )}
 
@@ -253,7 +290,11 @@ export default function StudentAuthPage() {
                   {registerErrors.password && <p className="text-xs text-red-500">{registerErrors.password}</p>}
                 </div>
 
-                <Button className="h-10 w-full rounded-lg bg-gradient-to-r from-[#6c3bd5] to-[#9148f2] text-base font-semibold text-white shadow-lg shadow-primary/30 transition hover:from-[#5b2bd8] hover:to-[#7f3ef0]">
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="h-10 w-full rounded-lg bg-gradient-to-r from-[#6c3bd5] to-[#9148f2] text-base font-semibold text-white shadow-lg shadow-primary/30 transition hover:from-[#5b2bd8] hover:to-[#7f3ef0] disabled:opacity-60"
+                >
                   {t("auth.student.register.submit")}
                 </Button>
               </form>

@@ -556,6 +556,62 @@ export type TranslationKey =
   | 'about.cta.subtitle'
   | 'about.cta.button'
 
+  // Learner Profile Page
+  | 'learnerProfile.title'
+  | 'learnerProfile.subtitle'
+  | 'learnerProfile.avatarAlt'
+  | 'learnerProfile.fallbackName'
+  | 'learnerProfile.roleBadge'
+  | 'learnerProfile.labels.firstName'
+  | 'learnerProfile.labels.lastName'
+  | 'learnerProfile.labels.bio'
+  | 'learnerProfile.labels.about'
+  | 'learnerProfile.stats.total'
+  | 'learnerProfile.stats.completed'
+  | 'learnerProfile.stats.upcoming'
+  | 'learnerProfile.stats.completionRate'
+  | 'learnerProfile.placeholders.bio'
+  | 'learnerProfile.placeholders.noBio'
+  | 'learnerProfile.placeholders.cancellationReason'
+  | 'learnerProfile.upcomingSessions.title'
+  | 'learnerProfile.upcomingSessions.description'
+  | 'learnerProfile.upcomingSessions.empty'
+  | 'learnerProfile.pastSessions.title'
+  | 'learnerProfile.pastSessions.description'
+  | 'learnerProfile.pastSessions.empty'
+  | 'learnerProfile.reviews.title'
+  | 'learnerProfile.reviews.description'
+  | 'learnerProfile.reviews.empty'
+  | 'learnerProfile.reviews.noComment'
+  | 'learnerProfile.support.title'
+  | 'learnerProfile.support.description'
+  | 'learnerProfile.sessions.with'
+  | 'learnerProfile.sessions.at'
+  | 'learnerProfile.buttons.upload'
+  | 'learnerProfile.buttons.editProfile'
+  | 'learnerProfile.buttons.cancel'
+  | 'learnerProfile.buttons.saveProfile'
+  | 'learnerProfile.buttons.saving'
+  | 'learnerProfile.buttons.joinMeeting'
+  | 'learnerProfile.buttons.rateReview'
+  | 'learnerProfile.buttons.donate'
+  | 'learnerProfile.buttons.preparingCheckout'
+  | 'learnerProfile.buttons.keepSession'
+  | 'learnerProfile.buttons.confirmCancellation'
+  | 'learnerProfile.buttons.cancelling'
+  | 'learnerProfile.errors.loginRequired'
+  | 'learnerProfile.errors.loadFailed'
+  | 'learnerProfile.errors.updateFailed'
+  | 'learnerProfile.errors.avatarFailed'
+  | 'learnerProfile.errors.cancelFailed'
+  | 'learnerProfile.errors.donationFailed'
+  | 'learnerProfile.modals.cancelSession.title'
+  | 'learnerProfile.modals.cancelSession.description'
+  | 'learnerProfile.modals.cancelSession.alreadyPassed'
+  | 'learnerProfile.modals.cancelSession.startsInHours'
+  | 'learnerProfile.modals.cancelSession.reasonLabel'
+  | 'learnerProfile.modals.cancelSession.reasonPlaceholder';
+
 export type Translations = Record<TranslationKey, string>;
 
 export const translations: Record<Language, Translations> = {
@@ -1101,6 +1157,62 @@ export const translations: Record<Language, Translations> = {
     'about.cta.title': 'Ready to Start Your Journey?',
     'about.cta.subtitle': 'Find a speaker who inspires you and book your first session today. Confidence is just a conversation away.',
     'about.cta.button': 'Find a Speaker',
+
+    // Learner Profile Page
+    'learnerProfile.title': 'Learner Profile',
+    'learnerProfile.subtitle': 'Manage your personal details, review your sessions, and keep track of your learning journey.',
+    'learnerProfile.avatarAlt': 'Avatar',
+    'learnerProfile.fallbackName': 'Learner',
+    'learnerProfile.roleBadge': 'Learner',
+    'learnerProfile.labels.firstName': 'First Name',
+    'learnerProfile.labels.lastName': 'Last Name',
+    'learnerProfile.labels.bio': 'Bio',
+    'learnerProfile.labels.about': 'About',
+    'learnerProfile.stats.total': 'Total Sessions',
+    'learnerProfile.stats.completed': 'Completed',
+    'learnerProfile.stats.upcoming': 'Upcoming',
+    'learnerProfile.stats.completionRate': 'Completion Rate',
+    'learnerProfile.placeholders.bio': 'Share a little bit about your goals and interests.',
+    'learnerProfile.placeholders.noBio': "You haven't added a bio yet. Tell speakers about yourself and your goals.",
+    'learnerProfile.placeholders.cancellationReason': "Let your speaker know why you're cancelling.",
+    'learnerProfile.upcomingSessions.title': 'Upcoming Sessions',
+    'learnerProfile.upcomingSessions.description': 'Stay prepared for your next conversations with Aurora speakers.',
+    'learnerProfile.upcomingSessions.empty': 'No upcoming sessions scheduled yet.',
+    'learnerProfile.pastSessions.title': 'Past Sessions',
+    'learnerProfile.pastSessions.description': 'Review your progress and share feedback with your speakers.',
+    'learnerProfile.pastSessions.empty': "You haven't completed any sessions yet.",
+    'learnerProfile.reviews.title': "Reviews You've Shared",
+    'learnerProfile.reviews.description': 'Your feedback helps our speakers grow and tailor sessions for future learners.',
+    'learnerProfile.reviews.empty': "You haven't left any reviews yet.",
+    'learnerProfile.reviews.noComment': 'No comment provided.',
+    'learnerProfile.support.title': 'Support the Aurora Community',
+    'learnerProfile.support.description': 'Your contributions help us provide scholarships and keep conversations accessible to learners worldwide.',
+    'learnerProfile.sessions.with': 'with',
+    'learnerProfile.sessions.at': 'at',
+    'learnerProfile.buttons.upload': 'Upload',
+    'learnerProfile.buttons.editProfile': 'Edit Profile',
+    'learnerProfile.buttons.cancel': 'Cancel',
+    'learnerProfile.buttons.saveProfile': 'Save Profile',
+    'learnerProfile.buttons.saving': 'Saving',
+    'learnerProfile.buttons.joinMeeting': 'Join meeting →',
+    'learnerProfile.buttons.rateReview': 'Rate & Review',
+    'learnerProfile.buttons.donate': 'Donate',
+    'learnerProfile.buttons.preparingCheckout': 'Preparing checkout...',
+    'learnerProfile.buttons.keepSession': 'Keep session',
+    'learnerProfile.buttons.confirmCancellation': 'Confirm cancellation',
+    'learnerProfile.buttons.cancelling': 'Cancelling...',
+    'learnerProfile.errors.loginRequired': 'You must be logged in to view this page.',
+    'learnerProfile.errors.loadFailed': 'Unable to load data',
+    'learnerProfile.errors.updateFailed': 'Failed to update profile',
+    'learnerProfile.errors.avatarFailed': 'Failed to upload avatar',
+    'learnerProfile.errors.cancelFailed': 'Unable to cancel session',
+    'learnerProfile.errors.donationFailed': 'Unable to start donation checkout',
+    'learnerProfile.modals.cancelSession.title': 'Cancel Session',
+    'learnerProfile.modals.cancelSession.description': "We'll notify your speaker and free up the slot for other learners.",
+    'learnerProfile.modals.cancelSession.alreadyPassed': 'This session time has already passed.',
+    'learnerProfile.modals.cancelSession.startsInHours': 'This session starts in approximately {hours} hour(s).',
+    'learnerProfile.modals.cancelSession.reasonLabel': 'Reason for cancellation (optional)',
+    'learnerProfile.modals.cancelSession.reasonPlaceholder': "Let your speaker know why you're cancelling.",
   },
   es: {
     // Header
@@ -1644,5 +1756,61 @@ export const translations: Record<Language, Translations> = {
     'about.cta.title': '¿Listo para comenzar tu viaje de idiomas?',
     'about.cta.subtitle': 'Encuentra un speaker que te inspire y reserva tu primera sesión hoy. La confianza está solo a un paso de una conversación.',
     'about.cta.button': 'Encuentra un Speaker',
+
+    // Learner Profile Page
+    'learnerProfile.title': 'Perfil de Learner',
+    'learnerProfile.subtitle': 'Administra tus datos personales, revisa tus sesiones y sigue tu viaje de aprendizaje.',
+    'learnerProfile.avatarAlt': 'Avatar',
+    'learnerProfile.fallbackName': 'Learner',
+    'learnerProfile.roleBadge': 'Learner',
+    'learnerProfile.labels.firstName': 'Nombre',
+    'learnerProfile.labels.lastName': 'Apellido',
+    'learnerProfile.labels.bio': 'Biografía',
+    'learnerProfile.labels.about': 'Acerca de',
+    'learnerProfile.stats.total': 'Sesiones totales',
+    'learnerProfile.stats.completed': 'Completadas',
+    'learnerProfile.stats.upcoming': 'Próximas',
+    'learnerProfile.stats.completionRate': 'Porcentaje de finalización',
+    'learnerProfile.placeholders.bio': 'Comparte un poco sobre tus metas e intereses.',
+    'learnerProfile.placeholders.noBio': 'Aún no agregas una biografía. Cuéntales a los speakers sobre ti y tus objetivos.',
+    'learnerProfile.placeholders.cancellationReason': 'Hazle saber a tu speaker por qué cancelas.',
+    'learnerProfile.upcomingSessions.title': 'Sesiones próximas',
+    'learnerProfile.upcomingSessions.description': 'Mantente preparado para tus próximas conversaciones con los speakers de Aurora.',
+    'learnerProfile.upcomingSessions.empty': 'Aún no tienes sesiones próximas programadas.',
+    'learnerProfile.pastSessions.title': 'Sesiones pasadas',
+    'learnerProfile.pastSessions.description': 'Revisa tu progreso y comparte comentarios con tus speakers.',
+    'learnerProfile.pastSessions.empty': 'Aún no has completado ninguna sesión.',
+    'learnerProfile.reviews.title': 'Reseñas que has compartido',
+    'learnerProfile.reviews.description': 'Tus comentarios ayudan a nuestros speakers a crecer y adaptar las sesiones para futuros learners.',
+    'learnerProfile.reviews.empty': 'Aún no has dejado reseñas.',
+    'learnerProfile.reviews.noComment': 'Sin comentarios.',
+    'learnerProfile.support.title': 'Apoya a la comunidad Aurora',
+    'learnerProfile.support.description': 'Tus contribuciones nos ayudan a ofrecer becas y mantener las conversaciones accesibles para learners de todo el mundo.',
+    'learnerProfile.sessions.with': 'con',
+    'learnerProfile.sessions.at': 'a las',
+    'learnerProfile.buttons.upload': 'Subir',
+    'learnerProfile.buttons.editProfile': 'Editar perfil',
+    'learnerProfile.buttons.cancel': 'Cancelar',
+    'learnerProfile.buttons.saveProfile': 'Guardar perfil',
+    'learnerProfile.buttons.saving': 'Guardando',
+    'learnerProfile.buttons.joinMeeting': 'Unirse a la reunión →',
+    'learnerProfile.buttons.rateReview': 'Calificar y reseñar',
+    'learnerProfile.buttons.donate': 'Donar',
+    'learnerProfile.buttons.preparingCheckout': 'Preparando pago...',
+    'learnerProfile.buttons.keepSession': 'Mantener sesión',
+    'learnerProfile.buttons.confirmCancellation': 'Confirmar cancelación',
+    'learnerProfile.buttons.cancelling': 'Cancelando...',
+    'learnerProfile.errors.loginRequired': 'Debes iniciar sesión para ver esta página.',
+    'learnerProfile.errors.loadFailed': 'No se pudieron cargar los datos',
+    'learnerProfile.errors.updateFailed': 'Error al actualizar el perfil',
+    'learnerProfile.errors.avatarFailed': 'Error al subir el avatar',
+    'learnerProfile.errors.cancelFailed': 'No se pudo cancelar la sesión',
+    'learnerProfile.errors.donationFailed': 'No se pudo iniciar el proceso de donación',
+    'learnerProfile.modals.cancelSession.title': 'Cancelar sesión',
+    'learnerProfile.modals.cancelSession.description': 'Notificaremos a tu speaker y liberaremos el espacio para otros learners.',
+    'learnerProfile.modals.cancelSession.alreadyPassed': 'Esta sesión ya pasó.',
+    'learnerProfile.modals.cancelSession.startsInHours': 'La sesión comienza aproximadamente en {hours} hora(s).',
+    'learnerProfile.modals.cancelSession.reasonLabel': 'Motivo de la cancelación (opcional)',
+    'learnerProfile.modals.cancelSession.reasonPlaceholder': 'Hazle saber a tu speaker por qué cancelas.',
   },
 };
