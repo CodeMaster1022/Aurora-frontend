@@ -85,7 +85,7 @@ export default function LearnerProfilePage() {
   const [isCancelling, setIsCancelling] = useState(false)
 
   const [isCreatingDonation, setIsCreatingDonation] = useState(false)
-  const [isUpcomingSessionsOpen, setIsUpcomingSessionsOpen] = useState(true)
+  const [isUpcomingSessionsOpen, setIsUpcomingSessionsOpen] = useState(false)
   const [isPastSessionsOpen, setIsPastSessionsOpen] = useState(true)
   const [isReviewsOpen, setIsReviewsOpen] = useState(true)
 
