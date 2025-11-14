@@ -12,10 +12,12 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
  }) {
    const pathname = usePathname()
   const publicPaths = new Set<string>(["/", "/privacy-policy", "/terms-and-conditions", "/about", "/speakers", "/home"]) 
-   const isAuthSection = pathname?.startsWith('/auth')
-   const isPublic = isAuthSection || (pathname ? publicPaths.has(pathname) : true)
-  const shouldShowFooter = !pathname?.startsWith('/auth')
-  const shouldShowHeader = !pathname?.startsWith('/auth')
+ const isAuthSection = pathname?.startsWith('/auth')
+ const isAdminSection = pathname?.startsWith('/admin')
+ const isPublic = isAuthSection || (pathname ? publicPaths.has(pathname) : true)
+ const hideChrome = isAuthSection || isAdminSection
+ const shouldShowFooter = !hideChrome
+ const shouldShowHeader = !hideChrome
    
    return (
      <>

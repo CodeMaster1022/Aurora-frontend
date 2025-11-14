@@ -76,8 +76,10 @@ export default function StudentAuthPage() {
           router.push("/learners/profile")
         } else if (userRole === "speaker") {
           router.push("/speakers/profile")
+        } else if (userRole === "admin") {
+          router.push("/admin")
         } else {
-          router.push("/speakers/profile")
+          router.push("/")
         }
       } else if (loginUser.rejected.match(result)) {
         setLocalError((result.payload as string) || t("auth.errors.loginFailed"))

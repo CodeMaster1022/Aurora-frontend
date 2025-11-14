@@ -63,6 +63,7 @@ export type TranslationKey =
   | 'speakers.noResults.description'
   | 'speakers.noResults.reset'
   | 'speakers.card.book'
+  | 'speakers.card.calendarNotConnected'
   | 'speakers.card.remote'
   | 'home.speakerCard.age'
   | 'home.speakerCard.book'
@@ -896,6 +897,7 @@ export const translations: Record<Language, Translations> = {
     'speakers.noResults.description': 'Try adjusting your search or explore other topics to discover more voices.',
     'speakers.noResults.reset': 'Clear Search',
     'speakers.card.book': 'Book Session',
+    'speakers.card.calendarNotConnected': 'Calendar not connected',
     'speakers.card.ageLabel': 'yrs',
     'speakers.card.remote': 'Remote',
     
@@ -1497,6 +1499,7 @@ export const translations: Record<Language, Translations> = {
     'speakers.noResults.description': 'Intenta ajustar tu búsqueda o explora otros temas para descubrir más voces.',
     'speakers.noResults.reset': 'Limpiar búsqueda',
     'speakers.card.book': 'Agendar sesión',
+    'speakers.card.calendarNotConnected': 'Calendario no conectado',
     'speakers.card.ageLabel': 'años',
     'speakers.card.remote': 'Remoto',
     

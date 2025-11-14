@@ -255,7 +255,7 @@ export default function HomePage() {
                             className="w-full justify-center rounded-xl"
                             asChild
                           >
-                            <Link href={speaker._id ? `/speakers/${speaker._id}` : "/speakers"}>
+                            <Link href={"/speakers"}>
                               {t("home.speakerCard.book")}
                             </Link>
                           </Button>

@@ -106,6 +106,9 @@ type Speaker = {
   rating?: number
   ratingCount?: number
   cost?: number
+  googleCalendar?: {
+    connected?: boolean
+  }
 }
 
 type FilteredSpeaker = Speaker & { id?: string }
@@ -286,9 +289,19 @@ export default function SpeakersPage() {
                         availability: (speaker as any)?.availability,
                       }}
                       trigger={
-                        <Button className="w-full rounded-lg px-5 cursor-pointer bg-[#59248F] text-white">
-                          {t("speakers.card.book")}
-                        </Button>
+                        speaker.googleCalendar?.connected ? (
+                          <Button className="w-full rounded-lg px-5 cursor-pointer bg-[#59248F] text-white">
+                            {t("speakers.card.book")}
+                          </Button>
+                        ) : (
+                          <Button
+                            className="w-full rounded-lg px-5 cursor-not-allowed bg-muted text-muted-foreground"
+                            disabled
+                            aria-disabled="true"
+                          >
+                            {t("speakers.card.calendarNotConnected")}
+                          </Button>
+                        )
                       }
                     />
                   </div>

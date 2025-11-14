@@ -216,7 +216,7 @@ export function Header() {
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="rounded-full"
+                  className="rounded-full cursor-pointer"
                   onClick={() => {
                     setShowUserMenu((prev) => !prev)
                     setShowAuthMenu(false)
@@ -229,14 +229,14 @@ export function Header() {
 
                 {showUserMenu && (
                   <div className="absolute right-0 mt-3 w-48 overflow-hidden rounded-xl border border-border bg-background shadow-xl">
-                    <Link
+                    {/* <Link
                       href={profileHref}
                       className="flex items-center gap-2 px-4 py-3 text-sm text-foreground transition-colors hover:bg-accent/50"
                       onClick={() => setShowUserMenu(false)}
                     >
                       <Settings className="size-4" />
                       {t("header.profile")}
-                    </Link>
+                    </Link> */}
                     <button
                       type="button"
                       className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-destructive transition-colors hover:bg-destructive/10"
@@ -268,14 +268,14 @@ export function Header() {
 
                 {showUserMenu && (
                   <div className="absolute right-0 mt-3 w-52 overflow-hidden rounded-xl border border-border bg-background shadow-xl">
-                    <Link
+                    {/* <Link
                       href={profileHref}
                       className="flex items-center gap-2 px-4 py-3 text-sm text-foreground transition-colors hover:bg-accent/50"
                       onClick={() => setShowUserMenu(false)}
                     >
                       <Settings className="size-4" />
                       {t("header.profile")}
-                    </Link>
+                    </Link> */}
                     <button
                       type="button"
                       className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-destructive transition-colors hover:bg-destructive/10"

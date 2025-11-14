@@ -33,6 +33,11 @@ export default function AuthRoleSelectionPage() {
         return
       }
 
+      if (user?.role === "admin") {
+        router.replace("/admin")
+        return
+      }
+
       router.replace("/")
     }
   }, [isAuthenticated, isLoading, user?.role, router])

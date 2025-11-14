@@ -80,6 +80,8 @@ export default function SpeakerAuthPage() {
         const role = result.payload.user?.role
         if (role === "speaker") {
           router.push("/speakers/profile")
+        } else if (role === "admin") {
+          router.push("/admin")
         } else {
           router.push("/learners/profile")
         }
