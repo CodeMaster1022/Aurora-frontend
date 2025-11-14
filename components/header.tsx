@@ -26,22 +26,8 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showAuthMenu, setShowAuthMenu] = useState(false)
-  const [theme, setTheme] = useState<ThemeMode>(() => {
-    if (typeof window === "undefined") {
-      return "light"
-    }
-
-    const storedTheme = window.localStorage.getItem("aurora-theme") as ThemeMode | null
-    if (storedTheme === "light" || storedTheme === "dark") {
-      return storedTheme
-    }
-
-    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      return "dark"
-    }
-
-    return "light"
-  })
+  const [mounted, setMounted] = useState(false)
+  const [theme, setTheme] = useState<ThemeMode>("light")
 
   const router = useRouter()
   const pathname = usePathname()
@@ -59,11 +45,30 @@ export function Header() {
   )
 
   useEffect(() => {
+    // Set mounted to true after hydration
+    setMounted(true)
+    
+    // Initialize theme from localStorage or system preference
+    const storedTheme = window.localStorage.getItem("aurora-theme") as ThemeMode | null
+    let initialTheme: ThemeMode = "light"
+    
+    if (storedTheme === "light" || storedTheme === "dark") {
+      initialTheme = storedTheme
+    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      initialTheme = "dark"
+    }
+    
+    setTheme(initialTheme)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted) return
+    
     const root = document.documentElement
     root.classList.remove("light", "dark")
     root.classList.add(theme)
     window.localStorage.setItem("aurora-theme", theme)
-  }, [theme])
+  }, [theme, mounted])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -115,6 +120,9 @@ export function Header() {
       return "/speakers/profile"
     }
 
+    if (user?.role === "admin") {
+      return "/admin"
+    }
     return "/"
   }, [isAuthenticated, user?.role])
 
@@ -175,7 +183,7 @@ export function Header() {
             onClick={toggleTheme}
             aria-label={theme === "dark" ? "Activate light mode" : "Activate dark mode"}
           >
-            {theme === "dark" ? <Sun className="size-5" /> : <Moon className="size-5" />}
+            {mounted && theme === "dark" ? <Sun className="size-5" /> : <Moon className="size-5" />}
           </Button>
           {!isAuthenticated ? (
             <div className="relative block md:hidden auth-menu-container">

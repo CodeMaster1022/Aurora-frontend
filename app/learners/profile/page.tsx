@@ -28,12 +28,14 @@ import {
   ArrowRight,
   AlertTriangle,
   LogOut,
+  ChevronDown,
 } from "lucide-react"
 import { learnerService, Session, Review, LearnerProfile } from "@/lib/services/learnerService"
 import { useAppDispatch, useAppSelector } from "@/lib/hooks/redux"
 import { getCurrentUser } from "@/lib/store/authSlice"
 import { LearnerRatingModal } from "@/components/LearnerRatingModal"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { useTranslation } from "@/lib/hooks/useTranslation"
 
 interface ReviewWithSession extends Review {
@@ -83,6 +85,9 @@ export default function LearnerProfilePage() {
   const [isCancelling, setIsCancelling] = useState(false)
 
   const [isCreatingDonation, setIsCreatingDonation] = useState(false)
+  const [isUpcomingSessionsOpen, setIsUpcomingSessionsOpen] = useState(true)
+  const [isPastSessionsOpen, setIsPastSessionsOpen] = useState(true)
+  const [isReviewsOpen, setIsReviewsOpen] = useState(true)
 
   const hasReviewedSession = (sessionId: string) => {
     return reviews.some((review) => {
@@ -441,25 +446,25 @@ export default function LearnerProfilePage() {
 
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-2 sm:gap-3 md:grid-cols-4 md:gap-4">
           <Card className="shadow-sm">
-            <CardContent className="p-3 sm:p-4 md:p-5">
+            <CardContent className="p-2 sm:p-4 md:p-5">
               <p className="text-[10px] font-medium text-muted-foreground sm:text-xs md:text-sm">{t("learnerProfile.stats.total")}</p>
               <p className="mt-1 text-lg font-semibold sm:mt-1.5 sm:text-xl md:mt-2 md:text-2xl">{totalSessionsCount}</p>
             </CardContent>
           </Card>
           <Card className="shadow-sm">
-            <CardContent className="p-3 sm:p-4 md:p-5">
+            <CardContent className="p-2 sm:p-4 md:p-5">
               <p className="text-[10px] font-medium text-muted-foreground sm:text-xs md:text-sm">{t("learnerProfile.stats.completed")}</p>
               <p className="mt-1 text-lg font-semibold sm:mt-1.5 sm:text-xl md:mt-2 md:text-2xl">{completedSessionsCount}</p>
             </CardContent>
           </Card>
           <Card className="shadow-sm">
-            <CardContent className="p-3 sm:p-4 md:p-5">
+            <CardContent className="p-2 sm:p-4 md:p-5">
               <p className="text-[10px] font-medium text-muted-foreground sm:text-xs md:text-sm">{t("learnerProfile.stats.upcoming")}</p>
               <p className="mt-1 text-lg font-semibold sm:mt-1.5 sm:text-xl md:mt-2 md:text-2xl">{upcomingSessionsCount}</p>
             </CardContent>
           </Card>
           <Card className="shadow-sm">
-            <CardContent className="p-3 sm:p-4 md:p-5">
+            <CardContent className="p-2 sm:p-4 md:p-5">
               <p className="text-[10px] font-medium text-muted-foreground sm:text-xs md:text-sm">{t("learnerProfile.stats.completionRate")}</p>
               <p className="mt-1 text-lg font-semibold sm:mt-1.5 sm:text-xl md:mt-2 md:text-2xl">{completionRate}</p>
             </CardContent>
@@ -467,205 +472,232 @@ export default function LearnerProfilePage() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:gap-5 md:gap-6 lg:grid-cols-2">
-          <Card className="shadow-sm">
-            <CardHeader className="p-3 sm:p-4 md:p-6">
-              <CardTitle className="flex items-center gap-1.5 text-sm font-semibold sm:gap-2 sm:text-base md:text-lg">
-                <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5" />
-                {t("learnerProfile.upcomingSessions.title")}
-              </CardTitle>
-              <CardDescription className="text-xs sm:text-sm">{t("learnerProfile.upcomingSessions.description")}</CardDescription>
-            </CardHeader>
-            <CardContent className="p-3 sm:p-4 md:p-6">
-              {upcomingSessions.length > 0 ? (
-                <div className="space-y-2.5 sm:space-y-3 md:space-y-4">
-                  {upcomingSessions.map((session) => (
-                    <div
-                      key={session._id}
-                      className="rounded-lg border border-border bg-muted/30 p-2.5 transition-colors hover:bg-muted sm:p-3 md:p-4"
-                    >
-                      <div className="flex flex-col gap-2 sm:gap-2.5 md:gap-3">
-                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                          <div className="min-w-0 flex-1 space-y-1.5 sm:space-y-2">
-                            <h3 className="text-sm font-semibold leading-tight sm:text-base">{session.title}</h3>
-                            <p className="text-xs text-muted-foreground sm:text-sm">
-                              {`${t("learnerProfile.sessions.with")} ${
-                                typeof session.speaker === "object"
-                                  ? `${(session.speaker as any).firstname} ${(session.speaker as any).lastname}`
-                                  : session.speaker
-                              }`}
-                            </p>
-                            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground sm:gap-3 sm:gap-4 sm:text-sm">
-                              <span className="inline-flex items-center gap-1 sm:gap-1.5">
-                                <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
-                                {formatDate(session.date)}
-                              </span>
-                              <span className="inline-flex items-center gap-1 sm:gap-1.5">
-                                <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
-                                {formatTime(session.time)}
-                              </span>
-                            </div>
-                            {session.meetingLink && (
-                              <a
-                                href={session.meetingLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-block text-xs font-medium text-primary hover:underline sm:text-sm"
-                              >
-                                {t("learnerProfile.buttons.joinMeeting")}
-                              </a>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1.5 sm:gap-2">
-                            <Badge variant="outline" className="text-[10px] uppercase sm:text-xs">
-                              {session.status}
-                            </Badge>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              className="h-7 cursor-pointer px-2 text-xs sm:h-8 sm:px-3 sm:text-sm"
-                              onClick={() => handleCancelSession(session)}
-                            >
-                              <span className="hidden sm:inline">{t("learnerProfile.buttons.cancel")}</span>
-                              <span className="sm:hidden">Cancel</span>
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
+          <Collapsible open={isUpcomingSessionsOpen} onOpenChange={setIsUpcomingSessionsOpen}>
+            <Card className="shadow-sm">
+              <CollapsibleTrigger asChild>
+                <CardHeader className="p-3 sm:p-4 md:p-6 cursor-pointer hover:bg-muted/50 transition-colors">
+                  <CardTitle className="flex items-center justify-between gap-1.5 text-sm font-semibold sm:gap-2 sm:text-base md:text-lg">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5" />
+                      {t("learnerProfile.upcomingSessions.title")}
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="rounded-lg border border-dashed border-border bg-muted/20 py-8 text-center text-xs text-muted-foreground sm:py-10 sm:text-sm md:py-12">
-                  {t("learnerProfile.upcomingSessions.empty")}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-sm">
-            <CardHeader className="p-3 sm:p-4 md:p-6">
-              <CardTitle className="flex items-center gap-1.5 text-sm font-semibold sm:gap-2 sm:text-base md:text-lg">
-                <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5" />
-                {t("learnerProfile.pastSessions.title")}
-              </CardTitle>
-              <CardDescription className="text-xs sm:text-sm">{t("learnerProfile.pastSessions.description")}</CardDescription>
-            </CardHeader>
-            <CardContent className="p-3 sm:p-4 md:p-6">
-              {pastSessions.length > 0 ? (
-                <div className="space-y-2.5 sm:space-y-3 md:space-y-4">
-                  {pastSessions.map((session) => (
-                    <div
-                      key={session._id}
-                      className="rounded-lg border border-border bg-muted/30 p-2.5 transition-colors hover:bg-muted sm:p-3 md:p-4"
-                    >
-                      <div className="flex flex-col gap-2 sm:gap-2.5 md:gap-3">
-                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                          <div className="min-w-0 flex-1 space-y-1.5 sm:space-y-2">
-                            <h3 className="text-sm font-semibold leading-tight sm:text-base">{session.title}</h3>
-                            <p className="text-xs text-muted-foreground sm:text-sm">
-                              {`${t("learnerProfile.sessions.with")} ${
-                                typeof session.speaker === "object"
-                                  ? `${(session.speaker as any).firstname} ${(session.speaker as any).lastname}`
-                                  : session.speaker
-                              }`}
-                            </p>
-                            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground sm:gap-3 sm:gap-4 sm:text-sm">
-                              <span className="inline-flex items-center gap-1 sm:gap-1.5">
-                                <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
-                                {formatDate(session.date)}
-                              </span>
-                              <span className="inline-flex items-center gap-1 sm:gap-1.5">
-                                <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
-                                {formatTime(session.time)}
-                              </span>
+                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isUpcomingSessionsOpen ? 'rotate-180' : ''}`} />
+                  </CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">{t("learnerProfile.upcomingSessions.description")}</CardDescription>
+                </CardHeader>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <CardContent className="p-3 sm:p-4 md:p-6">
+                  {upcomingSessions.length > 0 ? (
+                    <div className="space-y-2.5 sm:space-y-3 md:space-y-4">
+                      {upcomingSessions.map((session) => (
+                        <div
+                          key={session._id}
+                          className="rounded-lg border border-border bg-muted/30 p-2.5 transition-colors hover:bg-muted sm:p-3 md:p-4"
+                        >
+                          <div className="flex flex-col gap-2 sm:gap-2.5 md:gap-3">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                              <div className="min-w-0 flex-1 space-y-1.5 sm:space-y-2">
+                                <h3 className="text-sm font-semibold leading-tight sm:text-base">{session.title}</h3>
+                                <p className="text-xs text-muted-foreground sm:text-sm">
+                                  {`${t("learnerProfile.sessions.with")} ${
+                                    typeof session.speaker === "object"
+                                      ? `${(session.speaker as any).firstname} ${(session.speaker as any).lastname}`
+                                      : session.speaker
+                                  }`}
+                                </p>
+                                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground sm:gap-3 sm:gap-4 sm:text-sm">
+                                  <span className="inline-flex items-center gap-1 sm:gap-1.5">
+                                    <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
+                                    {formatDate(session.date)}
+                                  </span>
+                                  <span className="inline-flex items-center gap-1 sm:gap-1.5">
+                                    <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
+                                    {formatTime(session.time)}
+                                  </span>
+                                </div>
+                                {session.meetingLink && (
+                                  <a
+                                    href={session.meetingLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-block text-xs font-medium text-primary hover:underline sm:text-sm"
+                                  >
+                                    {t("learnerProfile.buttons.joinMeeting")}
+                                  </a>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-1.5 sm:gap-2">
+                                <Badge variant="outline" className="text-[10px] uppercase sm:text-xs">
+                                  {session.status}
+                                </Badge>
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  className="h-7 cursor-pointer px-2 text-xs sm:h-8 sm:px-3 sm:text-sm"
+                                  onClick={() => handleCancelSession(session)}
+                                >
+                                  <span className="hidden sm:inline">{t("learnerProfile.buttons.cancel")}</span>
+                                  <span className="sm:hidden">Cancel</span>
+                                </Button>
+                              </div>
                             </div>
                           </div>
-                          <div className="flex flex-col items-start gap-1.5 sm:items-end sm:gap-2">
-                            <Badge
-                              variant="outline"
-                              className={`text-[10px] uppercase sm:text-xs ${
-                                session.status === "completed"
-                                  ? "border-emerald-500 text-emerald-600 dark:text-emerald-300"
-                                  : "border-muted-foreground text-muted-foreground"
-                              }`}
-                            >
-                              {session.status}
-                            </Badge>
-                            {session.status === "completed" && !hasReviewedSession(session._id) && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-7 w-full cursor-pointer px-2 text-xs sm:h-8 sm:w-auto sm:px-3 sm:text-sm"
-                                onClick={() => handleRateSession(session)}
-                              >
-                                <Star className="mr-1 h-3 w-3 sm:mr-1.5 sm:h-3.5 sm:w-3.5 md:mr-2 md:h-4 md:w-4" />
-                                <span className="hidden sm:inline">{t("learnerProfile.buttons.rateReview")}</span>
-                                <span className="sm:hidden">Rate</span>
-                              </Button>
-                            )}
-                          </div>
                         </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="rounded-lg border border-dashed border-border bg-muted/20 py-8 text-center text-xs text-muted-foreground sm:py-10 sm:text-sm md:py-12">
-                  {t("learnerProfile.pastSessions.empty")}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        <Card className="shadow-sm">
-          <CardHeader className="p-3 sm:p-4 md:p-6">
-            <CardTitle className="flex items-center gap-1.5 text-sm font-semibold sm:gap-2 sm:text-base md:text-lg">
-              <MessageSquare className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5" />
-              {t("learnerProfile.reviews.title")}
-            </CardTitle>
-            <CardDescription className="text-xs sm:text-sm">{t("learnerProfile.reviews.description")}</CardDescription>
-          </CardHeader>
-          <CardContent className="p-3 sm:p-4 md:p-6">
-            {reviews.length > 0 ? (
-              <div className="space-y-2.5 sm:space-y-3 md:space-y-4">
-                {reviews.map((review) => (
-                  <div key={review._id} className="rounded-lg border border-border bg-muted/30 p-2.5 sm:p-3 md:p-4">
-                    <div className="flex items-center gap-0.5 text-amber-500 sm:gap-1">
-                      {Array.from({ length: 5 }).map((_, index) => (
-                        <Star
-                          key={index}
-                          className={`h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 ${index < review.rating ? "fill-amber-400" : "text-muted-foreground"}`}
-                        />
                       ))}
                     </div>
-                    <p className="mt-2 text-xs text-foreground sm:mt-2.5 sm:text-sm md:mt-3">{review.comment || t("learnerProfile.reviews.noComment")}</p>
-                    <div className="mt-1.5 flex flex-col gap-0.5 text-[10px] text-muted-foreground sm:mt-2 sm:flex-row sm:gap-1 sm:text-xs">
-                      <span>
-                        {typeof review.to === "object"
-                          ? `${(review.to as any).firstname} ${(review.to as any).lastname}`
-                          : review.to}
-                      </span>
-                      {review.sessionDetails && (
-                        <>
-                          <span className="hidden sm:inline">{" • "}</span>
-                          <span className="break-words">
-                            {review.sessionDetails.title} — {formatDate(review.sessionDetails.date)} {t("learnerProfile.sessions.at")}{" "}
-                            {formatTime(review.sessionDetails.time)}
-                          </span>
-                        </>
-                      )}
+                  ) : (
+                    <div className="rounded-lg border border-dashed border-border bg-muted/20 py-8 text-center text-xs text-muted-foreground sm:py-10 sm:text-sm md:py-12">
+                      {t("learnerProfile.upcomingSessions.empty")}
                     </div>
+                  )}
+                </CardContent>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
+
+          <Collapsible open={isPastSessionsOpen} onOpenChange={setIsPastSessionsOpen}>
+            <Card className="shadow-sm">
+              <CollapsibleTrigger asChild>
+                <CardHeader className="p-3 sm:p-4 md:p-6 cursor-pointer hover:bg-muted/50 transition-colors">
+                  <CardTitle className="flex items-center justify-between gap-1.5 text-sm font-semibold sm:gap-2 sm:text-base md:text-lg">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5" />
+                      {t("learnerProfile.pastSessions.title")}
+                    </div>
+                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isPastSessionsOpen ? 'rotate-180' : ''}`} />
+                  </CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">{t("learnerProfile.pastSessions.description")}</CardDescription>
+                </CardHeader>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <CardContent className="p-3 sm:p-4 md:p-6">
+                  {pastSessions.length > 0 ? (
+                    <div className="space-y-2.5 sm:space-y-3 md:space-y-4">
+                      {pastSessions.map((session) => (
+                        <div
+                          key={session._id}
+                          className="rounded-lg border border-border bg-muted/30 p-2.5 transition-colors hover:bg-muted sm:p-3 md:p-4"
+                        >
+                          <div className="flex flex-col gap-2 sm:gap-2.5 md:gap-3">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                              <div className="min-w-0 flex-1 space-y-1.5 sm:space-y-2">
+                                <h3 className="text-sm font-semibold leading-tight sm:text-base">{session.title}</h3>
+                                <p className="text-xs text-muted-foreground sm:text-sm">
+                                  {`${t("learnerProfile.sessions.with")} ${
+                                    typeof session.speaker === "object"
+                                      ? `${(session.speaker as any).firstname} ${(session.speaker as any).lastname}`
+                                      : session.speaker
+                                  }`}
+                                </p>
+                                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground sm:gap-3 sm:gap-4 sm:text-sm">
+                                  <span className="inline-flex items-center gap-1 sm:gap-1.5">
+                                    <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
+                                    {formatDate(session.date)}
+                                  </span>
+                                  <span className="inline-flex items-center gap-1 sm:gap-1.5">
+                                    <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
+                                    {formatTime(session.time)}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex flex-col items-start gap-1.5 sm:items-end sm:gap-2">
+                                <Badge
+                                  variant="outline"
+                                  className={`text-[10px] uppercase sm:text-xs ${
+                                    session.status === "completed"
+                                      ? "border-emerald-500 text-emerald-600 dark:text-emerald-300"
+                                      : "border-muted-foreground text-muted-foreground"
+                                  }`}
+                                >
+                                  {session.status}
+                                </Badge>
+                                {session.status === "completed" && !hasReviewedSession(session._id) && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-7 w-full cursor-pointer px-2 text-xs sm:h-8 sm:w-auto sm:px-3 sm:text-sm"
+                                    onClick={() => handleRateSession(session)}
+                                  >
+                                    <Star className="mr-1 h-3 w-3 sm:mr-1.5 sm:h-3.5 sm:w-3.5 md:mr-2 md:h-4 md:w-4" />
+                                    <span className="hidden sm:inline">{t("learnerProfile.buttons.rateReview")}</span>
+                                    <span className="sm:hidden">Rate</span>
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="rounded-lg border border-dashed border-border bg-muted/20 py-8 text-center text-xs text-muted-foreground sm:py-10 sm:text-sm md:py-12">
+                      {t("learnerProfile.pastSessions.empty")}
+                    </div>
+                  )}
+                </CardContent>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
+        </div>
+
+        <Collapsible open={isReviewsOpen} onOpenChange={setIsReviewsOpen}>
+          <Card className="shadow-sm">
+            <CollapsibleTrigger asChild>
+              <CardHeader className="p-3 sm:p-4 md:p-6 cursor-pointer hover:bg-muted/50 transition-colors">
+                <CardTitle className="flex items-center justify-between gap-1.5 text-sm font-semibold sm:gap-2 sm:text-base md:text-lg">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <MessageSquare className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5" />
+                    {t("learnerProfile.reviews.title")}
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-lg border border-dashed border-border bg-muted/20 py-8 text-center text-xs text-muted-foreground sm:py-10 sm:text-sm md:py-12">
-                {t("learnerProfile.reviews.empty")}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isReviewsOpen ? 'rotate-180' : ''}`} />
+                </CardTitle>
+                <CardDescription className="text-xs sm:text-sm">{t("learnerProfile.reviews.description")}</CardDescription>
+              </CardHeader>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <CardContent className="p-3 sm:p-4 md:p-6">
+                {reviews.length > 0 ? (
+                  <div className="space-y-2.5 sm:space-y-3 md:space-y-4">
+                    {reviews.map((review) => (
+                      <div key={review._id} className="rounded-lg border border-border bg-muted/30 p-2.5 sm:p-3 md:p-4">
+                        <div className="flex items-center gap-0.5 text-amber-500 sm:gap-1">
+                          {Array.from({ length: 5 }).map((_, index) => (
+                            <Star
+                              key={index}
+                              className={`h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 ${index < review.rating ? "fill-amber-400" : "text-muted-foreground"}`}
+                            />
+                          ))}
+                        </div>
+                        <p className="mt-2 text-xs text-foreground sm:mt-2.5 sm:text-sm md:mt-3">{review.comment || t("learnerProfile.reviews.noComment")}</p>
+                        <div className="mt-1.5 flex flex-col gap-0.5 text-[10px] text-muted-foreground sm:mt-2 sm:flex-row sm:gap-1 sm:text-xs">
+                          <span>
+                            {typeof review.to === "object"
+                              ? `${(review.to as any).firstname} ${(review.to as any).lastname}`
+                              : review.to}
+                          </span>
+                          {review.sessionDetails && (
+                            <>
+                              <span className="hidden sm:inline">{" • "}</span>
+                              <span className="break-words">
+                                {review.sessionDetails.title} — {formatDate(review.sessionDetails.date)} {t("learnerProfile.sessions.at")}{" "}
+                                {formatTime(review.sessionDetails.time)}
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-lg border border-dashed border-border bg-muted/20 py-8 text-center text-xs text-muted-foreground sm:py-10 sm:text-sm md:py-12">
+                    {t("learnerProfile.reviews.empty")}
+                  </div>
+                )}
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
 
         <Card className="shadow-sm">
           <CardContent className="flex flex-col gap-3 p-3 sm:gap-3.5 sm:p-4 md:flex-row md:items-center md:justify-between md:gap-4 md:p-6">
