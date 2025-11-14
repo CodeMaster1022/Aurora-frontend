@@ -36,6 +36,7 @@ import { getCurrentUser } from "@/lib/store/authSlice"
 import { LearnerRatingModal } from "@/components/LearnerRatingModal"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useTranslation } from "@/lib/hooks/useTranslation"
 
 interface ReviewWithSession extends Review {
@@ -471,7 +472,7 @@ export default function LearnerProfilePage() {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:gap-5 md:gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:gap-5 md:gap-6 lg:grid-cols-1">
           <Collapsible open={isUpcomingSessionsOpen} onOpenChange={setIsUpcomingSessionsOpen}>
             <Card className="shadow-sm">
               <CollapsibleTrigger asChild>
@@ -489,63 +490,122 @@ export default function LearnerProfilePage() {
               <CollapsibleContent>
                 <CardContent className="p-3 sm:p-4 md:p-6">
                   {upcomingSessions.length > 0 ? (
-                    <div className="space-y-2.5 sm:space-y-3 md:space-y-4">
-                      {upcomingSessions.map((session) => (
-                        <div
-                          key={session._id}
-                          className="rounded-lg border border-border bg-muted/30 p-2.5 transition-colors hover:bg-muted sm:p-3 md:p-4"
-                        >
-                          <div className="flex flex-col gap-2 sm:gap-2.5 md:gap-3">
-                            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                              <div className="min-w-0 flex-1 space-y-1.5 sm:space-y-2">
-                                <h3 className="text-sm font-semibold leading-tight sm:text-base">{session.title}</h3>
-                                <p className="text-xs text-muted-foreground sm:text-sm">
-                                  {`${t("learnerProfile.sessions.with")} ${
-                                    typeof session.speaker === "object"
-                                      ? `${(session.speaker as any).firstname} ${(session.speaker as any).lastname}`
-                                      : session.speaker
-                                  }`}
-                                </p>
-                                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground sm:gap-3 sm:gap-4 sm:text-sm">
-                                  <span className="inline-flex items-center gap-1 sm:gap-1.5">
-                                    <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
-                                    {formatDate(session.date)}
-                                  </span>
-                                  <span className="inline-flex items-center gap-1 sm:gap-1.5">
-                                    <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
-                                    {formatTime(session.time)}
-                                  </span>
+                    <>
+                      {/* Mobile/Tablet View - Cards */}
+                      <div className="space-y-2.5 sm:space-y-3 md:hidden">
+                        {upcomingSessions.map((session) => (
+                          <div
+                            key={session._id}
+                            className="rounded-lg border border-border bg-muted/30 p-2.5 transition-colors hover:bg-muted sm:p-3"
+                          >
+                            <div className="flex flex-col gap-2 sm:gap-2.5">
+                              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                <div className="min-w-0 flex-1 space-y-1.5 sm:space-y-2">
+                                  <h3 className="text-sm font-semibold leading-tight sm:text-base">{session.title}</h3>
+                                  <p className="text-xs text-muted-foreground sm:text-sm">
+                                    {`${t("learnerProfile.sessions.with")} ${
+                                      typeof session.speaker === "object"
+                                        ? `${(session.speaker as any).firstname} ${(session.speaker as any).lastname}`
+                                        : session.speaker
+                                    }`}
+                                  </p>
+                                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground sm:gap-3 sm:gap-4 sm:text-sm">
+                                    <span className="inline-flex items-center gap-1 sm:gap-1.5">
+                                      <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                                      {formatDate(session.date)}
+                                    </span>
+                                    <span className="inline-flex items-center gap-1 sm:gap-1.5">
+                                      <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                                      {formatTime(session.time)}
+                                    </span>
+                                  </div>
+                                  {session.meetingLink && (
+                                    <a
+                                      href={session.meetingLink}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-block text-xs font-medium text-primary hover:underline sm:text-sm"
+                                    >
+                                      {t("learnerProfile.buttons.joinMeeting")}
+                                    </a>
+                                  )}
                                 </div>
-                                {session.meetingLink && (
-                                  <a
-                                    href={session.meetingLink}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-block text-xs font-medium text-primary hover:underline sm:text-sm"
+                                <div className="flex items-center gap-1.5 sm:gap-2">
+                                  <Badge variant="outline" className="text-[10px] uppercase sm:text-xs">
+                                    {session.status}
+                                  </Badge>
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    className="h-7 cursor-pointer px-2 text-xs sm:h-8 sm:px-3 sm:text-sm"
+                                    onClick={() => handleCancelSession(session)}
                                   >
-                                    {t("learnerProfile.buttons.joinMeeting")}
-                                  </a>
-                                )}
-                              </div>
-                              <div className="flex items-center gap-1.5 sm:gap-2">
-                                <Badge variant="outline" className="text-[10px] uppercase sm:text-xs">
-                                  {session.status}
-                                </Badge>
-                                <Button
-                                  variant="destructive"
-                                  size="sm"
-                                  className="h-7 cursor-pointer px-2 text-xs sm:h-8 sm:px-3 sm:text-sm"
-                                  onClick={() => handleCancelSession(session)}
-                                >
-                                  <span className="hidden sm:inline">{t("learnerProfile.buttons.cancel")}</span>
-                                  <span className="sm:hidden">Cancel</span>
-                                </Button>
+                                    <span className="hidden sm:inline">{t("learnerProfile.buttons.cancel")}</span>
+                                    <span className="sm:hidden">Cancel</span>
+                                  </Button>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                      {/* Desktop View - Table */}
+                      <div className="hidden md:block">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="text-xs sm:text-sm">Title</TableHead>
+                              <TableHead className="text-xs sm:text-sm">Speaker</TableHead>
+                              <TableHead className="text-xs sm:text-sm">Date</TableHead>
+                              <TableHead className="text-xs sm:text-sm">Time</TableHead>
+                              <TableHead className="text-xs sm:text-sm">Status</TableHead>
+                              <TableHead className="text-xs sm:text-sm">Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {upcomingSessions.map((session) => (
+                              <TableRow key={session._id}>
+                                <TableCell className="font-medium text-xs sm:text-sm">{session.title}</TableCell>
+                                <TableCell className="text-xs sm:text-sm">
+                                  {typeof session.speaker === "object"
+                                    ? `${(session.speaker as any).firstname} ${(session.speaker as any).lastname}`
+                                    : session.speaker}
+                                </TableCell>
+                                <TableCell className="text-xs sm:text-sm">{formatDate(session.date)}</TableCell>
+                                <TableCell className="text-xs sm:text-sm">{formatTime(session.time)}</TableCell>
+                                <TableCell>
+                                  <Badge variant="outline" className="text-[10px] uppercase sm:text-xs">
+                                    {session.status}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex items-center gap-2">
+                                    {session.meetingLink && (
+                                      <a
+                                        href={session.meetingLink}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-xs font-medium text-primary hover:underline sm:text-sm"
+                                      >
+                                        {t("learnerProfile.buttons.joinMeeting")}
+                                      </a>
+                                    )}
+                                    <Button
+                                      variant="destructive"
+                                      size="sm"
+                                      className="h-7 cursor-pointer px-2 text-xs sm:h-8 sm:px-3 sm:text-sm"
+                                      onClick={() => handleCancelSession(session)}
+                                    >
+                                      {t("learnerProfile.buttons.cancel")}
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </>
                   ) : (
                     <div className="rounded-lg border border-dashed border-border bg-muted/20 py-8 text-center text-xs text-muted-foreground sm:py-10 sm:text-sm md:py-12">
                       {t("learnerProfile.upcomingSessions.empty")}
@@ -573,63 +633,124 @@ export default function LearnerProfilePage() {
               <CollapsibleContent>
                 <CardContent className="p-3 sm:p-4 md:p-6">
                   {pastSessions.length > 0 ? (
-                    <div className="space-y-2.5 sm:space-y-3 md:space-y-4">
-                      {pastSessions.map((session) => (
-                        <div
-                          key={session._id}
-                          className="rounded-lg border border-border bg-muted/30 p-2.5 transition-colors hover:bg-muted sm:p-3 md:p-4"
-                        >
-                          <div className="flex flex-col gap-2 sm:gap-2.5 md:gap-3">
-                            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                              <div className="min-w-0 flex-1 space-y-1.5 sm:space-y-2">
-                                <h3 className="text-sm font-semibold leading-tight sm:text-base">{session.title}</h3>
-                                <p className="text-xs text-muted-foreground sm:text-sm">
-                                  {`${t("learnerProfile.sessions.with")} ${
-                                    typeof session.speaker === "object"
-                                      ? `${(session.speaker as any).firstname} ${(session.speaker as any).lastname}`
-                                      : session.speaker
-                                  }`}
-                                </p>
-                                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground sm:gap-3 sm:gap-4 sm:text-sm">
-                                  <span className="inline-flex items-center gap-1 sm:gap-1.5">
-                                    <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
-                                    {formatDate(session.date)}
-                                  </span>
-                                  <span className="inline-flex items-center gap-1 sm:gap-1.5">
-                                    <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
-                                    {formatTime(session.time)}
-                                  </span>
+                    <>
+                      {/* Mobile/Tablet View - Cards */}
+                      <div className="space-y-2.5 sm:space-y-3 md:hidden">
+                        {pastSessions.map((session) => (
+                          <div
+                            key={session._id}
+                            className="rounded-lg border border-border bg-muted/30 p-2.5 transition-colors hover:bg-muted sm:p-3"
+                          >
+                            <div className="flex flex-col gap-2 sm:gap-2.5">
+                              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                <div className="min-w-0 flex-1 space-y-1.5 sm:space-y-2">
+                                  <h3 className="text-sm font-semibold leading-tight sm:text-base">{session.title}</h3>
+                                  <p className="text-xs text-muted-foreground sm:text-sm">
+                                    {`${t("learnerProfile.sessions.with")} ${
+                                      typeof session.speaker === "object"
+                                        ? `${(session.speaker as any).firstname} ${(session.speaker as any).lastname}`
+                                        : session.speaker
+                                    }`}
+                                  </p>
+                                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground sm:gap-3 sm:gap-4 sm:text-sm">
+                                    <span className="inline-flex items-center gap-1 sm:gap-1.5">
+                                      <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                                      {formatDate(session.date)}
+                                    </span>
+                                    <span className="inline-flex items-center gap-1 sm:gap-1.5">
+                                      <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                                      {formatTime(session.time)}
+                                    </span>
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="flex flex-col items-start gap-1.5 sm:items-end sm:gap-2">
-                                <Badge
-                                  variant="outline"
-                                  className={`text-[10px] uppercase sm:text-xs ${
-                                    session.status === "completed"
-                                      ? "border-emerald-500 text-emerald-600 dark:text-emerald-300"
-                                      : "border-muted-foreground text-muted-foreground"
-                                  }`}
-                                >
-                                  {session.status}
-                                </Badge>
-                                {session.status === "completed" && !hasReviewedSession(session._id) && (
-                                  <Button
-                                    size="sm"
+                                <div className="flex flex-col items-start gap-1.5 sm:items-end sm:gap-2">
+                                  <Badge
                                     variant="outline"
-                                    className="h-7 w-full cursor-pointer px-2 text-xs sm:h-8 sm:w-auto sm:px-3 sm:text-sm"
-                                    onClick={() => handleRateSession(session)}
+                                    className={`text-[10px] uppercase sm:text-xs ${
+                                      session.status === "completed"
+                                        ? "border-emerald-500 text-emerald-600 dark:text-emerald-300"
+                                        : "border-muted-foreground text-muted-foreground"
+                                    }`}
                                   >
-                                    <Star className="mr-1 h-3 w-3 sm:mr-1.5 sm:h-3.5 sm:w-3.5 md:mr-2 md:h-4 md:w-4" />
-                                    <span className="hidden sm:inline">{t("learnerProfile.buttons.rateReview")}</span>
-                                    <span className="sm:hidden">Rate</span>
-                                  </Button>
-                                )}
+                                    {session.status}
+                                  </Badge>
+                                  {session.status === "completed" && !hasReviewedSession(session._id) && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="h-7 w-full cursor-pointer px-2 text-xs sm:h-8 sm:w-auto sm:px-3 sm:text-sm"
+                                      onClick={() => handleRateSession(session)}
+                                    >
+                                      <Star className="mr-1 h-3 w-3 sm:mr-1.5 sm:h-3.5 sm:w-3.5" />
+                                      <span className="hidden sm:inline">{t("learnerProfile.buttons.rateReview")}</span>
+                                      <span className="sm:hidden">Rate</span>
+                                    </Button>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                      {/* Desktop View - Table */}
+                      <div className="hidden md:block">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="text-xs sm:text-sm">Title</TableHead>
+                              <TableHead className="text-xs sm:text-sm">Speaker</TableHead>
+                              <TableHead className="text-xs sm:text-sm">Date</TableHead>
+                              <TableHead className="text-xs sm:text-sm">Time</TableHead>
+                              <TableHead className="text-xs sm:text-sm">Status</TableHead>
+                              <TableHead className="text-xs sm:text-sm">Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {pastSessions.map((session) => (
+                              <TableRow key={session._id}>
+                                <TableCell className="font-medium text-xs sm:text-sm">{session.title}</TableCell>
+                                <TableCell className="text-xs sm:text-sm">
+                                  {typeof session.speaker === "object"
+                                    ? `${(session.speaker as any).firstname} ${(session.speaker as any).lastname}`
+                                    : session.speaker}
+                                </TableCell>
+                                <TableCell className="text-xs sm:text-sm">{formatDate(session.date)}</TableCell>
+                                <TableCell className="text-xs sm:text-sm">{formatTime(session.time)}</TableCell>
+                                <TableCell>
+                                  <Badge
+                                    variant="outline"
+                                    className={`text-[10px] uppercase sm:text-xs ${
+                                      session.status === "completed"
+                                        ? "border-emerald-500 text-emerald-600 dark:text-emerald-300"
+                                        : "border-muted-foreground text-muted-foreground"
+                                    }`}
+                                  >
+                                    {session.status}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>
+                                  {session.status === "completed" && !hasReviewedSession(session._id) ? (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="h-7 cursor-pointer px-2 text-xs sm:h-8 sm:px-3 sm:text-sm"
+                                      onClick={() => handleRateSession(session)}
+                                    >
+                                      <Star className="mr-1 h-3 w-3 sm:mr-1.5 sm:h-3.5 sm:w-3.5" />
+                                      {t("learnerProfile.buttons.rateReview")}
+                                    </Button>
+                                  ) : (
+                                    <Badge variant="outline" className="text-[10px] uppercase sm:text-xs">
+                                      Feedback Given
+                                    </Badge>
+                                  )}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </>
                   ) : (
                     <div className="rounded-lg border border-dashed border-border bg-muted/20 py-8 text-center text-xs text-muted-foreground sm:py-10 sm:text-sm md:py-12">
                       {t("learnerProfile.pastSessions.empty")}
@@ -658,37 +779,86 @@ export default function LearnerProfilePage() {
             <CollapsibleContent>
               <CardContent className="p-3 sm:p-4 md:p-6">
                 {reviews.length > 0 ? (
-                  <div className="space-y-2.5 sm:space-y-3 md:space-y-4">
-                    {reviews.map((review) => (
-                      <div key={review._id} className="rounded-lg border border-border bg-muted/30 p-2.5 sm:p-3 md:p-4">
-                        <div className="flex items-center gap-0.5 text-amber-500 sm:gap-1">
-                          {Array.from({ length: 5 }).map((_, index) => (
-                            <Star
-                              key={index}
-                              className={`h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 ${index < review.rating ? "fill-amber-400" : "text-muted-foreground"}`}
-                            />
+                  <>
+                    {/* Mobile/Tablet View - Cards */}
+                    <div className="space-y-2.5 sm:space-y-3 md:hidden">
+                      {reviews.map((review) => (
+                        <div key={review._id} className="rounded-lg border border-border bg-muted/30 p-2.5 sm:p-3">
+                          <div className="flex items-center gap-0.5 text-amber-500 sm:gap-1">
+                            {Array.from({ length: 5 }).map((_, index) => (
+                              <Star
+                                key={index}
+                                className={`h-3 w-3 sm:h-3.5 sm:w-3.5 ${index < review.rating ? "fill-amber-400" : "text-muted-foreground"}`}
+                              />
+                            ))}
+                          </div>
+                          <p className="mt-2 text-xs text-foreground sm:mt-2.5 sm:text-sm">{review.comment || t("learnerProfile.reviews.noComment")}</p>
+                          <div className="mt-1.5 flex flex-col gap-0.5 text-[10px] text-muted-foreground sm:mt-2 sm:flex-row sm:gap-1 sm:text-xs">
+                            <span>
+                              {typeof review.to === "object"
+                                ? `${(review.to as any).firstname} ${(review.to as any).lastname}`
+                                : review.to}
+                            </span>
+                            {review.sessionDetails && (
+                              <>
+                                <span className="hidden sm:inline">{" • "}</span>
+                                <span className="break-words">
+                                  {review.sessionDetails.title} — {formatDate(review.sessionDetails.date)} {t("learnerProfile.sessions.at")}{" "}
+                                  {formatTime(review.sessionDetails.time)}
+                                </span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {/* Desktop View - Table */}
+                    <div className="hidden md:block">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="text-xs sm:text-sm">Rating</TableHead>
+                            <TableHead className="text-xs sm:text-sm">Comment</TableHead>
+                            <TableHead className="text-xs sm:text-sm">To</TableHead>
+                            <TableHead className="text-xs sm:text-sm">Session</TableHead>
+                            <TableHead className="text-xs sm:text-sm">Date & Time</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {reviews.map((review) => (
+                            <TableRow key={review._id}>
+                              <TableCell>
+                                <div className="flex items-center gap-0.5 text-amber-500">
+                                  {Array.from({ length: 5 }).map((_, index) => (
+                                    <Star
+                                      key={index}
+                                      className={`h-3 w-3 sm:h-3.5 sm:w-3.5 ${index < review.rating ? "fill-amber-400" : "text-muted-foreground"}`}
+                                    />
+                                  ))}
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-xs sm:text-sm max-w-md">
+                                <p className="line-clamp-2">{review.comment || t("learnerProfile.reviews.noComment")}</p>
+                              </TableCell>
+                              <TableCell className="text-xs sm:text-sm">
+                                {typeof review.to === "object"
+                                  ? `${(review.to as any).firstname} ${(review.to as any).lastname}`
+                                  : review.to}
+                              </TableCell>
+                              <TableCell className="text-xs sm:text-sm">
+                                {review.sessionDetails ? review.sessionDetails.title : "-"}
+                              </TableCell>
+                              <TableCell className="text-xs sm:text-sm">
+                                {review.sessionDetails
+                                  ? `${formatDate(review.sessionDetails.date)} ${t("learnerProfile.sessions.at")} ${formatTime(review.sessionDetails.time)}`
+                                  : "-"}
+                              </TableCell>
+                            </TableRow>
                           ))}
-                        </div>
-                        <p className="mt-2 text-xs text-foreground sm:mt-2.5 sm:text-sm md:mt-3">{review.comment || t("learnerProfile.reviews.noComment")}</p>
-                        <div className="mt-1.5 flex flex-col gap-0.5 text-[10px] text-muted-foreground sm:mt-2 sm:flex-row sm:gap-1 sm:text-xs">
-                          <span>
-                            {typeof review.to === "object"
-                              ? `${(review.to as any).firstname} ${(review.to as any).lastname}`
-                              : review.to}
-                          </span>
-                          {review.sessionDetails && (
-                            <>
-                              <span className="hidden sm:inline">{" • "}</span>
-                              <span className="break-words">
-                                {review.sessionDetails.title} — {formatDate(review.sessionDetails.date)} {t("learnerProfile.sessions.at")}{" "}
-                                {formatTime(review.sessionDetails.time)}
-                              </span>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </>
                 ) : (
                   <div className="rounded-lg border border-dashed border-border bg-muted/20 py-8 text-center text-xs text-muted-foreground sm:py-10 sm:text-sm md:py-12">
                     {t("learnerProfile.reviews.empty")}

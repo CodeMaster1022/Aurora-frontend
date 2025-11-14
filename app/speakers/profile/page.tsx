@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { 
   Calendar, 
   Clock, 
@@ -67,10 +68,11 @@ export default function SpeakerDashboardPage() {
   const [isUploading, setIsUploading] = useState(false)
   const [isSavingAvailability, setIsSavingAvailability] = useState(false)
   const [isAvailabilityOpen, setIsAvailabilityOpen] = useState(false) // Default closed
-  const [isUpcomingSessionsOpen, setIsUpcomingSessionsOpen] = useState(true) // Default open
+  const [isUpcomingSessionsOpen, setIsUpcomingSessionsOpen] = useState(false) // Default closed
   const [isPastSessionsOpen, setIsPastSessionsOpen] = useState(true) // Default open
   const [isCalendarOpen, setIsCalendarOpen] = useState(false) // Default closed
   const [isReviewsReceivedOpen, setIsReviewsReceivedOpen] = useState(false) // Default closed
+  const [isReviewsGivenOpen, setIsReviewsGivenOpen] = useState(false) // Default closed
   const editProfileSnapshotRef = useRef<{
     bio: string
     age: string
@@ -336,20 +338,26 @@ export default function SpeakerDashboardPage() {
       
       if (response.success && response.data) {
         const { upcomingSessions, pastSessions, reviews, profile } = response.data
-        console.log(reviews, "======================>>>>")
         // Update sessions
         setUpcomingSessions(upcomingSessions || [])
         setPastSessions((pastSessions as Session[]) || [])
         
-        // Process reviews to add type field based on current user
-        const processedReviews: ReviewWithType[] = (reviews || []).map((review: Review) => ({
-          ...review,
-          type: typeof review.to === 'object' && review.to._id === user?._id 
-            ? 'received' as const 
-            : typeof review.from === 'object' && review.from._id === user?._id
-            ? 'given' as const
-            : 'received' as const
-        }))
+        // Use the type field from backend (already set correctly)
+        // Backend sets: type: 'received' for reviews where to: userId, type: 'given' for reviews where from: userId
+        const processedReviews: ReviewWithType[] = (reviews || []).map((review: any) => {
+          // Trust the backend type field, but add fallback logic if missing
+          let reviewType: 'received' | 'given' = review.type;
+          if (!reviewType) {
+            // Fallback: determine type based on user ID comparison
+            const toId = typeof review.to === 'object' ? review.to._id : review.to;
+            const fromId = typeof review.from === 'object' ? review.from._id : review.from;
+            reviewType = toId === user?._id ? 'received' : fromId === user?._id ? 'given' : 'received';
+          }
+          return {
+            ...review,
+            type: reviewType
+          };
+        })
         setReviews(processedReviews)
         
         // Update profile data
@@ -505,33 +513,40 @@ export default function SpeakerDashboardPage() {
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
+      weekday: 'short',
+      month: 'short',
       day: 'numeric'
     })
   }
 
-  // Check if a session has been reviewed by this speaker
-  const hasBeenReviewed = (sessionId: string) => {
-    return givenReviews.some(review => review.session === sessionId)
+  const formatTime = (time: string) => {
+    const [hours, minutes] = time.split(":")
+    return new Date(`1970-01-01T${hours.padStart(2, "0")}:${minutes}:00`).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    })
   }
 
-  // Determine if the current speaker has already submitted a review for the session
+  // Check if the speaker has given a review for this session (to a learner)
+  const hasBeenReviewed = (sessionId: string) => {
+    return givenReviews.some(review => {
+      const reviewSessionId = typeof review.session === 'string' 
+        ? review.session 
+        : (review.session as any)?._id || (review.session as any)?.id
+      return reviewSessionId === sessionId || reviewSessionId?.toString() === sessionId?.toString()
+    })
+  }
+
+  // Check if the speaker has received a review for this session (from a learner)
+  // This checks if any learner has given a review TO the speaker for this session
   const hasReceivedReviews = (sessionId: string) => {
     if (!user?._id) return false
-    console.log(reviews, 'reviews')
-    return reviews.some(review => {
-      if (review.session !== sessionId) {
-        return false
-      }
-
-      const reviewerId =
-        typeof review.from === "string"
-          ? review.from
-          : review.from?._id
-
-      return reviewerId === user._id
+    return receivedReviews.some(review => {
+      // Check if this review is for the given session
+      const reviewSessionId = typeof review.session === 'string' 
+        ? review.session 
+        : (review.session as any)?._id || (review.session as any)?.id
+      return reviewSessionId === sessionId || reviewSessionId?.toString() === sessionId?.toString()
     })
   }
 
@@ -1080,7 +1095,7 @@ export default function SpeakerDashboardPage() {
               </CardHeader>
               <CollapsibleContent className="data-[state=closed]:hidden">
                 <CardContent className="space-y-2 p-3 sm:space-y-3 sm:p-4 md:p-6">
-                  <div className="grid gap-2 sm:gap-3 sm:grid-cols-2">
+                  <div className="grid gap-2 sm:gap-3 sm:grid-cols-1">
                 {availability.map((day, index) => {
                   const dayData = daysOfWeek.find((d) => d.key === day.day)
                   const dayLabel = dayData ? t(dayData.translationKey as any) : day.day
@@ -1137,7 +1152,7 @@ export default function SpeakerDashboardPage() {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 gap-3 sm:gap-4 md:gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:gap-4 md:gap-6 lg:grid-cols-1">
           <Card className="shadow-sm">
             <Collapsible open={isUpcomingSessionsOpen} onOpenChange={setIsUpcomingSessionsOpen} defaultOpen={true}>
               <CardHeader className="p-3 sm:p-4 md:p-6">
@@ -1161,75 +1176,135 @@ export default function SpeakerDashboardPage() {
               <CollapsibleContent className="data-[state=closed]:hidden">
                 <div className="px-3 sm:px-4 md:px-6 pb-3 sm:pb-4 md:pb-6">
                   {upcomingSessions.length > 0 ? (
-                    <div className="space-y-2 sm:space-y-3 md:space-y-4">
-                      {upcomingSessions.map((session) => (
-                        <div
-                          key={session._id}
-                          className="rounded-lg border border-border bg-muted/40 p-2 transition-colors hover:bg-muted sm:p-3 md:px-4"
-                        >
-                          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
-                            <div className="space-y-1.5 sm:space-y-2 w-full">
-                              <div className="flex items-center justify-between w-full">
-                                <h3 className="text-sm font-semibold sm:text-base">{session.title}</h3>
-                                <div className="flex items-center gap-2">
-                                <Badge variant="outline" className="text-xs uppercase">
-                                  {session.status}
-                                </Badge>
-                                <Button
-                                  variant="destructive"
-                                  size="icon"
-                                  className="h-9 w-9 cursor-pointer"
-                                  onClick={() => handleCancelSession(session)}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
+                    <>
+                      {/* Mobile/Tablet View - Cards */}
+                      <div className="space-y-2 sm:space-y-3 md:hidden">
+                        {upcomingSessions.map((session) => (
+                          <div
+                            key={session._id}
+                            className="rounded-lg border border-border bg-muted/40 p-2 transition-colors hover:bg-muted sm:p-3"
+                          >
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
+                              <div className="space-y-1.5 sm:space-y-2 w-full">
+                                <div className="flex items-center justify-between w-full">
+                                  <h3 className="text-sm font-semibold sm:text-base">{session.title}</h3>
+                                  <div className="flex items-center gap-2">
+                                    <Badge variant="outline" className="text-xs uppercase">
+                                      {session.status}
+                                    </Badge>
+                                    <Button
+                                      variant="destructive"
+                                      size="icon"
+                                      className="h-9 w-9 cursor-pointer"
+                                      onClick={() => handleCancelSession(session)}
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </div>
                                 </div>
-                            </div>
-                              
-                              <p className="text-xs text-muted-foreground sm:text-sm">
-                                {t('dashboard.sessions.with')}{" "}
-                                <span className="font-medium text-foreground">
-                                  {typeof session.learner === 'object'
-                                    ? `${session.learner.firstname} ${session.learner.lastname}`
-                                    : session.learner}
-                                </span>
-                              </p>
-                              {(session as any).topics?.length > 0 && (
-                                <p className="text-[10px] text-muted-foreground sm:text-xs">
-                                  {t('dashboard.sessions.topics')} {(session as any).topics.join(', ')}
+                                <p className="text-xs text-muted-foreground sm:text-sm">
+                                  {t('dashboard.sessions.with')}{" "}
+                                  <span className="font-medium text-foreground">
+                                    {typeof session.learner === 'object'
+                                      ? `${session.learner.firstname} ${session.learner.lastname}`
+                                      : session.learner}
+                                  </span>
                                 </p>
-                              )}
-                              {(session as any).icebreaker && (
-                                <div className="rounded-md border border-amber-400/40 bg-amber-400/10 p-2 text-[10px] text-amber-600 dark:text-amber-200 sm:p-3 sm:text-xs">
-                                  <p className="font-semibold uppercase tracking-wide">{t('dashboard.sessions.icebreaker')}</p>
-                                  <p className="mt-0.5 leading-relaxed sm:mt-1">{(session as any).icebreaker}</p>
+                                {(session as any).topics?.length > 0 && (
+                                  <p className="text-[10px] text-muted-foreground sm:text-xs">
+                                    {t('dashboard.sessions.topics')} {(session as any).topics.join(', ')}
+                                  </p>
+                                )}
+                                {(session as any).icebreaker && (
+                                  <div className="rounded-md border border-amber-400/40 bg-amber-400/10 p-2 text-[10px] text-amber-600 dark:text-amber-200 sm:p-3 sm:text-xs">
+                                    <p className="font-semibold uppercase tracking-wide">{t('dashboard.sessions.icebreaker')}</p>
+                                    <p className="mt-0.5 leading-relaxed sm:mt-1">{(session as any).icebreaker}</p>
+                                  </div>
+                                )}
+                                {(session as any).meetingLink && (
+                                  <a
+                                    href={(session as any).meetingLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-sm font-medium text-primary hover:underline"
+                                  >
+                                    Join Meeting →
+                                  </a>
+                                )}
+                                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground sm:gap-3 sm:text-sm">
+                                  <span className="inline-flex items-center gap-1 sm:gap-2">
+                                    <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
+                                    {formatDate(session.date)}
+                                  </span>
+                                  <span className="inline-flex items-center gap-1 sm:gap-2">
+                                    <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
+                                    {session.time} ({session.duration} min)
+                                  </span>
                                 </div>
-                              )}
-                              {(session as any).meetingLink && (
-                                <a
-                                  href={(session as any).meetingLink}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-sm font-medium text-primary hover:underline"
-                                >
-                                  Join Meeting →
-                                </a>
-                              )}
-                              <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground sm:gap-3 sm:text-sm">
-                                <span className="inline-flex items-center gap-1 sm:gap-2">
-                                  <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
-                                  {formatDate(session.date)}
-                                </span>
-                                <span className="inline-flex items-center gap-1 sm:gap-2">
-                                  <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
-                                  {session.time} ({session.duration} min)
-                                </span>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                      {/* Desktop View - Table */}
+                      <div className="hidden md:block">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="text-xs sm:text-sm">Title</TableHead>
+                              <TableHead className="text-xs sm:text-sm">Learner</TableHead>
+                              <TableHead className="text-xs sm:text-sm">Date</TableHead>
+                              <TableHead className="text-xs sm:text-sm">Time</TableHead>
+                              <TableHead className="text-xs sm:text-sm">Duration</TableHead>
+                              <TableHead className="text-xs sm:text-sm">Status</TableHead>
+                              <TableHead className="text-xs sm:text-sm">Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {upcomingSessions.map((session) => (
+                              <TableRow key={session._id}>
+                                <TableCell className="font-medium text-xs sm:text-sm">{session.title}</TableCell>
+                                <TableCell className="text-xs sm:text-sm">
+                                  {typeof session.learner === 'object'
+                                    ? `${session.learner.firstname} ${session.learner.lastname}`
+                                    : session.learner}
+                                </TableCell>
+                                <TableCell className="text-xs sm:text-sm">{formatDate(session.date)}</TableCell>
+                                <TableCell className="text-xs sm:text-sm">{formatTime(session.time)}</TableCell>
+                                <TableCell className="text-xs sm:text-sm">{session.duration} min</TableCell>
+                                <TableCell>
+                                  <Badge variant="outline" className="text-[10px] uppercase sm:text-xs">
+                                    {session.status}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex items-center gap-2">
+                                    {(session as any).meetingLink && (
+                                      <a
+                                        href={(session as any).meetingLink}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-xs font-medium text-primary hover:underline sm:text-sm"
+                                      >
+                                        Join
+                                      </a>
+                                    )}
+                                    <Button
+                                      variant="destructive"
+                                      size="sm"
+                                      className="h-7 cursor-pointer px-2 text-xs sm:h-8 sm:px-3 sm:text-sm"
+                                      onClick={() => handleCancelSession(session)}
+                                    >
+                                      <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </>
                   ) : (
                     <div className="rounded-lg border border-dashed border-border bg-muted/30 py-12 text-center text-sm text-muted-foreground">
                       {t('dashboard.sessions.upcoming.none')}
@@ -1263,61 +1338,117 @@ export default function SpeakerDashboardPage() {
               <CollapsibleContent className="data-[state=closed]:hidden">
                 <div className="px-3 sm:px-4 md:px-6 pb-3 sm:pb-4 md:pb-6">
                   {pastSessions.length > 0 ? (
-                    <div className="space-y-2 sm:space-y-3 md:space-y-4">
-                      {pastSessions.map((session) => (
-                        <div
-                          key={session._id}
-                          className="rounded-lg border border-border bg-muted/40 p-2 transition-colors hover:bg-muted sm:p-3 md:p-4"
-                        >
-                          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3 w-full">
-                            <div className="space-y-1.5 sm:space-y-2">
-                              <h3 className="text-sm font-semibold sm:text-base">{session.title}</h3>
-                              <p className="text-xs text-muted-foreground sm:text-sm">
-                                {t('dashboard.sessions.with')}{" "}
-                                <span className="font-medium text-foreground">
+                    <>
+                      {/* Mobile/Tablet View - Cards */}
+                      <div className="space-y-2 sm:space-y-3 md:hidden">
+                        {pastSessions.map((session) => (
+                          <div
+                            key={session._id}
+                            className="rounded-lg border border-border bg-muted/40 p-2 transition-colors hover:bg-muted sm:p-3"
+                          >
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3 w-full">
+                              <div className="space-y-1.5 sm:space-y-2">
+                                <h3 className="text-sm font-semibold sm:text-base">{session.title}</h3>
+                                <p className="text-xs text-muted-foreground sm:text-sm">
+                                  {t('dashboard.sessions.with')}{" "}
+                                  <span className="font-medium text-foreground">
+                                    {typeof session.learner === 'object'
+                                      ? `${session.learner.firstname} ${session.learner.lastname}`
+                                      : session.learner}
+                                  </span>
+                                </p>
+                                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground sm:gap-3 sm:text-sm">
+                                  <span className="inline-flex items-center gap-1 sm:gap-2">
+                                    <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
+                                    {formatDate(session.date)}
+                                  </span>
+                                  <span className="inline-flex items-center gap-1 sm:gap-2">
+                                    <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
+                                    {session.time}
+                                  </span>
+                                </div>
+                                {(session as any).cancellationReason && (
+                                  <p className="text-xs text-destructive">
+                                    {t('dashboard.sessions.reason')} {(session as any).cancellationReason}
+                                  </p>
+                                )}
+                              </div>
+                              <div className="flex flex-col items-end gap-2">
+                                <Badge
+                                  variant="outline"
+                                  className={`text-xs uppercase ${
+                                    session.status === 'cancelled'
+                                      ? 'border-destructive text-destructive'
+                                      : 'border-emerald-500 text-emerald-600 dark:text-emerald-300'
+                                  }`}
+                                >
+                                  {session.status}
+                                </Badge>
+                                {session.status === 'completed' && !hasReceivedReviews(session._id) && (
+                                  <Button size="sm" className="cursor-pointer" onClick={() => handleRateSession(session)}>
+                                    <Star className="mr-2 h-4 w-4" />
+                                    {t('dashboard.sessions.rate')}
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      {/* Desktop View - Table */}
+                      <div className="hidden md:block">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="text-xs sm:text-sm">Title</TableHead>
+                              <TableHead className="text-xs sm:text-sm">Learner</TableHead>
+                              <TableHead className="text-xs sm:text-sm">Date</TableHead>
+                              <TableHead className="text-xs sm:text-sm">Time</TableHead>
+                              <TableHead className="text-xs sm:text-sm">Status</TableHead>
+                              <TableHead className="text-xs sm:text-sm">Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {pastSessions.map((session) => (
+                              <TableRow key={session._id}>
+                                <TableCell className="font-medium text-xs sm:text-sm">{session.title}</TableCell>
+                                <TableCell className="text-xs sm:text-sm">
                                   {typeof session.learner === 'object'
                                     ? `${session.learner.firstname} ${session.learner.lastname}`
                                     : session.learner}
-                                </span>
-                              </p>
-                              <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground sm:gap-3 sm:text-sm">
-                                <span className="inline-flex items-center gap-1 sm:gap-2">
-                                  <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
-                                  {formatDate(session.date)}
-                                </span>
-                                <span className="inline-flex items-center gap-1 sm:gap-2">
-                                  <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
-                                  {session.time}
-                                </span>
-                              </div>
-                              {(session as any).cancellationReason && (
-                                <p className="text-xs text-destructive">
-                                  {t('dashboard.sessions.reason')} {(session as any).cancellationReason}
-                                </p>
-                              )}
-                            </div>
-                            <div className="flex flex-col items-end gap-2">
-                              <Badge
-                                variant="outline"
-                                className={`text-xs uppercase ${
-                                  session.status === 'cancelled'
-                                    ? 'border-destructive text-destructive'
-                                    : 'border-emerald-500 text-emerald-600 dark:text-emerald-300'
-                                }`}
-                              >
-                                {session.status}
-                              </Badge>
-                              {session.status === 'completed' && !hasReceivedReviews(session._id) && (
-                                <Button size="sm" className="cursor-pointer" onClick={() => handleRateSession(session)}>
-                                  <Star className="mr-2 h-4 w-4" />
-                                  {t('dashboard.sessions.rate')}
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                                </TableCell>
+                                <TableCell className="text-xs sm:text-sm">{formatDate(session.date)}</TableCell>
+                                <TableCell className="text-xs sm:text-sm">{formatTime(session.time)}</TableCell>
+                                <TableCell>
+                                  <Badge
+                                    variant="outline"
+                                    className={`text-[10px] uppercase sm:text-xs ${
+                                      session.status === 'cancelled'
+                                        ? 'border-destructive text-destructive'
+                                        : 'border-emerald-500 text-emerald-600 dark:text-emerald-300'
+                                    }`}
+                                  >
+                                    {session.status}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>
+                                  {session.status === 'completed' && !hasReceivedReviews(session._id) ? (
+                                    <Button size="sm" className="cursor-pointer" onClick={() => handleRateSession(session)}>
+                                      <Star className="mr-1 h-3 w-3 sm:mr-2 sm:h-4 sm:w-4" />
+                                      {t('dashboard.sessions.rate')}
+                                    </Button>
+                                  ) : (
+                                    <Badge variant="outline" className="text-[10px] uppercase sm:text-xs">
+                                      Feedback Given
+                                    </Badge>
+                                  )}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </>
                   ) : (
                     <div className="rounded-lg border border-dashed border-border bg-muted/30 py-12 text-center text-sm text-muted-foreground">
                       {t('dashboard.sessions.past.none')}
@@ -1329,7 +1460,7 @@ export default function SpeakerDashboardPage() {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 gap-3 sm:gap-4 md:gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:gap-4 md:gap-6 lg:grid-cols-1">
           <Card className="shadow-sm">
             <Collapsible open={isReviewsReceivedOpen} onOpenChange={setIsReviewsReceivedOpen} defaultOpen={false}>
               <CardHeader className="p-3 sm:p-4 md:p-6">
@@ -1353,29 +1484,110 @@ export default function SpeakerDashboardPage() {
               <CollapsibleContent className="data-[state=closed]:hidden">
                 <CardContent className="p-3 sm:p-4 md:p-6">
                   {receivedReviews.length > 0 ? (
-                    <div className="space-y-2 sm:space-y-3 md:space-y-4">
-                      {receivedReviews.map((review) => (
-                        <div key={review._id} className="rounded-lg border border-border bg-muted/40 p-2 sm:p-3 md:p-4">
-                          <div className="flex items-center gap-0.5 sm:gap-1">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`h-3 w-3 sm:h-4 sm:w-4 ${
-                                  i < review.rating ? 'fill-yellow-400 text-yellow-500' : 'text-muted-foreground'
-                                }`}
-                              />
-                            ))}
+                    <>
+                      {/* Mobile/Tablet View - Cards */}
+                      <div className="space-y-2 sm:space-y-3 md:hidden">
+                        {receivedReviews.map((review) => (
+                          <div key={review._id} className="rounded-lg border border-border bg-muted/40 p-2 sm:p-3">
+                            <div className="flex items-center gap-0.5 sm:gap-1">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`h-3 w-3 sm:h-4 sm:w-4 ${
+                                    i < review.rating ? 'fill-yellow-400 text-yellow-500' : 'text-muted-foreground'
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                            <p className="mt-2 text-xs text-foreground sm:mt-3 sm:text-sm">{review.comment}</p>
+                            <div className="mt-1.5 flex items-center gap-2 text-[10px] text-muted-foreground sm:mt-2 sm:text-xs">
+                              {typeof review.from === 'object' && (review.from as any).avatar ? (
+                                <div className="relative h-5 w-5 shrink-0 overflow-hidden rounded-full bg-muted sm:h-6 sm:w-6">
+                                  <Image
+                                    src={(review.from as any).avatar}
+                                    alt={`${review.from.firstname} ${review.from.lastname}`}
+                                    fill
+                                    className="object-cover"
+                                    sizes="24px"
+                                  />
+                                </div>
+                              ) : (
+                                <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-muted sm:h-6 sm:w-6">
+                                  <User className="h-3 w-3 text-muted-foreground sm:h-3.5 sm:w-3.5" />
+                                </div>
+                              )}
+                              <span>
+                                {t('dashboard.reviews.received.from')}{" "}
+                                {typeof review.from === 'object'
+                                  ? `${review.from.firstname} ${review.from.lastname}`
+                                  : review.from} • {new Date(review.createdAt).toLocaleDateString()}
+                              </span>
+                            </div>
                           </div>
-                          <p className="mt-2 text-xs text-foreground sm:mt-3 sm:text-sm">{review.comment}</p>
-                          <p className="mt-1.5 text-[10px] text-muted-foreground sm:mt-2 sm:text-xs">
-                            {t('dashboard.reviews.received.from')}{" "}
-                            {typeof review.from === 'object'
-                              ? `${review.from.firstname} ${review.from.lastname}`
-                              : review.from} • {new Date(review.createdAt).toLocaleDateString()}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                      {/* Desktop View - Table */}
+                      <div className="hidden md:block">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="text-xs sm:text-sm">Rating</TableHead>
+                              <TableHead className="text-xs sm:text-sm">Comment</TableHead>
+                              <TableHead className="text-xs sm:text-sm">From</TableHead>
+                              <TableHead className="text-xs sm:text-sm">Date</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {receivedReviews.map((review) => (
+                              <TableRow key={review._id}>
+                                <TableCell>
+                                  <div className="flex items-center gap-0.5 text-amber-500">
+                                    {[...Array(5)].map((_, i) => (
+                                      <Star
+                                        key={i}
+                                        className={`h-3 w-3 sm:h-3.5 sm:w-3.5 ${
+                                          i < review.rating ? 'fill-amber-400' : 'text-muted-foreground'
+                                        }`}
+                                      />
+                                    ))}
+                                  </div>
+                                </TableCell>
+                                <TableCell className="text-xs sm:text-sm max-w-md">
+                                  <p className="line-clamp-2">{review.comment}</p>
+                                </TableCell>
+                                <TableCell className="text-xs sm:text-sm">
+                                  <div className="flex items-center gap-2">
+                                    {typeof review.from === 'object' && (review.from as any).avatar ? (
+                                      <div className="relative h-6 w-6 shrink-0 overflow-hidden rounded-full bg-muted sm:h-7 sm:w-7">
+                                        <Image
+                                          src={(review.from as any).avatar}
+                                          alt={`${review.from.firstname} ${review.from.lastname}`}
+                                          fill
+                                          className="object-cover"
+                                          sizes="28px"
+                                        />
+                                      </div>
+                                    ) : (
+                                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted sm:h-7 sm:w-7">
+                                        <User className="h-3.5 w-3.5 text-muted-foreground sm:h-4 sm:w-4" />
+                                      </div>
+                                    )}
+                                    <span>
+                                      {typeof review.from === 'object'
+                                        ? `${review.from.firstname} ${review.from.lastname}`
+                                        : review.from}
+                                    </span>
+                                  </div>
+                                </TableCell>
+                                <TableCell className="text-xs sm:text-sm">
+                                  {new Date(review.createdAt).toLocaleDateString()}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </>
                   ) : (
                     <div className="rounded-lg border border-dashed border-border bg-muted/30 py-8 text-center text-xs text-muted-foreground sm:py-12 sm:text-sm">
                       {t('dashboard.reviews.received.none')}
@@ -1386,48 +1598,106 @@ export default function SpeakerDashboardPage() {
             </Collapsible>
           </Card>
 
-          <Card className="shadow-sm">
-            <CardHeader className="p-3 sm:p-4 md:p-6">
-              <CardTitle className="flex items-center gap-1.5 text-sm font-semibold sm:gap-2 sm:text-base md:text-lg">
-                <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5" />
-                {t('dashboard.reviews.given.title')}
-              </CardTitle>
-              <CardDescription className="text-xs sm:text-sm">
-                {givenReviews.length} {t('dashboard.reviews.given.count')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-3 sm:p-4 md:p-6">
-              {givenReviews.length > 0 ? (
-                <div className="space-y-2 sm:space-y-3 md:space-y-4">
-                  {givenReviews.map((review) => (
-                    <div key={review._id} className="rounded-lg border border-border bg-muted/40 p-2 sm:p-3 md:p-4">
-                      <div className="flex items-center gap-0.5 sm:gap-1">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`h-3 w-3 sm:h-4 sm:w-4 ${
-                              i < review.rating ? 'fill-yellow-400 text-yellow-500' : 'text-muted-foreground'
-                            }`}
-                          />
+          <Collapsible open={isReviewsGivenOpen} onOpenChange={setIsReviewsGivenOpen} defaultOpen={false}>
+            <Card className="shadow-sm">
+              <CardHeader className="p-3 sm:p-4 md:p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-1.5 text-sm font-semibold sm:gap-2 sm:text-base md:text-lg">
+                      <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5" />
+                      {t('dashboard.reviews.given.title')}
+                    </CardTitle>
+                    <CardDescription className="text-xs sm:text-sm">
+                      {givenReviews.length} {t('dashboard.reviews.given.count')}
+                    </CardDescription>
+                  </div>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isReviewsGivenOpen ? 'rotate-180' : ''}`} />
+                    </Button>
+                  </CollapsibleTrigger>
+                </div>
+              </CardHeader>
+              <CollapsibleContent className="data-[state=closed]:hidden">
+                <CardContent className="p-3 sm:p-4 md:p-6">
+                  {givenReviews.length > 0 ? (
+                    <>
+                      {/* Mobile/Tablet View - Cards */}
+                      <div className="space-y-2 sm:space-y-3 md:hidden">
+                        {givenReviews.map((review) => (
+                          <div key={review._id} className="rounded-lg border border-border bg-muted/40 p-2 sm:p-3">
+                            <div className="flex items-center gap-0.5 sm:gap-1">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`h-3 w-3 sm:h-4 sm:w-4 ${
+                                    i < review.rating ? 'fill-yellow-400 text-yellow-500' : 'text-muted-foreground'
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                            <p className="mt-2 text-xs text-foreground sm:mt-3 sm:text-sm">{review.comment}</p>
+                            <p className="mt-1.5 text-[10px] text-muted-foreground sm:mt-2 sm:text-xs">
+                              {t('dashboard.reviews.given.for')}{" "}
+                              {typeof review.to === 'object'
+                                ? `${review.to.firstname} ${review.to.lastname}`
+                                : review.to} • {new Date(review.createdAt).toLocaleDateString()}
+                            </p>
+                          </div>
                         ))}
                       </div>
-                      <p className="mt-2 text-xs text-foreground sm:mt-3 sm:text-sm">{review.comment}</p>
-                      <p className="mt-1.5 text-[10px] text-muted-foreground sm:mt-2 sm:text-xs">
-                        {t('dashboard.reviews.given.for')}{" "}
-                        {typeof review.to === 'object'
-                          ? `${review.to.firstname} ${review.to.lastname}`
-                          : review.to} • {new Date(review.createdAt).toLocaleDateString()}
-                      </p>
+                      {/* Desktop View - Table */}
+                      <div className="hidden md:block">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="text-xs sm:text-sm">Rating</TableHead>
+                              <TableHead className="text-xs sm:text-sm">Comment</TableHead>
+                              <TableHead className="text-xs sm:text-sm">To</TableHead>
+                              <TableHead className="text-xs sm:text-sm">Date</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {givenReviews.map((review) => (
+                              <TableRow key={review._id}>
+                                <TableCell>
+                                  <div className="flex items-center gap-0.5 text-amber-500">
+                                    {[...Array(5)].map((_, i) => (
+                                      <Star
+                                        key={i}
+                                        className={`h-3 w-3 sm:h-3.5 sm:w-3.5 ${
+                                          i < review.rating ? 'fill-amber-400' : 'text-muted-foreground'
+                                        }`}
+                                      />
+                                    ))}
+                                  </div>
+                                </TableCell>
+                                <TableCell className="text-xs sm:text-sm max-w-md">
+                                  <p className="line-clamp-2">{review.comment}</p>
+                                </TableCell>
+                                <TableCell className="text-xs sm:text-sm">
+                                  {typeof review.to === 'object'
+                                    ? `${review.to.firstname} ${review.to.lastname}`
+                                    : review.to}
+                                </TableCell>
+                                <TableCell className="text-xs sm:text-sm">
+                                  {new Date(review.createdAt).toLocaleDateString()}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="rounded-lg border border-dashed border-border bg-muted/30 py-8 text-center text-xs text-muted-foreground sm:py-12 sm:text-sm">
+                      {t('dashboard.reviews.received.none')}
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="rounded-lg border border-dashed border-border bg-muted/30 py-8 text-center text-xs text-muted-foreground sm:py-12 sm:text-sm">
-                  {t('dashboard.reviews.received.none')}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                  )}
+                </CardContent>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
         </div>
       </div>
 
