@@ -123,6 +123,7 @@ class SpeakerService {
     age?: number;
     cost?: number;
     location?: string;
+    timezone?: string;
     availability?: SpeakerAvailability[];
   }): Promise<{
     success: boolean;

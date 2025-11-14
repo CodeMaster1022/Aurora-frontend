@@ -304,41 +304,41 @@ export default function LearnerProfilePage() {
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Loader2 className="h-6 w-6 animate-spin text-primary sm:h-8 sm:w-8" />
       </div>
     )
   }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 pb-16 pt-8 sm:px-6 lg:px-8">
-        <header className="flex flex-col gap-2">
-          <h1 className="text-3xl font-semibold sm:text-4xl">{t("learnerProfile.title")}</h1>
-          <p className="text-muted-foreground">{t("learnerProfile.subtitle")}</p>
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-3 pb-8 pt-4 sm:gap-6 sm:px-4 sm:pb-12 sm:pt-6 md:gap-8 md:px-6 lg:px-8 lg:pb-16 lg:pt-8">
+        <header className="flex flex-col gap-1 sm:gap-2">
+          <h1 className="text-xl font-semibold sm:text-2xl md:text-3xl lg:text-4xl">{t("learnerProfile.title")}</h1>
+          <p className="text-xs text-muted-foreground sm:text-sm">{t("learnerProfile.subtitle")}</p>
         </header>
 
         {error && (
-          <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive sm:px-4 sm:py-3 sm:text-sm">
             {error}
           </div>
         )}
 
         <Card className="shadow-sm">
-          <CardContent className="flex flex-col gap-6 p-6">
-            <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-              <div className="flex items-start gap-4 sm:gap-6">
-                <div className="relative h-20 w-20 overflow-hidden rounded-full bg-muted sm:h-24 sm:w-24">
+          <CardContent className="flex flex-col gap-3 p-3 sm:gap-4 sm:p-4 md:gap-6 md:p-6">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-6">
+              <div className="flex items-start gap-3 sm:gap-4 md:gap-6">
+                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-muted sm:h-16 sm:w-16 md:h-20 md:w-20 lg:h-24 lg:w-24">
                   {avatarPreview ? (
                     <Image src={avatarPreview} alt={t("learnerProfile.avatarAlt")} fill className="object-cover" sizes="96px" />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center">
-                      <User className="h-10 w-10 text-muted-foreground" />
+                      <User className="h-6 w-6 text-muted-foreground sm:h-7 sm:w-7 md:h-8 md:w-8 lg:h-10 lg:w-10" />
                     </div>
                   )}
                   {isEditingProfile && (
-                    <label className="absolute bottom-2 right-2 inline-flex cursor-pointer items-center rounded-full bg-primary px-2 py-1 text-xs font-medium text-primary-foreground shadow-sm hover:bg-primary/90">
-                      <Camera className="mr-1 h-3.5 w-3.5" />
-                      {t("learnerProfile.buttons.upload")}
+                    <label className="absolute bottom-0 right-0 inline-flex cursor-pointer items-center rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-medium text-primary-foreground shadow-sm hover:bg-primary/90 sm:bottom-1 sm:right-1 sm:px-2 sm:py-1 sm:text-xs">
+                      <Camera className="mr-0.5 h-2.5 w-2.5 sm:mr-1 sm:h-3 sm:w-3" />
+                      <span className="hidden sm:inline">{t("learnerProfile.buttons.upload")}</span>
                       <input
                         type="file"
                         accept="image/*"
@@ -349,81 +349,88 @@ export default function LearnerProfilePage() {
                     </label>
                   )}
                 </div>
-                <div className="space-y-2">
+                <div className="min-w-0 flex-1 space-y-1 sm:space-y-2">
                   <div>
-                    <h2 className="text-2xl font-semibold leading-tight">
+                    <h2 className="text-base font-semibold leading-tight sm:text-lg md:text-xl lg:text-2xl">
                       {[firstname, lastname].filter(Boolean).join(" ") || user?.email || t("learnerProfile.fallbackName")}
                     </h2>
-                    <p className="text-sm text-muted-foreground">{user?.email}</p>
+                    <p className="text-xs text-muted-foreground sm:text-sm">{user?.email}</p>
                   </div>
-                  <Badge variant="outline" className="text-xs uppercase">
+                  <Badge variant="outline" className="text-[10px] uppercase sm:text-xs">
                     {t("learnerProfile.roleBadge")}
                   </Badge>
                 </div>
               </div>
-              <div className="flex items-center gap-2 self-end md:self-auto">
+              <div className="flex items-center gap-2 self-start sm:self-end md:self-auto">
                 {isEditingProfile ? (
                   <>
                     <Button
                       variant="outline"
-                      className="cursor-pointer"
+                      size="sm"
+                      className="cursor-pointer text-xs sm:text-sm"
                       onClick={handleCancelEditProfile}
                       disabled={isSavingProfile}
                     >
-                      {t("learnerProfile.buttons.cancel")}
+                      <span className="hidden sm:inline">{t("learnerProfile.buttons.cancel")}</span>
+                      <span className="sm:hidden">{t("learnerProfile.buttons.cancel").split(" ")[0]}</span>
                     </Button>
                     <Button
-                      className="cursor-pointer"
+                      size="sm"
+                      className="cursor-pointer text-xs sm:text-sm"
                       onClick={handleSaveProfile}
                       disabled={isSavingProfile}
                     >
                       {isSavingProfile ? (
                         <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          {t("learnerProfile.buttons.saving")}
+                          <Loader2 className="mr-1 h-3 w-3 animate-spin sm:mr-2 sm:h-4 sm:w-4" />
+                          <span className="hidden sm:inline">{t("learnerProfile.buttons.saving")}</span>
+                          <span className="sm:hidden">...</span>
                         </>
                       ) : (
                         <>
-                          <Save className="mr-2 h-4 w-4" />
-                          {t("learnerProfile.buttons.saveProfile")}
+                          <Save className="mr-1 h-3 w-3 sm:mr-2 sm:h-4 sm:w-4" />
+                          <span className="hidden sm:inline">{t("learnerProfile.buttons.saveProfile")}</span>
+                          <span className="sm:hidden">Save</span>
                         </>
                       )}
                     </Button>
                   </>
                 ) : (
-                  <Button variant="outline" className="cursor-pointer" onClick={handleStartEditProfile}>
-                    <Edit className="mr-2 h-4 w-4" />
-                    {t("learnerProfile.buttons.editProfile")}
+                  <Button variant="outline" size="sm" className="cursor-pointer text-xs sm:text-sm" onClick={handleStartEditProfile}>
+                    <Edit className="mr-1 h-3 w-3 sm:mr-2 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">{t("learnerProfile.buttons.editProfile")}</span>
+                    <span className="sm:hidden">Edit</span>
                   </Button>
                 )}
               </div>
             </div>
 
             {isEditingProfile ? (
-              <div className="grid gap-6 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>{t("learnerProfile.labels.firstName")}</Label>
-                  <Input value={firstname} onChange={(event) => setFirstname(event.target.value)} />
+              <div className="grid gap-3 sm:gap-4 md:grid-cols-2 md:gap-6">
+                <div className="space-y-1.5 sm:space-y-2">
+                  <Label className="text-xs sm:text-sm">{t("learnerProfile.labels.firstName")}</Label>
+                  <Input value={firstname} onChange={(event) => setFirstname(event.target.value)} className="h-8 text-sm sm:h-10 sm:text-base" />
                 </div>
-                <div className="space-y-2">
-                  <Label>{t("learnerProfile.labels.lastName")}</Label>
-                  <Input value={lastname} onChange={(event) => setLastname(event.target.value)} />
+                <div className="space-y-1.5 sm:space-y-2">
+                  <Label className="text-xs sm:text-sm">{t("learnerProfile.labels.lastName")}</Label>
+                  <Input value={lastname} onChange={(event) => setLastname(event.target.value)} className="h-8 text-sm sm:h-10 sm:text-base" />
                 </div>
-                <div className="md:col-span-2 space-y-2">
-                  <Label>{t("learnerProfile.labels.bio")}</Label>
+                <div className="md:col-span-2 space-y-1.5 sm:space-y-2">
+                  <Label className="text-xs sm:text-sm">{t("learnerProfile.labels.bio")}</Label>
                   <Textarea
                     value={bio}
                     onChange={(event) => setBio(event.target.value)}
-                    rows={4}
+                    rows={3}
+                    className="text-sm sm:rows-4 sm:text-base"
                     placeholder={t("learnerProfile.placeholders.bio")}
                   />
                 </div>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-2 sm:space-y-4">
                 <div>
-                  <Label className="text-xs uppercase text-muted-foreground">{t("learnerProfile.labels.about")}</Label>
-                  <p className="mt-2 rounded-lg border border-border bg-muted/40 p-4 text-sm leading-relaxed text-muted-foreground">
+                  <Label className="text-[10px] uppercase text-muted-foreground sm:text-xs">{t("learnerProfile.labels.about")}</Label>
+                  <p className="mt-1.5 rounded-lg border border-border bg-muted/40 p-2 text-xs leading-relaxed text-muted-foreground sm:mt-2 sm:p-3 sm:text-sm md:p-4">
                     {bio || t("learnerProfile.placeholders.noBio")}
                   </p>
                 </div>
@@ -432,100 +439,103 @@ export default function LearnerProfilePage() {
           </CardContent>
         </Card>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-2 sm:gap-3 md:grid-cols-4 md:gap-4">
           <Card className="shadow-sm">
-            <CardContent className="p-5">
-              <p className="text-sm font-medium text-muted-foreground">{t("learnerProfile.stats.total")}</p>
-              <p className="mt-2 text-2xl font-semibold">{totalSessionsCount}</p>
+            <CardContent className="p-3 sm:p-4 md:p-5">
+              <p className="text-[10px] font-medium text-muted-foreground sm:text-xs md:text-sm">{t("learnerProfile.stats.total")}</p>
+              <p className="mt-1 text-lg font-semibold sm:mt-1.5 sm:text-xl md:mt-2 md:text-2xl">{totalSessionsCount}</p>
             </CardContent>
           </Card>
           <Card className="shadow-sm">
-            <CardContent className="p-5">
-              <p className="text-sm font-medium text-muted-foreground">{t("learnerProfile.stats.completed")}</p>
-              <p className="mt-2 text-2xl font-semibold">{completedSessionsCount}</p>
+            <CardContent className="p-3 sm:p-4 md:p-5">
+              <p className="text-[10px] font-medium text-muted-foreground sm:text-xs md:text-sm">{t("learnerProfile.stats.completed")}</p>
+              <p className="mt-1 text-lg font-semibold sm:mt-1.5 sm:text-xl md:mt-2 md:text-2xl">{completedSessionsCount}</p>
             </CardContent>
           </Card>
           <Card className="shadow-sm">
-            <CardContent className="p-5">
-              <p className="text-sm font-medium text-muted-foreground">{t("learnerProfile.stats.upcoming")}</p>
-              <p className="mt-2 text-2xl font-semibold">{upcomingSessionsCount}</p>
+            <CardContent className="p-3 sm:p-4 md:p-5">
+              <p className="text-[10px] font-medium text-muted-foreground sm:text-xs md:text-sm">{t("learnerProfile.stats.upcoming")}</p>
+              <p className="mt-1 text-lg font-semibold sm:mt-1.5 sm:text-xl md:mt-2 md:text-2xl">{upcomingSessionsCount}</p>
             </CardContent>
           </Card>
           <Card className="shadow-sm">
-            <CardContent className="p-5">
-              <p className="text-sm font-medium text-muted-foreground">{t("learnerProfile.stats.completionRate")}</p>
-              <p className="mt-2 text-2xl font-semibold">{completionRate}</p>
+            <CardContent className="p-3 sm:p-4 md:p-5">
+              <p className="text-[10px] font-medium text-muted-foreground sm:text-xs md:text-sm">{t("learnerProfile.stats.completionRate")}</p>
+              <p className="mt-1 text-lg font-semibold sm:mt-1.5 sm:text-xl md:mt-2 md:text-2xl">{completionRate}</p>
             </CardContent>
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:gap-5 md:gap-6 lg:grid-cols-2">
           <Card className="shadow-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg font-semibold">
-                <Calendar className="h-5 w-5" />
+            <CardHeader className="p-3 sm:p-4 md:p-6">
+              <CardTitle className="flex items-center gap-1.5 text-sm font-semibold sm:gap-2 sm:text-base md:text-lg">
+                <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5" />
                 {t("learnerProfile.upcomingSessions.title")}
               </CardTitle>
-              <CardDescription>{t("learnerProfile.upcomingSessions.description")}</CardDescription>
+              <CardDescription className="text-xs sm:text-sm">{t("learnerProfile.upcomingSessions.description")}</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-3 sm:p-4 md:p-6">
               {upcomingSessions.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-2.5 sm:space-y-3 md:space-y-4">
                   {upcomingSessions.map((session) => (
                     <div
                       key={session._id}
-                      className="rounded-lg border border-border bg-muted/30 p-4 transition-colors hover:bg-muted"
+                      className="rounded-lg border border-border bg-muted/30 p-2.5 transition-colors hover:bg-muted sm:p-3 md:p-4"
                     >
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                        <div className="space-y-2">
-                          <h3 className="text-base font-semibold">{session.title}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {`${t("learnerProfile.sessions.with")} ${
-                              typeof session.speaker === "object"
-                                ? `${(session.speaker as any).firstname} ${(session.speaker as any).lastname}`
-                                : session.speaker
-                            }`}
-                          </p>
-                          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                            <span className="inline-flex items-center gap-2">
-                              <Calendar className="h-4 w-4" />
-                              {formatDate(session.date)}
-                            </span>
-                            <span className="inline-flex items-center gap-2">
-                              <Clock className="h-4 w-4" />
-                              {formatTime(session.time)}
-                            </span>
+                      <div className="flex flex-col gap-2 sm:gap-2.5 md:gap-3">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                          <div className="min-w-0 flex-1 space-y-1.5 sm:space-y-2">
+                            <h3 className="text-sm font-semibold leading-tight sm:text-base">{session.title}</h3>
+                            <p className="text-xs text-muted-foreground sm:text-sm">
+                              {`${t("learnerProfile.sessions.with")} ${
+                                typeof session.speaker === "object"
+                                  ? `${(session.speaker as any).firstname} ${(session.speaker as any).lastname}`
+                                  : session.speaker
+                              }`}
+                            </p>
+                            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground sm:gap-3 sm:gap-4 sm:text-sm">
+                              <span className="inline-flex items-center gap-1 sm:gap-1.5">
+                                <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
+                                {formatDate(session.date)}
+                              </span>
+                              <span className="inline-flex items-center gap-1 sm:gap-1.5">
+                                <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
+                                {formatTime(session.time)}
+                              </span>
+                            </div>
+                            {session.meetingLink && (
+                              <a
+                                href={session.meetingLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-block text-xs font-medium text-primary hover:underline sm:text-sm"
+                              >
+                                {t("learnerProfile.buttons.joinMeeting")}
+                              </a>
+                            )}
                           </div>
-                          {session.meetingLink && (
-                            <a
-                              href={session.meetingLink}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-sm font-medium text-primary hover:underline"
+                          <div className="flex items-center gap-1.5 sm:gap-2">
+                            <Badge variant="outline" className="text-[10px] uppercase sm:text-xs">
+                              {session.status}
+                            </Badge>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              className="h-7 cursor-pointer px-2 text-xs sm:h-8 sm:px-3 sm:text-sm"
+                              onClick={() => handleCancelSession(session)}
                             >
-                              {t("learnerProfile.buttons.joinMeeting")}
-                            </a>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="text-xs uppercase">
-                            {session.status}
-                          </Badge>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            className="cursor-pointer"
-                            onClick={() => handleCancelSession(session)}
-                          >
-                            {t("learnerProfile.buttons.cancel")}
-                          </Button>
+                              <span className="hidden sm:inline">{t("learnerProfile.buttons.cancel")}</span>
+                              <span className="sm:hidden">Cancel</span>
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="rounded-lg border border-dashed border-border bg-muted/20 py-12 text-center text-sm text-muted-foreground">
+                <div className="rounded-lg border border-dashed border-border bg-muted/20 py-8 text-center text-xs text-muted-foreground sm:py-10 sm:text-sm md:py-12">
                   {t("learnerProfile.upcomingSessions.empty")}
                 </div>
               )}
@@ -533,71 +543,74 @@ export default function LearnerProfilePage() {
           </Card>
 
           <Card className="shadow-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg font-semibold">
-                <Clock className="h-5 w-5" />
+            <CardHeader className="p-3 sm:p-4 md:p-6">
+              <CardTitle className="flex items-center gap-1.5 text-sm font-semibold sm:gap-2 sm:text-base md:text-lg">
+                <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5" />
                 {t("learnerProfile.pastSessions.title")}
               </CardTitle>
-              <CardDescription>{t("learnerProfile.pastSessions.description")}</CardDescription>
+              <CardDescription className="text-xs sm:text-sm">{t("learnerProfile.pastSessions.description")}</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-3 sm:p-4 md:p-6">
               {pastSessions.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-2.5 sm:space-y-3 md:space-y-4">
                   {pastSessions.map((session) => (
                     <div
                       key={session._id}
-                      className="rounded-lg border border-border bg-muted/30 p-4 transition-colors hover:bg-muted"
+                      className="rounded-lg border border-border bg-muted/30 p-2.5 transition-colors hover:bg-muted sm:p-3 md:p-4"
                     >
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                        <div className="space-y-2">
-                          <h3 className="text-base font-semibold">{session.title}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {`${t("learnerProfile.sessions.with")} ${
-                              typeof session.speaker === "object"
-                                ? `${(session.speaker as any).firstname} ${(session.speaker as any).lastname}`
-                                : session.speaker
-                            }`}
-                          </p>
-                          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                            <span className="inline-flex items-center gap-2">
-                              <Calendar className="h-4 w-4" />
-                              {formatDate(session.date)}
-                            </span>
-                            <span className="inline-flex items-center gap-2">
-                              <Clock className="h-4 w-4" />
-                              {formatTime(session.time)}
-                            </span>
+                      <div className="flex flex-col gap-2 sm:gap-2.5 md:gap-3">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                          <div className="min-w-0 flex-1 space-y-1.5 sm:space-y-2">
+                            <h3 className="text-sm font-semibold leading-tight sm:text-base">{session.title}</h3>
+                            <p className="text-xs text-muted-foreground sm:text-sm">
+                              {`${t("learnerProfile.sessions.with")} ${
+                                typeof session.speaker === "object"
+                                  ? `${(session.speaker as any).firstname} ${(session.speaker as any).lastname}`
+                                  : session.speaker
+                              }`}
+                            </p>
+                            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground sm:gap-3 sm:gap-4 sm:text-sm">
+                              <span className="inline-flex items-center gap-1 sm:gap-1.5">
+                                <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
+                                {formatDate(session.date)}
+                              </span>
+                              <span className="inline-flex items-center gap-1 sm:gap-1.5">
+                                <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
+                                {formatTime(session.time)}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex flex-col items-end gap-2">
-                          <Badge
-                            variant="outline"
-                            className={`text-xs uppercase ${
-                              session.status === "completed"
-                                ? "border-emerald-500 text-emerald-600 dark:text-emerald-300"
-                                : "border-muted-foreground text-muted-foreground"
-                            }`}
-                          >
-                            {session.status}
-                          </Badge>
-                          {session.status === "completed" && !hasReviewedSession(session._id) && (
-                            <Button
-                              size="sm"
+                          <div className="flex flex-col items-start gap-1.5 sm:items-end sm:gap-2">
+                            <Badge
                               variant="outline"
-                              className="cursor-pointer"
-                              onClick={() => handleRateSession(session)}
+                              className={`text-[10px] uppercase sm:text-xs ${
+                                session.status === "completed"
+                                  ? "border-emerald-500 text-emerald-600 dark:text-emerald-300"
+                                  : "border-muted-foreground text-muted-foreground"
+                              }`}
                             >
-                              <Star className="mr-2 h-4 w-4" />
-                              {t("learnerProfile.buttons.rateReview")}
-                            </Button>
-                          )}
+                              {session.status}
+                            </Badge>
+                            {session.status === "completed" && !hasReviewedSession(session._id) && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-7 w-full cursor-pointer px-2 text-xs sm:h-8 sm:w-auto sm:px-3 sm:text-sm"
+                                onClick={() => handleRateSession(session)}
+                              >
+                                <Star className="mr-1 h-3 w-3 sm:mr-1.5 sm:h-3.5 sm:w-3.5 md:mr-2 md:h-4 md:w-4" />
+                                <span className="hidden sm:inline">{t("learnerProfile.buttons.rateReview")}</span>
+                                <span className="sm:hidden">Rate</span>
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="rounded-lg border border-dashed border-border bg-muted/20 py-12 text-center text-sm text-muted-foreground">
+                <div className="rounded-lg border border-dashed border-border bg-muted/20 py-8 text-center text-xs text-muted-foreground sm:py-10 sm:text-sm md:py-12">
                   {t("learnerProfile.pastSessions.empty")}
                 </div>
               )}
@@ -606,46 +619,48 @@ export default function LearnerProfilePage() {
         </div>
 
         <Card className="shadow-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg font-semibold">
-              <MessageSquare className="h-5 w-5" />
+          <CardHeader className="p-3 sm:p-4 md:p-6">
+            <CardTitle className="flex items-center gap-1.5 text-sm font-semibold sm:gap-2 sm:text-base md:text-lg">
+              <MessageSquare className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5" />
               {t("learnerProfile.reviews.title")}
             </CardTitle>
-            <CardDescription>{t("learnerProfile.reviews.description")}</CardDescription>
+            <CardDescription className="text-xs sm:text-sm">{t("learnerProfile.reviews.description")}</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 sm:p-4 md:p-6">
             {reviews.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-2.5 sm:space-y-3 md:space-y-4">
                 {reviews.map((review) => (
-                  <div key={review._id} className="rounded-lg border border-border bg-muted/30 p-4">
-                    <div className="flex items-center gap-1 text-amber-500">
+                  <div key={review._id} className="rounded-lg border border-border bg-muted/30 p-2.5 sm:p-3 md:p-4">
+                    <div className="flex items-center gap-0.5 text-amber-500 sm:gap-1">
                       {Array.from({ length: 5 }).map((_, index) => (
                         <Star
                           key={index}
-                          className={`h-4 w-4 ${index < review.rating ? "fill-amber-400" : "text-muted-foreground"}`}
+                          className={`h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 ${index < review.rating ? "fill-amber-400" : "text-muted-foreground"}`}
                         />
                       ))}
                     </div>
-                    <p className="mt-3 text-sm text-foreground">{review.comment || t("learnerProfile.reviews.noComment")}</p>
-                    <div className="mt-2 text-xs text-muted-foreground">
+                    <p className="mt-2 text-xs text-foreground sm:mt-2.5 sm:text-sm md:mt-3">{review.comment || t("learnerProfile.reviews.noComment")}</p>
+                    <div className="mt-1.5 flex flex-col gap-0.5 text-[10px] text-muted-foreground sm:mt-2 sm:flex-row sm:gap-1 sm:text-xs">
                       <span>
                         {typeof review.to === "object"
                           ? `${(review.to as any).firstname} ${(review.to as any).lastname}`
                           : review.to}
                       </span>
                       {review.sessionDetails && (
-                        <span>
-                          {" • "}
-                          {review.sessionDetails.title} — {formatDate(review.sessionDetails.date)} {t("learnerProfile.sessions.at")}{" "}
-                          {formatTime(review.sessionDetails.time)}
-                        </span>
+                        <>
+                          <span className="hidden sm:inline">{" • "}</span>
+                          <span className="break-words">
+                            {review.sessionDetails.title} — {formatDate(review.sessionDetails.date)} {t("learnerProfile.sessions.at")}{" "}
+                            {formatTime(review.sessionDetails.time)}
+                          </span>
+                        </>
                       )}
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="rounded-lg border border-dashed border-border bg-muted/20 py-12 text-center text-sm text-muted-foreground">
+              <div className="rounded-lg border border-dashed border-border bg-muted/20 py-8 text-center text-xs text-muted-foreground sm:py-10 sm:text-sm md:py-12">
                 {t("learnerProfile.reviews.empty")}
               </div>
             )}
@@ -653,23 +668,27 @@ export default function LearnerProfilePage() {
         </Card>
 
         <Card className="shadow-sm">
-          <CardContent className="flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between">
-            <div className="space-y-2">
-              <h3 className="text-xl font-semibold">{t("learnerProfile.support.title")}</h3>
-              <p className="text-sm text-muted-foreground">{t("learnerProfile.support.description")}</p>
+          <CardContent className="flex flex-col gap-3 p-3 sm:gap-3.5 sm:p-4 md:flex-row md:items-center md:justify-between md:gap-4 md:p-6">
+            <div className="space-y-1 sm:space-y-1.5 md:space-y-2">
+              <h3 className="text-base font-semibold sm:text-lg md:text-xl">{t("learnerProfile.support.title")}</h3>
+              <p className="text-xs text-muted-foreground sm:text-sm">{t("learnerProfile.support.description")}</p>
             </div>
             <Button
-              className="inline-flex items-center gap-2"
+              size="sm"
+              className="inline-flex w-full items-center justify-center gap-1.5 text-xs sm:w-auto sm:text-sm"
               onClick={handleCreateDonation}
               disabled={isCreatingDonation}
             >
               {isCreatingDonation ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-3 w-3 animate-spin sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
               ) : (
-                <Heart className="h-4 w-4" />
+                <Heart className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
               )}
-              {isCreatingDonation ? t("learnerProfile.buttons.preparingCheckout") : t("learnerProfile.buttons.donate")}
-              <ArrowRight className="h-4 w-4" />
+              <span className="hidden sm:inline">
+                {isCreatingDonation ? t("learnerProfile.buttons.preparingCheckout") : t("learnerProfile.buttons.donate")}
+              </span>
+              <span className="sm:hidden">{isCreatingDonation ? "..." : "Donate"}</span>
+              <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
             </Button>
           </CardContent>
         </Card>
@@ -690,32 +709,32 @@ export default function LearnerProfilePage() {
       )}
 
       <Dialog open={cancelModalOpen} onOpenChange={setCancelModalOpen}>
-        <DialogContent className="bg-card border-border text-card-foreground">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
-              <AlertTriangle className="h-5 w-5 text-destructive" />
+        <DialogContent className="bg-card border-border text-card-foreground max-w-[95vw] sm:max-w-md">
+          <DialogHeader className="space-y-1.5 sm:space-y-2">
+            <DialogTitle className="flex items-center gap-1.5 text-sm font-semibold sm:gap-2 sm:text-base md:text-lg">
+              <AlertTriangle className="h-4 w-4 text-destructive sm:h-4 sm:w-4 md:h-5 md:w-5" />
               {t("learnerProfile.modals.cancelSession.title")}
             </DialogTitle>
-            <DialogDescription className="text-muted-foreground">
+            <DialogDescription className="text-xs text-muted-foreground sm:text-sm">
               {t("learnerProfile.modals.cancelSession.description")}
             </DialogDescription>
           </DialogHeader>
           {selectedSessionForCancellation && (
-            <div className="space-y-4">
-              <div className="rounded-lg border border-border bg-muted/50 p-4 text-sm text-muted-foreground">
-                <p className="font-medium text-card-foreground">{selectedSessionForCancellation.title}</p>
-                <p className="text-muted-foreground">
+            <div className="space-y-3 sm:space-y-4">
+              <div className="rounded-lg border border-border bg-muted/50 p-2.5 text-xs text-muted-foreground sm:p-3 sm:text-sm md:p-4">
+                <p className="font-medium text-card-foreground sm:text-base">{selectedSessionForCancellation.title}</p>
+                <p className="mt-1 text-muted-foreground sm:mt-1.5">
                   {`${t("learnerProfile.sessions.with")} ${
                     typeof selectedSessionForCancellation.speaker === "object"
                       ? `${(selectedSessionForCancellation.speaker as any).firstname} ${(selectedSessionForCancellation.speaker as any).lastname}`
                       : selectedSessionForCancellation.speaker
                   }`}
                 </p>
-                <p className="text-muted-foreground">
+                <p className="mt-1 text-muted-foreground sm:mt-1.5">
                   {formatDate(selectedSessionForCancellation.date)} {t("learnerProfile.sessions.at")}{" "}
                   {formatTime(selectedSessionForCancellation.time)}
                 </p>
-                <p className="text-xs text-muted-foreground/80">
+                <p className="mt-1 text-[10px] text-muted-foreground/80 sm:mt-1.5 sm:text-xs">
                   {(() => {
                     const hoursUntil = getHoursUntilSession(selectedSessionForCancellation)
                     if (hoursUntil < 0) {
@@ -729,8 +748,8 @@ export default function LearnerProfilePage() {
                 </p>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="cancellation-reason" className="text-sm font-medium">
+              <div className="space-y-1.5 sm:space-y-2">
+                <Label htmlFor="cancellation-reason" className="text-xs font-medium sm:text-sm">
                   {t("learnerProfile.modals.cancelSession.reasonLabel")}
                 </Label>
                 <Textarea
@@ -738,15 +757,17 @@ export default function LearnerProfilePage() {
                   value={cancellationReason}
                   onChange={(event) => setCancellationReason(event.target.value)}
                   placeholder={t("learnerProfile.modals.cancelSession.reasonPlaceholder")}
-                  rows={4}
-                  className="border border-input bg-background text-foreground placeholder:text-muted-foreground focus-visible:ring-primary/30"
+                  rows={3}
+                  className="border border-input bg-background text-xs text-foreground placeholder:text-muted-foreground focus-visible:ring-primary/30 sm:rows-4 sm:text-sm"
                 />
               </div>
             </div>
           )}
-          <DialogFooter className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+          <DialogFooter className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <Button
               variant="outline"
+              size="sm"
+              className="w-full text-xs sm:w-auto sm:text-sm"
               onClick={() => {
                 setCancelModalOpen(false)
                 setSelectedSessionForCancellation(null)
@@ -758,16 +779,22 @@ export default function LearnerProfilePage() {
             </Button>
             <Button
               variant="destructive"
+              size="sm"
+              className="w-full text-xs sm:w-auto sm:text-sm"
               onClick={handleConfirmCancellation}
               disabled={isCancelling}
             >
               {isCancelling ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t("learnerProfile.buttons.cancelling")}
+                  <Loader2 className="mr-1.5 h-3 w-3 animate-spin sm:mr-2 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">{t("learnerProfile.buttons.cancelling")}</span>
+                  <span className="sm:hidden">Cancelling...</span>
                 </>
               ) : (
-                t("learnerProfile.buttons.confirmCancellation")
+                <>
+                  <span className="hidden sm:inline">{t("learnerProfile.buttons.confirmCancellation")}</span>
+                  <span className="sm:hidden">Confirm</span>
+                </>
               )}
             </Button>
           </DialogFooter>

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useAppSelector } from "@/lib/hooks/redux"
 import { useTranslation } from "@/lib/hooks/useTranslation"
 import { learnerService } from "@/lib/services/learnerService"
@@ -74,6 +75,128 @@ const dayNameToIndex: Record<string, number> = {
 
 const steps = ["Schedule", "Details", "Review"]
 
+// Common timezones list
+const TIMEZONES = [
+  { value: "UTC", label: "UTC (Coordinated Universal Time)" },
+  { value: "America/New_York", label: "Eastern Time (ET)" },
+  { value: "America/Chicago", label: "Central Time (CT)" },
+  { value: "America/Denver", label: "Mountain Time (MT)" },
+  { value: "America/Los_Angeles", label: "Pacific Time (PT)" },
+  { value: "America/Phoenix", label: "Arizona Time (MST)" },
+  { value: "America/Anchorage", label: "Alaska Time (AKT)" },
+  { value: "Pacific/Honolulu", label: "Hawaii Time (HST)" },
+  { value: "Europe/London", label: "London (GMT/BST)" },
+  { value: "Europe/Paris", label: "Paris (CET/CEST)" },
+  { value: "Europe/Berlin", label: "Berlin (CET/CEST)" },
+  { value: "Europe/Rome", label: "Rome (CET/CEST)" },
+  { value: "Europe/Madrid", label: "Madrid (CET/CEST)" },
+  { value: "Europe/Amsterdam", label: "Amsterdam (CET/CEST)" },
+  { value: "Europe/Athens", label: "Athens (EET/EEST)" },
+  { value: "Europe/Moscow", label: "Moscow (MSK)" },
+  { value: "Asia/Dubai", label: "Dubai (GST)" },
+  { value: "Asia/Kolkata", label: "Mumbai/New Delhi (IST)" },
+  { value: "Asia/Shanghai", label: "Shanghai (CST)" },
+  { value: "Asia/Tokyo", label: "Tokyo (JST)" },
+  { value: "Asia/Seoul", label: "Seoul (KST)" },
+  { value: "Asia/Hong_Kong", label: "Hong Kong (HKT)" },
+  { value: "Asia/Singapore", label: "Singapore (SGT)" },
+  { value: "Australia/Sydney", label: "Sydney (AEDT/AEST)" },
+  { value: "Australia/Melbourne", label: "Melbourne (AEDT/AEST)" },
+  { value: "Australia/Brisbane", label: "Brisbane (AEST)" },
+  { value: "Pacific/Auckland", label: "Auckland (NZDT/NZST)" },
+  { value: "America/Toronto", label: "Toronto (ET)" },
+  { value: "America/Vancouver", label: "Vancouver (PT)" },
+  { value: "America/Mexico_City", label: "Mexico City (CST)" },
+  { value: "America/Sao_Paulo", label: "São Paulo (BRT)" },
+  { value: "America/Buenos_Aires", label: "Buenos Aires (ART)" },
+]
+
+// Timezone conversion utilities
+// This function converts a time from one timezone to another
+const convertTimeToTimezone = (time: string, date: string, fromTimezone: string, toTimezone: string): string => {
+  try {
+    const [hours, minutes] = time.split(":").map(Number)
+    const [year, month, day] = date.split("-").map(Number)
+    
+    // Create a date string for the target date
+    const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+    
+    // To convert time between timezones, we need to:
+    // 1. Create a Date object that represents the time in fromTimezone
+    // 2. Get the UTC equivalent
+    // 3. Format that UTC time in toTimezone
+    
+    // We'll use a helper: create a date at noon UTC on the target date
+    // This gives us a reference point to calculate offsets
+    const noonUTC = new Date(`${dateStr}T12:00:00Z`)
+    
+    // Get what time noon UTC is in fromTimezone
+    const fromTZNoon = new Intl.DateTimeFormat("en-US", {
+      timeZone: fromTimezone,
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).formatToParts(noonUTC)
+    
+    const fromTZNoonHour = parseInt(fromTZNoon.find(p => p.type === "hour")?.value || "12")
+    const fromTZNoonMin = parseInt(fromTZNoon.find(p => p.type === "minute")?.value || "0")
+    
+    // Calculate offset: if noon UTC = 5 PM in fromTimezone, offset is +5 hours
+    const fromTZOffsetMinutes = (fromTZNoonHour * 60 + fromTZNoonMin) - (12 * 60)
+    
+    // Now, if we want "hours:minutes" in fromTimezone, what UTC time is that?
+    // desiredTime - offset = UTC time
+    const desiredTotalMinutes = hours * 60 + minutes
+    const utcTotalMinutes = desiredTotalMinutes - fromTZOffsetMinutes
+    
+    // Normalize to 0-1439 (minutes in a day)
+    let normalizedMinutes = utcTotalMinutes
+    while (normalizedMinutes < 0) normalizedMinutes += 1440
+    while (normalizedMinutes >= 1440) normalizedMinutes -= 1440
+    
+    const utcHours = Math.floor(normalizedMinutes / 60)
+    const utcMins = normalizedMinutes % 60
+    
+    // Create UTC date
+    const utcDate = new Date(`${dateStr}T${String(utcHours).padStart(2, "0")}:${String(utcMins).padStart(2, "0")}:00Z`)
+    
+    // Format in toTimezone
+    const toParts = new Intl.DateTimeFormat("en-US", {
+      timeZone: toTimezone,
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).formatToParts(utcDate)
+    
+    const toHour = toParts.find(p => p.type === "hour")?.value || "00"
+    const toMinute = toParts.find(p => p.type === "minute")?.value || "00"
+    
+    return `${toHour.padStart(2, "0")}:${toMinute.padStart(2, "0")}`
+  } catch (error) {
+    console.error("Error converting timezone:", error)
+    return time // Return original time on error
+  }
+}
+
+// Convert time from speaker's timezone to UTC for backend
+const convertTimeToUTC = (time: string, date: string, timezone: string): string => {
+  return convertTimeToTimezone(time, date, timezone, "UTC")
+}
+
+// Convert time from UTC to speaker's timezone for display
+const convertTimeFromUTC = (time: string, date: string, timezone: string): string => {
+  return convertTimeToTimezone(time, date, "UTC", timezone)
+}
+
+// Get user's browser timezone or default to UTC
+const getUserTimezone = (): string => {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone
+  } catch {
+    return "UTC"
+  }
+}
+
 export function BookSessionDialog({
   speaker,
   trigger,
@@ -94,6 +217,7 @@ export function BookSessionDialog({
   const [speakerDetails, setSpeakerDetails] = useState<SpeakerDetails>(speaker)
   const [currentStep, setCurrentStep] = useState(0)
   const [selectedDate, setSelectedDate] = useState<Date>()
+  const [selectedTimezone, setSelectedTimezone] = useState<string>(getUserTimezone())
 
   useEffect(() => {
     setSpeakerDetails(speaker)
@@ -108,6 +232,7 @@ export function BookSessionDialog({
       setBookingSuccess(false)
       setCurrentStep(0)
       setSelectedDate(undefined)
+      setSelectedTimezone(getUserTimezone())
       return
     }
 
@@ -166,15 +291,21 @@ export function BookSessionDialog({
     fetchSpeakerDetails()
   }, [open, speakerId, speakerDetails?.availability, t])
 
+  // Get day name from date string - use UTC to avoid timezone issues
   const getDayNameFromDate = (dateString: string): string => {
     if (!dateString) return ""
-    const date = new Date(dateString)
+    // Parse date string as UTC to avoid local timezone issues
+    // dateString is in format YYYY-MM-DD
+    const [year, month, day] = dateString.split("-").map(Number)
+    // Create date in UTC (month is 0-indexed in Date constructor)
+    const date = new Date(Date.UTC(year, month - 1, day))
     const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
-    return days[date.getDay()]
+    return days[date.getUTCDay()]
   }
 
   const isDateAvailable = (dateString: string): boolean => {
     if (!dateString || !speakerDetails?.availability) return false
+    // Use UTC-based day calculation for consistency
     const dayName = getDayNameFromDate(dateString)
     const dayAvailability = speakerDetails.availability.find((avail) => avail.day === dayName)
     return dayAvailability?.isAvailable || false
@@ -187,8 +318,10 @@ export function BookSessionDialog({
     return `${year}-${month}-${day}`
   }
 
-  const generateTimeSlots = (dateString: string): string[] => {
+  const generateTimeSlots = (dateString: string, timezone: string): string[] => {
     if (!dateString || !speakerDetails?.availability) return []
+    
+    // Get day name based on UTC date (consistent day calculation)
     const dayName = getDayNameFromDate(dateString)
     const dayAvailability = speakerDetails.availability.find((avail) => avail.day === dayName)
 
@@ -196,15 +329,31 @@ export function BookSessionDialog({
       return []
     }
 
-    const [startHour, startMinute] = dayAvailability.startTime.split(":").map(Number)
-    const [endHour, endMinute] = dayAvailability.endTime.split(":").map(Number)
+    // Assume speaker's availability times are stored in UTC
+    // Convert them to the selected timezone for display
+    const startTimeUTC = dayAvailability.startTime
+    const endTimeUTC = dayAvailability.endTime
+
+    // Convert start and end times to the selected timezone
+    const startTimeInTZ = convertTimeFromUTC(startTimeUTC, dateString, timezone)
+    const endTimeInTZ = convertTimeFromUTC(endTimeUTC, dateString, timezone)
+
+    const [startHour, startMinute] = startTimeInTZ.split(":").map(Number)
+    const [endHour, endMinute] = endTimeInTZ.split(":").map(Number)
 
     const startMinutes = startHour * 60 + startMinute
     const endMinutes = endHour * 60 + endMinute
 
+    // Handle cases where timezone conversion causes day rollover
+    // If end time is before start time, it means we've crossed midnight
+    let adjustedEndMinutes = endMinutes
+    if (endMinutes < startMinutes) {
+      adjustedEndMinutes = endMinutes + 1440 // Add 24 hours
+    }
+
     const slots: string[] = []
-    for (let current = startMinutes; current <= endMinutes - 30; current += 30) {
-      const hour = Math.floor(current / 60)
+    for (let current = startMinutes; current <= adjustedEndMinutes - 30; current += 30) {
+      const hour = Math.floor(current / 60) % 24 // Handle overflow
       const minute = current % 60
       slots.push(`${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`)
     }
@@ -212,7 +361,7 @@ export function BookSessionDialog({
     return slots
   }
 
-  const validateBookingTime = (date: string, time: string): string | null => {
+  const validateBookingTime = (date: string, time: string, timezone: string): string | null => {
     if (!date || !time || !speakerDetails?.availability) return null
 
     const dayName = getDayNameFromDate(date)
@@ -224,10 +373,15 @@ export function BookSessionDialog({
       return `${t("speakerProfile.bookSession.unavailableDay")} ${dayLabel}.`
     }
 
+    // Convert the selected time (in selected timezone) to UTC for validation
+    // Then convert availability times to selected timezone for display
+    const startTimeInTZ = convertTimeFromUTC(dayAvailability.startTime || "00:00", date, timezone)
+    const endTimeInTZ = convertTimeFromUTC(dayAvailability.endTime || "23:59", date, timezone)
+
     const [requestedHour, requestedMinute] = time.split(":").map(Number)
     const requestedMinutes = requestedHour * 60 + requestedMinute
-    const [startHour, startMinute] = (dayAvailability.startTime || "00:00").split(":").map(Number)
-    const [endHour, endMinute] = (dayAvailability.endTime || "23:59").split(":").map(Number)
+    const [startHour, startMinute] = startTimeInTZ.split(":").map(Number)
+    const [endHour, endMinute] = endTimeInTZ.split(":").map(Number)
     const startMinutes = startHour * 60 + startMinute
     const endMinutes = endHour * 60 + endMinute
     const sessionEndMinutes = requestedMinutes + 30
@@ -235,9 +389,9 @@ export function BookSessionDialog({
     if (requestedMinutes < startMinutes || sessionEndMinutes > endMinutes) {
       const dayTranslation = daysOfWeek.find((d) => d.key === dayName)
       const dayLabel = dayTranslation ? t(dayTranslation.translationKey as any) : dayName.charAt(0).toUpperCase() + dayName.slice(1)
-      return `${t("speakerProfile.bookSession.timeNotInRange")} ${dayAvailability.startTime} ${t(
+      return `${t("speakerProfile.bookSession.timeNotInRange")} ${startTimeInTZ} ${t(
         "dashboard.availability.to",
-      )} ${dayAvailability.endTime} ${t("dashboard.availability.to")} ${dayLabel}.`
+      )} ${endTimeInTZ} ${t("dashboard.availability.to")} ${dayLabel}.`
     }
 
     return null
@@ -256,15 +410,15 @@ export function BookSessionDialog({
 
   const timeSlots = useMemo(() => {
     if (!formData.date) return []
-    return generateTimeSlots(formData.date)
-  }, [formData.date, speakerDetails?.availability])
+    return generateTimeSlots(formData.date, selectedTimezone)
+  }, [formData.date, speakerDetails?.availability, selectedTimezone])
 
   const scheduleReady = Boolean(formData.date && formData.time)
   const detailsReady = Boolean(formData.title?.trim())
 
   const handleNextStep = () => {
     if (currentStep === 0) {
-      const availabilityError = validateBookingTime(formData.date, formData.time)
+      const availabilityError = validateBookingTime(formData.date, formData.time, selectedTimezone)
       if (availabilityError) {
         setBookingError(availabilityError)
         return
@@ -296,7 +450,7 @@ export function BookSessionDialog({
       return
     }
 
-    const availabilityError = validateBookingTime(formData.date, formData.time)
+    const availabilityError = validateBookingTime(formData.date, formData.time, selectedTimezone)
     if (availabilityError) {
       setBookingError(availabilityError)
       return
@@ -312,11 +466,14 @@ export function BookSessionDialog({
       setIsBooking(true)
       setBookingError("")
 
+      // Convert the selected time from the selected timezone to UTC for the backend
+      const timeInUTC = convertTimeToUTC(formData.time, formData.date, selectedTimezone)
+
       await learnerService.bookSession({
         speakerId,
         title: formData.title,
         date: formData.date,
-        time: formData.time,
+        time: timeInUTC,
         topics,
       })
 
@@ -428,6 +585,30 @@ export function BookSessionDialog({
       case 0:
         return (
           <div className="space-y-4">
+            <div className="bg-card rounded-lg px-4 py-3 border border-border">
+              <Label className="text-foreground font-semibold block text-sm mb-2">
+                Timezone
+              </Label>
+              <Select value={selectedTimezone} onValueChange={(value) => {
+                setSelectedTimezone(value)
+                setFormData((prev) => ({ ...prev, time: "" })) // Reset time when timezone changes
+                setBookingError("")
+              }}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select timezone" />
+                </SelectTrigger>
+                <SelectContent>
+                  {TIMEZONES.map((tz) => (
+                    <SelectItem key={tz.value} value={tz.value}>
+                      {tz.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-2">
+                Times are displayed in {TIMEZONES.find(tz => tz.value === selectedTimezone)?.label || selectedTimezone}
+              </p>
+            </div>
             <div className="grid gap-1 lg:grid-cols-[6fr_4fr]">
               <div className="bg-card rounded-lg border border-border mx-auto">
                 {/* <Label className="text-white font-semibold mb-3 block text-sm">
@@ -584,7 +765,7 @@ export function BookSessionDialog({
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">{t("speakerProfile.bookSession.time")}</span>
-                <span>{formData.time || "—"}</span>
+                <span>{formData.time || "—"} ({TIMEZONES.find(tz => tz.value === selectedTimezone)?.label || selectedTimezone})</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">{t("speakerProfile.bookSession.sessionTitle")}</span>

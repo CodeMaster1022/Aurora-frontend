@@ -326,7 +326,7 @@ export function Header() {
       </div>
     </header>
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/60 bg-background/95 px-6 py-3 shadow-lg backdrop-blur md:hidden">
-      <div className="mx-auto flex w-full max-w-md items-center justify-around text-xs font-medium text-foreground/70">
+      <div className="mx-auto flex w-full max-w-md items-center justify-between text-xs font-medium text-foreground/70">
         <Link
           href="/home"
           className={`flex flex-col items-center gap-1 transition-colors ${pathname === "/" ? "text-primary" : "hover:text-primary/80"}`}
