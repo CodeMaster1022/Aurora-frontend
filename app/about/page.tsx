@@ -122,13 +122,13 @@ export default function AboutPage() {
             <div className="h-full transition-colors duration-300">
               <div className="flex flex-col gap-5">
                 <p className="text-base md:text-lg leading-relaxed text-muted-foreground">
-                If you're new here, my name is Mónica Medina, and my mission in life is communication—helping people express themselves and feel happy.
+                  {t('about.story.intro.p1')}
                 </p>
                 <p className="text-base md:text-lg leading-relaxed text-muted-foreground">
-                I've been teaching English at multiple levels, from children to adults, since 1988. Beyond teaching, I have a special bond with elderly people—they are living treasures, with encyclopedic knowledge and extraordinary life stories.
+                  {t('about.story.intro.p2')}
                 </p>
                 <p className="text-base md:text-lg leading-relaxed text-muted-foreground">
-                I've helped hundreds of English learners succeed—and they've become better people through it.
+                  {t('about.story.intro.p3')}
                 </p>
               </div>
             </div>
@@ -144,7 +144,7 @@ export default function AboutPage() {
           >
             <motion.div
               key={activeIndex}
-              className="relative overflow-hidden rounded-3xl shadow-xl border border-border/60 aspect-[9/10] object-fit"
+              className="relative overflow-hidden rounded-3xl shadow-xl border border-border/60 aspect-[3/3.9] object-fit"
               initial={{ opacity: 0, scale: 0.98, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ duration: 0.5, ease: "easeOut" }}

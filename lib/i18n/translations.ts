@@ -533,6 +533,9 @@ export type TranslationKey =
   | 'about.story.title'
   | 'about.story.p1'
   | 'about.story.p2'
+  | 'about.story.intro.p1'
+  | 'about.story.intro.p2'
+  | 'about.story.intro.p3'
   | 'about.mission.title'
   | 'about.mission.p1'
   | 'about.mission.point1'
@@ -1149,6 +1152,9 @@ export const translations: Record<Language, Translations> = {
     'about.story.title': 'The Story of Aurora',
     'about.story.p1': 'If you are new here, my name is Monica Medina and my mission in life is communication—helping people to communicate and helping people to feel happy.I have been teaching English, at multiple levels, including children and adults, since 1988. Besides teaching, I have a special chemistry with elderly people. They are living treasures, as they possess a thorough encyclopedia within, and an exceptional storybook of experiences. I have prepared hundreds of English students to be successful in the language. They have become better people!',
     'about.story.p2': 'From living rooms to laptops, from nerves to smiles—Aurora is where learners show up as themselves and leave a little braver every time.',
+    'about.story.intro.p1': "If you're new here, my name is Mónica Medina, and my mission in life is communication—helping people express themselves and feel happy.",
+    'about.story.intro.p2': "I've been teaching English at multiple levels, from children to adults, since 1988. Beyond teaching, I have a special bond with elderly people—they are living treasures, with encyclopedic knowledge and extraordinary life stories.",
+    'about.story.intro.p3': "I've helped hundreds of English learners succeed—and they've become better people through it.",
     'about.mission.title': 'Our Mission',
     'about.mission.p1': 'To make English practice accessible, human, and joyful—by matching learners with thoughtful speakers and giving them everything they need to connect, grow, and belong.',
     'about.mission.point1': 'Warm, one‑to‑one sessions that build confidence',
@@ -1762,6 +1768,9 @@ export const translations: Record<Language, Translations> = {
     'about.story.title': 'La Historia de Aurora',
     'about.story.p1': 'Si eres nuevo por aquí, me llamo Mónica Medina y mi misión en la vida es la comunicación: ayudar a las personas a comunicarse y a sentirse felices. Llevo enseñando inglés a distintos niveles, incluyendo niños y adultos, desde 1988. Además de la docencia, tengo una conexión especial con las personas mayores. Son un tesoro viviente, pues poseen una enciclopedia andante y un valioso caudal de experiencias. He preparado a cientos de estudiantes de inglés para que dominen el idioma con éxito. ¡Se han convertido en mejores personas!',
     'about.story.p2': 'Desde las salas de estar hasta los laptops, desde nervios a sonrisas—Aurora es donde los aprendices se muestran como ellos mismos y se sienten un poco más valientes cada vez.',
+    'about.story.intro.p1': 'Si eres nuevo por aquí, me llamo Mónica Medina, y mi misión en la vida es la comunicación: ayudar a las personas a expresarse y sentirse felices.',
+    'about.story.intro.p2': 'He estado enseñando inglés en múltiples niveles, desde niños hasta adultos, desde 1988. Más allá de la enseñanza, tengo un vínculo especial con las personas mayores: son tesoros vivientes, con conocimientos enciclopédicos e historias de vida extraordinarias.',
+    'about.story.intro.p3': 'He ayudado a cientos de estudiantes de inglés a tener éxito—y se han convertido en mejores personas a través de ello.',
     'about.mission.title': 'Nuestra Misión',
     'about.mission.p1': 'Para hacer que la práctica de inglés sea accesible, humana y alegre—al hacer coincidir a los aprendices con hablantes reflexivos y dándoles todo lo que necesitan para conectarse, crecer y pertenecer.',
     'about.mission.point1': 'Sesiones cálidas de uno a uno que construyen confianza',

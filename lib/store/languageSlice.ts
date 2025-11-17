@@ -17,8 +17,10 @@ const getStoredLanguage = (): Language => {
   return 'en';
 };
 
+// Always default to English for initial state (to avoid hydration mismatch)
+// Language will be initialized from localStorage after client-side hydration
 const initialState: LanguageState = {
-  language: getStoredLanguage(),
+  language: 'en',
 };
 
 const languageSlice = createSlice({

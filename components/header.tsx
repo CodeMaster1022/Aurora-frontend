@@ -152,6 +152,7 @@ export function Header() {
                 key={link.href}
                 href={link.href}
                 className={`transition-colors hover:text-primary ${pathname === link.href ? "text-primary" : ""}`}
+                suppressHydrationWarning
               >
                 {link.label}
               </Link>
@@ -338,16 +339,18 @@ export function Header() {
         <Link
           href="/home"
           className={`flex flex-col items-center gap-1 transition-colors ${pathname === "/" ? "text-primary" : "hover:text-primary/80"}`}
+          suppressHydrationWarning
         >
           <Home className="size-5" />
-          <span>{t("header.home")}</span>
+          <span suppressHydrationWarning>{t("header.home")}</span>
         </Link>
         <Link
           href="/about"
           className={`flex flex-col items-center gap-1 transition-colors ${pathname === "/about" ? "text-primary" : "hover:text-primary/80"}`}
+          suppressHydrationWarning
         >
           <Info className="size-5" />
-          <span>{t("header.nosotros")}</span>
+          <span suppressHydrationWarning>{t("header.nosotros")}</span>
         </Link>
         <Link
           href={profileHref}
