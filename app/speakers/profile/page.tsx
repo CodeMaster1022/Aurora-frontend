@@ -127,6 +127,60 @@ export default function SpeakerDashboardPage() {
       return "UTC"
     }
   }
+
+  // Timezone conversion utilities
+  // Convert time from one timezone to another
+  const convertTimeToTimezone = (time: string, date: string, fromTimezone: string, toTimezone: string): string => {
+    try {
+      const [hours, minutes] = time.split(":").map(Number)
+      const [year, month, day] = date.split("-").map(Number)
+      
+      const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+      const noonUTC = new Date(`${dateStr}T12:00:00Z`)
+      
+      const fromTZNoon = new Intl.DateTimeFormat("en-US", {
+        timeZone: fromTimezone,
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      }).formatToParts(noonUTC)
+      
+      const fromTZNoonHour = parseInt(fromTZNoon.find(p => p.type === "hour")?.value || "12")
+      const fromTZNoonMin = parseInt(fromTZNoon.find(p => p.type === "minute")?.value || "0")
+      const fromTZOffsetMinutes = (fromTZNoonHour * 60 + fromTZNoonMin) - (12 * 60)
+      
+      const desiredTotalMinutes = hours * 60 + minutes
+      const utcTotalMinutes = desiredTotalMinutes - fromTZOffsetMinutes
+      
+      let normalizedMinutes = utcTotalMinutes
+      while (normalizedMinutes < 0) normalizedMinutes += 1440
+      while (normalizedMinutes >= 1440) normalizedMinutes -= 1440
+      
+      const utcHours = Math.floor(normalizedMinutes / 60)
+      const utcMins = normalizedMinutes % 60
+      const utcDate = new Date(`${dateStr}T${String(utcHours).padStart(2, "0")}:${String(utcMins).padStart(2, "0")}:00Z`)
+      
+      const toParts = new Intl.DateTimeFormat("en-US", {
+        timeZone: toTimezone,
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      }).formatToParts(utcDate)
+      
+      const toHour = toParts.find(p => p.type === "hour")?.value || "00"
+      const toMinute = toParts.find(p => p.type === "minute")?.value || "00"
+      
+      return `${toHour.padStart(2, "0")}:${toMinute.padStart(2, "0")}`
+    } catch (error) {
+      console.error("Error converting timezone:", error)
+      return time
+    }
+  }
+
+  // Convert time from UTC to display timezone
+  const convertTimeFromUTC = (time: string, date: string, timezone: string): string => {
+    return convertTimeToTimezone(time, date, "UTC", timezone)
+  }
   
   // Available topic options - loaded from backend
   const [availableTopics, setAvailableTopics] = useState<string[]>([])
@@ -145,6 +199,7 @@ export default function SpeakerDashboardPage() {
   const [isCalendarConnected, setIsCalendarConnected] = useState(false)
   const [isConnectingCalendar, setIsConnectingCalendar] = useState(false)
   const [calendarExpiresAt, setCalendarExpiresAt] = useState<string | null>(null)
+  const [calendarTimezone, setCalendarTimezone] = useState<string | null>(null)
 
   // Days of the week
   const daysOfWeek = [
@@ -233,6 +288,36 @@ export default function SpeakerDashboardPage() {
       if (response.success) {
         setIsCalendarConnected(response.data.connected)
         setCalendarExpiresAt(response.data.expiresAt)
+        // Update calendar timezone if available
+        if (response.data.timezone) {
+          const calendarTZ = response.data.timezone
+          setCalendarTimezone(calendarTZ)
+          // Always use calendar timezone when calendar is connected
+          setTimezone(calendarTZ)
+          
+          // Reload availability to convert times to calendar timezone
+          if (availability.length > 0) {
+            const today = new Date()
+            const nextMonday = new Date(today)
+            nextMonday.setDate(today.getDate() + ((1 + 7 - today.getDay()) % 7))
+            const referenceDate = nextMonday.toISOString().split('T')[0]
+            
+            const convertedAvailability = availability.map(avail => {
+              if (!avail.isAvailable || !avail.startTime || !avail.endTime) {
+                return avail
+              }
+              // Convert from UTC to calendar timezone (availability times are stored in UTC)
+              const startTimeInTZ = convertTimeFromUTC(avail.startTime, referenceDate, calendarTZ)
+              const endTimeInTZ = convertTimeFromUTC(avail.endTime, referenceDate, calendarTZ)
+              return {
+                ...avail,
+                startTime: startTimeInTZ,
+                endTime: endTimeInTZ
+              }
+            })
+            setAvailability(convertedAvailability)
+          }
+        }
       }
     } catch (error) {
       // console.error('Error checking calendar status:', error)
@@ -369,15 +454,39 @@ export default function SpeakerDashboardPage() {
           setBio(profile.bio || "")
           setAge(profile.age ? profile.age.toString() : "")
           setLocation(profile.location || fallbackLocation)
-          setTimezone((user as any)?.timezone || getUserTimezone())
+          // Use calendar timezone if available, otherwise use browser timezone
+          const initialTimezone = calendarTimezone || getUserTimezone()
+          setTimezone(initialTimezone)
           setCost(profile.cost ? profile.cost.toString() : "")
           setInterests(user?.interests || [])
           // Normalize availability to ensure all 7 days are present
           const profileAvailability = profile.availability || []
           console.log('Loaded availability from backend:', profileAvailability)
           const normalizedAvailability = normalizeAvailability(profileAvailability)
-          console.log('Normalized availability:', normalizedAvailability)
-          setAvailability(normalizedAvailability)
+          
+          // Convert availability times from UTC to calendar timezone
+          const displayTimezone = calendarTimezone || getUserTimezone()
+          const today = new Date()
+          const nextMonday = new Date(today)
+          nextMonday.setDate(today.getDate() + ((1 + 7 - today.getDay()) % 7))
+          const referenceDate = nextMonday.toISOString().split('T')[0] // YYYY-MM-DD
+          
+          const convertedAvailability = normalizedAvailability.map(avail => {
+            if (!avail.isAvailable || !avail.startTime || !avail.endTime) {
+              return avail
+            }
+            // Convert from UTC to display timezone
+            const startTimeInTZ = convertTimeFromUTC(avail.startTime, referenceDate, displayTimezone)
+            const endTimeInTZ = convertTimeFromUTC(avail.endTime, referenceDate, displayTimezone)
+            return {
+              ...avail,
+              startTime: startTimeInTZ,
+              endTime: endTimeInTZ
+            }
+          })
+          
+          console.log('Normalized and converted availability:', convertedAvailability)
+          setAvailability(convertedAvailability)
         } else {
           // If no profile data, initialize with default availability
           console.log('No profile data, initializing with defaults')
@@ -409,14 +518,15 @@ export default function SpeakerDashboardPage() {
       // Update user interests in backend
       await speakerService.updateInterests(interests)
       
-      await speakerService.updateProfile({ 
-        bio, 
-        age: age ? Number(age) : undefined,
-        cost: cost ? Number(cost) : undefined,
-        location: location ? location.trim() : "",
-        timezone: timezone || getUserTimezone(),
-        availability 
-      })
+        await speakerService.updateProfile({ 
+          bio, 
+          age: age ? Number(age) : undefined,
+          cost: cost ? Number(cost) : undefined,
+          location: location ? location.trim() : "",
+          // Only save timezone if calendar is not connected, otherwise use calendar timezone
+          timezone: isCalendarConnected && calendarTimezone ? calendarTimezone : (timezone || getUserTimezone()),
+          availability 
+        })
       await speakerService.updateAvailability(availability)
       editProfileSnapshotRef.current = null
       setIsEditingProfile(false)
@@ -434,7 +544,8 @@ export default function SpeakerDashboardPage() {
       age,
       cost,
       location,
-      timezone,
+      // Only save timezone if calendar is not connected, otherwise it's managed by calendar
+      timezone: isCalendarConnected && calendarTimezone ? calendarTimezone : timezone,
       interests: [...interests],
       avatar: avatarPreview
     }
@@ -652,6 +763,7 @@ export default function SpeakerDashboardPage() {
       // Update local state
       setIsCalendarConnected(false)
       setCalendarExpiresAt(null)
+      setCalendarTimezone(null)
     } catch (err) {
       console.error('Error disconnecting calendar:', err)
       setError(t('dashboard.errors.calendarDisconnectFailed'))
@@ -911,24 +1023,42 @@ export default function SpeakerDashboardPage() {
                       Share your city to help learners understand your location.
                     </p> */}
                   </div>
-                  <div className="rounded-lg border border-border bg-muted/30 p-3 shadow-sm sm:rounded-xl sm:p-4 md:p-5">
-                    <Label className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground sm:text-xs">Timezone</Label>
-                    <Select value={timezone} onValueChange={setTimezone}>
-                      <SelectTrigger className="mt-3">
-                        <SelectValue placeholder="Select your timezone" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {TIMEZONES.map((tz) => (
-                          <SelectItem key={tz.value} value={tz.value}>
-                            {tz.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {/* <p className="mt-2 text-xs text-muted-foreground">
-                      Your timezone is used to convert your availability times. This ensures learners see your schedule correctly.
-                    </p> */}
-                  </div>
+                  {!isCalendarConnected && (
+                    <div className="rounded-lg border border-border bg-muted/30 p-3 shadow-sm sm:rounded-xl sm:p-4 md:p-5">
+                      <Label className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground sm:text-xs">Timezone</Label>
+                      <Select value={timezone} onValueChange={setTimezone}>
+                        <SelectTrigger className="mt-3">
+                          <SelectValue placeholder="Select your timezone" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {TIMEZONES.map((tz) => (
+                            <SelectItem key={tz.value} value={tz.value}>
+                              {tz.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Connect your Google Calendar to automatically use its timezone.
+                      </p>
+                    </div>
+                  )}
+                  {isCalendarConnected && calendarTimezone && (
+                    <div className="rounded-lg border border-border bg-muted/30 p-3 shadow-sm sm:rounded-xl sm:p-4 md:p-5">
+                      <Label className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground sm:text-xs">Timezone</Label>
+                      <div className="mt-3 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-medium text-foreground">
+                            {TIMEZONES.find(tz => tz.value === calendarTimezone)?.label || calendarTimezone}
+                          </span>
+                          <span className="text-xs text-emerald-600 dark:text-emerald-400">From Calendar</span>
+                        </div>
+                      </div>
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Your timezone is automatically synced with your Google Calendar.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
@@ -1013,17 +1143,19 @@ export default function SpeakerDashboardPage() {
                           {t('dashboard.calendar.expires')} {new Date(calendarExpiresAt).toLocaleDateString()}
                         </p>
                       )}
-                      <div className="rounded-lg border border-border bg-muted/30 px-3 py-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-medium text-muted-foreground">Timezone</span>
-                          <span className="text-sm font-semibold text-foreground">
-                            {TIMEZONES.find(tz => tz.value === timezone)?.label || timezone || 'UTC'}
-                          </span>
+                      {calendarTimezone && (
+                        <div className="rounded-lg border border-border bg-muted/30 px-3 py-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-medium text-muted-foreground">Timezone</span>
+                            <span className="text-sm font-semibold text-foreground">
+                              {TIMEZONES.find(tz => tz.value === calendarTimezone)?.label || calendarTimezone}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            Sessions are scheduled in your calendar timezone.
+                          </p>
                         </div>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          Sessions are scheduled in your timezone
-                        </p>
-                      </div>
+                      )}
                       <Button
                         variant="outline"
                         className="w-full cursor-pointer"

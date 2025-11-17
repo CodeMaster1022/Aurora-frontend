@@ -10,7 +10,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
+import { Check, ChevronsUpDown } from "lucide-react"
 import { useAppSelector } from "@/lib/hooks/redux"
 import { useTranslation } from "@/lib/hooks/useTranslation"
 import { learnerService } from "@/lib/services/learnerService"
@@ -28,6 +30,10 @@ type SpeakerDetails = {
   firstname?: string
   lastname?: string
   availability?: SpeakerAvailability[]
+  googleCalendar?: {
+    timezone?: string
+    connected?: boolean
+  }
 }
 
 type BookingFormState = {
@@ -76,40 +82,49 @@ const dayNameToIndex: Record<string, number> = {
 const steps = ["Schedule", "Details", "Review"]
 
 // Common timezones list
-const TIMEZONES = [
-  { value: "UTC", label: "UTC (Coordinated Universal Time)" },
-  { value: "America/New_York", label: "Eastern Time (ET)" },
-  { value: "America/Chicago", label: "Central Time (CT)" },
-  { value: "America/Denver", label: "Mountain Time (MT)" },
-  { value: "America/Los_Angeles", label: "Pacific Time (PT)" },
-  { value: "America/Phoenix", label: "Arizona Time (MST)" },
-  { value: "America/Anchorage", label: "Alaska Time (AKT)" },
-  { value: "Pacific/Honolulu", label: "Hawaii Time (HST)" },
-  { value: "Europe/London", label: "London (GMT/BST)" },
-  { value: "Europe/Paris", label: "Paris (CET/CEST)" },
-  { value: "Europe/Berlin", label: "Berlin (CET/CEST)" },
-  { value: "Europe/Rome", label: "Rome (CET/CEST)" },
-  { value: "Europe/Madrid", label: "Madrid (CET/CEST)" },
-  { value: "Europe/Amsterdam", label: "Amsterdam (CET/CEST)" },
-  { value: "Europe/Athens", label: "Athens (EET/EEST)" },
-  { value: "Europe/Moscow", label: "Moscow (MSK)" },
-  { value: "Asia/Dubai", label: "Dubai (GST)" },
-  { value: "Asia/Kolkata", label: "Mumbai/New Delhi (IST)" },
-  { value: "Asia/Shanghai", label: "Shanghai (CST)" },
-  { value: "Asia/Tokyo", label: "Tokyo (JST)" },
-  { value: "Asia/Seoul", label: "Seoul (KST)" },
-  { value: "Asia/Hong_Kong", label: "Hong Kong (HKT)" },
-  { value: "Asia/Singapore", label: "Singapore (SGT)" },
-  { value: "Australia/Sydney", label: "Sydney (AEDT/AEST)" },
-  { value: "Australia/Melbourne", label: "Melbourne (AEDT/AEST)" },
-  { value: "Australia/Brisbane", label: "Brisbane (AEST)" },
-  { value: "Pacific/Auckland", label: "Auckland (NZDT/NZST)" },
-  { value: "America/Toronto", label: "Toronto (ET)" },
-  { value: "America/Vancouver", label: "Vancouver (PT)" },
-  { value: "America/Mexico_City", label: "Mexico City (CST)" },
-  { value: "America/Sao_Paulo", label: "São Paulo (BRT)" },
-  { value: "America/Buenos_Aires", label: "Buenos Aires (ART)" },
-]
+// Generate timezone list dynamically using Intl API
+const getAllTimezones = (): Array<{ value: string; label: string }> => {
+  try {
+    // Get all IANA timezones
+    const timezones = Intl.supportedValuesOf('timeZone')
+    
+    // Format each timezone with a readable label
+    return timezones.map(tz => {
+      try {
+        const date = new Date()
+        const formatter = new Intl.DateTimeFormat('en-US', {
+          timeZone: tz,
+          timeZoneName: 'short'
+        })
+        const parts = formatter.formatToParts(date)
+        const timeZoneName = parts.find(p => p.type === 'timeZoneName')?.value || ''
+        
+        // Get city/region name from timezone (e.g., "America/New_York" -> "New York")
+        const cityName = tz.split('/').pop()?.replace(/_/g, ' ') || tz
+        
+        // Create label: "New York (EST)" or just "New York" if no abbreviation
+        const label = timeZoneName ? `${cityName} (${timeZoneName})` : cityName
+        
+        return { value: tz, label }
+      } catch {
+        // Fallback if formatting fails
+        return { value: tz, label: tz }
+      }
+    }).sort((a, b) => {
+      // Sort alphabetically by label
+      return a.label.localeCompare(b.label)
+    })
+  } catch (error) {
+    console.error('Error generating timezones:', error)
+    // Fallback to a minimal list if Intl API is not supported
+    return [
+      { value: 'UTC', label: 'UTC (Coordinated Universal Time)' }
+    ]
+  }
+}
+
+// Cache the timezone list (generated once)
+const TIMEZONES = getAllTimezones()
 
 // Timezone conversion utilities
 // This function converts a time from one timezone to another
@@ -188,15 +203,6 @@ const convertTimeFromUTC = (time: string, date: string, timezone: string): strin
   return convertTimeToTimezone(time, date, "UTC", timezone)
 }
 
-// Get user's browser timezone or default to UTC
-const getUserTimezone = (): string => {
-  try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone
-  } catch {
-    return "UTC"
-  }
-}
-
 // Format timezone to a human-readable label
 const formatTimezoneLabel = (tzValue: string): string => {
   try {
@@ -236,26 +242,112 @@ export function BookSessionDialog({
   const [speakerDetails, setSpeakerDetails] = useState<SpeakerDetails>(speaker)
   const [currentStep, setCurrentStep] = useState(0)
   const [selectedDate, setSelectedDate] = useState<Date>()
-  const [selectedTimezone, setSelectedTimezone] = useState<string>(getUserTimezone())
+  // Get speaker's calendar timezone as default
+  const getDefaultTimezone = (): string => {
+    return speakerDetails?.googleCalendar?.timezone || speaker?.googleCalendar?.timezone || "UTC"
+  }
+  
+  const [selectedTimezone, setSelectedTimezone] = useState<string>(getDefaultTimezone())
+  const [timezoneOpen, setTimezoneOpen] = useState(false)
 
-  // Create a list of timezones that includes the system timezone if not already in the list
-  const availableTimezones = useMemo(() => {
-    const userTimezone = getUserTimezone()
-    const isInList = TIMEZONES.some((tz) => tz.value === userTimezone)
+  // Get speaker's calendar timezone (original timezone for availability)
+  const speakerTimezone = useMemo(() => {
+    return speakerDetails?.googleCalendar?.timezone || speaker?.googleCalendar?.timezone || "UTC"
+  }, [speakerDetails?.googleCalendar?.timezone, speaker?.googleCalendar?.timezone])
+
+  // Helper function to format date to string (needed before convertedAvailability)
+  const formatDateToString = (date: Date) => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, "0")
+    const day = String(date.getDate()).padStart(2, "0")
+    return `${year}-${month}-${day}`
+  }
+
+  // Convert availability times from speaker's timezone to selected timezone for display
+  // Keep original availability intact (in speaker's timezone)
+  const convertedAvailability = useMemo(() => {
+    if (!speakerDetails?.availability || selectedTimezone === speakerTimezone) {
+      // No conversion needed if timezone matches or no availability
+      return speakerDetails?.availability || []
+    }
+
+    // Convert each availability entry from speaker's timezone to selected timezone
+    return speakerDetails.availability.map((avail) => {
+      if (!avail.isAvailable || !avail.startTime || !avail.endTime) {
+        return avail // Return as-is if not available
+      }
+
+      // Convert start and end times from speaker's timezone to selected timezone
+      // We need a reference date for conversion - use a fixed date (today) for consistent conversion
+      // Note: The actual date selected by user will be used when generating slots
+      const referenceDate = formatDateToString(new Date())
+      
+      const convertedStartTime = convertTimeToTimezone(
+        avail.startTime,
+        referenceDate,
+        speakerTimezone,
+        selectedTimezone
+      )
+      const convertedEndTime = convertTimeToTimezone(
+        avail.endTime,
+        referenceDate,
+        speakerTimezone,
+        selectedTimezone
+      )
+
+      return {
+        ...avail,
+        startTime: convertedStartTime,
+        endTime: convertedEndTime,
+      }
+    })
+  }, [speakerDetails?.availability, speakerTimezone, selectedTimezone])
+
+  // Get speaker's timezone label for display
+  const speakerTimezoneLabel = useMemo(() => {
+    const speakerTZ = speakerDetails?.googleCalendar?.timezone || speaker?.googleCalendar?.timezone
+    if (!speakerTZ) return "UTC"
     
-    if (isInList) {
-      return TIMEZONES
+    // Try to find in standard list first
+    const standardTZ = TIMEZONES.find((tz) => tz.value === speakerTZ)
+    if (standardTZ) return standardTZ.label
+    
+    // Otherwise format it
+    return formatTimezoneLabel(speakerTZ)
+  }, [speakerDetails?.googleCalendar?.timezone, speaker?.googleCalendar?.timezone])
+
+  // Create a list of timezones that includes speaker's calendar timezone if not already in the list
+  const availableTimezones = useMemo(() => {
+    const speakerTimezone = speakerDetails?.googleCalendar?.timezone || speaker?.googleCalendar?.timezone
+    
+    const timezonesToAdd: Array<{ value: string; label: string }> = []
+    
+    // Add speaker's calendar timezone if not in list
+    if (speakerTimezone && !TIMEZONES.some((tz) => tz.value === speakerTimezone)) {
+      timezonesToAdd.push({ value: speakerTimezone, label: formatTimezoneLabel(speakerTimezone) })
     }
     
-    // Add system timezone to the beginning of the list
-    return [
-      { value: userTimezone, label: formatTimezoneLabel(userTimezone) },
-      ...TIMEZONES,
-    ]
-  }, [])
+    // If speaker has calendar timezone, prioritize it at the top
+    if (speakerTimezone && TIMEZONES.some((tz) => tz.value === speakerTimezone)) {
+      const speakerTZ = TIMEZONES.find((tz) => tz.value === speakerTimezone)
+      const otherTZs = TIMEZONES.filter((tz) => tz.value !== speakerTimezone)
+      return [
+        ...timezonesToAdd,
+        speakerTZ!,
+        ...otherTZs,
+      ]
+    }
+    
+    return [...timezonesToAdd, ...TIMEZONES]
+  }, [speakerDetails?.googleCalendar?.timezone, speaker?.googleCalendar?.timezone])
 
   useEffect(() => {
+    // Update speaker details when prop changes
     setSpeakerDetails(speaker)
+    // Update timezone to speaker's calendar timezone when available
+    if (speaker?.googleCalendar?.timezone) {
+      setSelectedTimezone(speaker.googleCalendar.timezone)
+    }
   }, [speaker])
 
   const speakerId = speakerDetails?._id ?? speaker?._id
@@ -267,7 +359,9 @@ export function BookSessionDialog({
       setBookingSuccess(false)
       setCurrentStep(0)
       setSelectedDate(undefined)
-      setSelectedTimezone(getUserTimezone())
+      // Reset to speaker's calendar timezone when dialog closes
+      const defaultTZ = speaker?.googleCalendar?.timezone || speakerDetails?.googleCalendar?.timezone || "UTC"
+      setSelectedTimezone(defaultTZ)
       return
     }
 
@@ -300,31 +394,60 @@ export function BookSessionDialog({
   useEffect(() => {
     if (!open || !speakerId) return
 
-    const hasAvailability = speakerDetails?.availability && speakerDetails.availability.length > 0
-    if (hasAvailability) return
+    // Always fetch speaker details when dialog opens to ensure we have googleCalendar data
+    let isMounted = true
 
     const fetchSpeakerDetails = async () => {
       try {
         setIsLoadingDetails(true)
         const response = await learnerService.getSpeakerProfile(speakerId)
-        if (response.success && response.data.speaker) {
-          setSpeakerDetails((prev) => ({
+        if (response.success && response.data.speaker && isMounted) {
+          const updatedSpeaker = {
             ...response.data.speaker,
             // Preserve any existing data such as custom trigger names if already present
-            firstname: response.data.speaker.firstname ?? prev?.firstname,
-            lastname: response.data.speaker.lastname ?? prev?.lastname,
-          }))
+            firstname: response.data.speaker.firstname ?? speaker?.firstname,
+            lastname: response.data.speaker.lastname ?? speaker?.lastname,
+            // Ensure googleCalendar object is preserved (including timezone)
+            googleCalendar: response.data.speaker.googleCalendar || speaker?.googleCalendar,
+          }
+          console.log("Fetched speaker data:", updatedSpeaker)
+          console.log("Speaker calendar timezone:", updatedSpeaker.googleCalendar?.timezone)
+          console.log("Speaker availability (raw from backend):", updatedSpeaker.availability)
+          setSpeakerDetails(updatedSpeaker)
+          
+          // Update timezone to speaker's calendar timezone when fetched
+          if (updatedSpeaker.googleCalendar?.timezone) {
+            setSelectedTimezone(updatedSpeaker.googleCalendar.timezone)
+          }
+          
+          // Log availability times to verify they're in UTC
+          if (updatedSpeaker.availability && updatedSpeaker.availability.length > 0) {
+            updatedSpeaker.availability.forEach((avail: SpeakerAvailability) => {
+              if (avail.isAvailable) {
+                console.log(`Availability ${avail.day}: ${avail.startTime} - ${avail.endTime} (should be UTC)`)
+              }
+            })
+          }
         }
       } catch (error) {
         console.error("Error loading speaker profile:", error)
-        setBookingError(t("speakerProfile.bookSession.failed"))
+        if (isMounted) {
+          setBookingError(t("speakerProfile.bookSession.failed"))
+        }
       } finally {
-        setIsLoadingDetails(false)
+        if (isMounted) {
+          setIsLoadingDetails(false)
+        }
       }
     }
 
     fetchSpeakerDetails()
-  }, [open, speakerId, speakerDetails?.availability, t])
+
+    return () => {
+      isMounted = false
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, speakerId])
 
   // Get day name from date string - use UTC to avoid timezone issues
   const getDayNameFromDate = (dateString: string): string => {
@@ -339,48 +462,56 @@ export function BookSessionDialog({
   }
 
   const isDateAvailable = (dateString: string): boolean => {
-    if (!dateString || !speakerDetails?.availability) return false
+    if (!dateString || !convertedAvailability || convertedAvailability.length === 0) return false
     // Use UTC-based day calculation for consistency
     const dayName = getDayNameFromDate(dateString)
-    const dayAvailability = speakerDetails.availability.find((avail) => avail.day === dayName)
+    const dayAvailability = convertedAvailability.find((avail) => avail.day === dayName)
     return dayAvailability?.isAvailable || false
   }
 
-  const formatDateToString = (date: Date) => {
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, "0")
-    const day = String(date.getDate()).padStart(2, "0")
-    return `${year}-${month}-${day}`
-  }
-
-  const generateTimeSlots = (dateString: string, timezone: string): string[] => {
-    if (!dateString || !speakerDetails?.availability) return []
+  const generateTimeSlots = (dateString: string): string[] => {
+    if (!dateString || !speakerDetails?.availability || speakerDetails.availability.length === 0) return []
     
     // Get day name based on UTC date (consistent day calculation)
     const dayName = getDayNameFromDate(dateString)
-    const dayAvailability = speakerDetails.availability.find((avail) => avail.day === dayName)
+    const originalDayAvailability = speakerDetails.availability.find((avail) => avail.day === dayName)
 
-    if (!dayAvailability || !dayAvailability.isAvailable || !dayAvailability.startTime || !dayAvailability.endTime) {
+    if (!originalDayAvailability || !originalDayAvailability.isAvailable || !originalDayAvailability.startTime || !originalDayAvailability.endTime) {
       return []
     }
 
-    // Assume speaker's availability times are stored in UTC
-    // Convert them to the selected timezone for display
-    const startTimeUTC = dayAvailability.startTime
-    const endTimeUTC = dayAvailability.endTime
+    // Convert availability times from speaker's timezone to selected timezone
+    // Use the specific date for accurate DST conversion
+    let startTime: string
+    let endTime: string
+    
+    if (selectedTimezone === speakerTimezone) {
+      // No conversion needed
+      startTime = originalDayAvailability.startTime
+      endTime = originalDayAvailability.endTime
+    } else {
+      // Convert using the specific date for accurate timezone conversion
+      startTime = convertTimeToTimezone(
+        originalDayAvailability.startTime,
+        dateString,
+        speakerTimezone,
+        selectedTimezone
+      )
+      endTime = convertTimeToTimezone(
+        originalDayAvailability.endTime,
+        dateString,
+        speakerTimezone,
+        selectedTimezone
+      )
+    }
 
-    // Convert start and end times to the selected timezone
-    const startTimeInTZ = convertTimeFromUTC(startTimeUTC, dateString, timezone)
-    const endTimeInTZ = convertTimeFromUTC(endTimeUTC, dateString, timezone)
-
-    const [startHour, startMinute] = startTimeInTZ.split(":").map(Number)
-    const [endHour, endMinute] = endTimeInTZ.split(":").map(Number)
+    const [startHour, startMinute] = startTime.split(":").map(Number)
+    const [endHour, endMinute] = endTime.split(":").map(Number)
 
     const startMinutes = startHour * 60 + startMinute
     const endMinutes = endHour * 60 + endMinute
 
-    // Handle cases where timezone conversion causes day rollover
-    // If end time is before start time, it means we've crossed midnight
+    // Handle cases where end time is before start time (crosses midnight)
     let adjustedEndMinutes = endMinutes
     if (endMinutes < startMinutes) {
       adjustedEndMinutes = endMinutes + 1440 // Add 24 hours
@@ -396,27 +527,47 @@ export function BookSessionDialog({
     return slots
   }
 
-  const validateBookingTime = (date: string, time: string, timezone: string): string | null => {
-    if (!date || !time || !speakerDetails?.availability) return null
+  const validateBookingTime = (date: string, time: string): string | null => {
+    if (!date || !time || !speakerDetails?.availability || speakerDetails.availability.length === 0) return null
 
     const dayName = getDayNameFromDate(date)
-    const dayAvailability = speakerDetails.availability.find((avail) => avail.day === dayName)
+    const originalDayAvailability = speakerDetails.availability.find((avail) => avail.day === dayName)
 
-    if (!dayAvailability || !dayAvailability.isAvailable) {
+    if (!originalDayAvailability || !originalDayAvailability.isAvailable) {
       const dayTranslation = daysOfWeek.find((d) => d.key === dayName)
       const dayLabel = dayTranslation ? t(dayTranslation.translationKey as any) : dayName.charAt(0).toUpperCase() + dayName.slice(1)
       return `${t("speakerProfile.bookSession.unavailableDay")} ${dayLabel}.`
     }
 
-    // Convert the selected time (in selected timezone) to UTC for validation
-    // Then convert availability times to selected timezone for display
-    const startTimeInTZ = convertTimeFromUTC(dayAvailability.startTime || "00:00", date, timezone)
-    const endTimeInTZ = convertTimeFromUTC(dayAvailability.endTime || "23:59", date, timezone)
+    // Convert availability times from speaker's timezone to selected timezone
+    // Use the specific date for accurate DST conversion
+    let startTime: string
+    let endTime: string
+    
+    if (selectedTimezone === speakerTimezone) {
+      // No conversion needed
+      startTime = originalDayAvailability.startTime || "00:00"
+      endTime = originalDayAvailability.endTime || "23:59"
+    } else {
+      // Convert using the specific date for accurate timezone conversion
+      startTime = convertTimeToTimezone(
+        originalDayAvailability.startTime || "00:00",
+        date,
+        speakerTimezone,
+        selectedTimezone
+      )
+      endTime = convertTimeToTimezone(
+        originalDayAvailability.endTime || "23:59",
+        date,
+        speakerTimezone,
+        selectedTimezone
+      )
+    }
 
     const [requestedHour, requestedMinute] = time.split(":").map(Number)
     const requestedMinutes = requestedHour * 60 + requestedMinute
-    const [startHour, startMinute] = startTimeInTZ.split(":").map(Number)
-    const [endHour, endMinute] = endTimeInTZ.split(":").map(Number)
+    const [startHour, startMinute] = startTime.split(":").map(Number)
+    const [endHour, endMinute] = endTime.split(":").map(Number)
     const startMinutes = startHour * 60 + startMinute
     const endMinutes = endHour * 60 + endMinute
     const sessionEndMinutes = requestedMinutes + 30
@@ -424,15 +575,16 @@ export function BookSessionDialog({
     if (requestedMinutes < startMinutes || sessionEndMinutes > endMinutes) {
       const dayTranslation = daysOfWeek.find((d) => d.key === dayName)
       const dayLabel = dayTranslation ? t(dayTranslation.translationKey as any) : dayName.charAt(0).toUpperCase() + dayName.slice(1)
-      return `${t("speakerProfile.bookSession.timeNotInRange")} ${startTimeInTZ} ${t(
+      return `${t("speakerProfile.bookSession.timeNotInRange")} ${startTime} ${t(
         "dashboard.availability.to",
-      )} ${endTimeInTZ} ${t("dashboard.availability.to")} ${dayLabel}.`
+      )} ${endTime} ${t("dashboard.availability.to")} ${dayLabel}.`
     }
 
     return null
   }
 
   const unavailableDayMatchers = useMemo<Matcher[]>(() => {
+    // Use original availability for day availability check (days don't change with timezone)
     if (!speakerDetails?.availability) return []
     const unavailableDays = speakerDetails.availability
       .filter((avail) => !avail.isAvailable)
@@ -445,15 +597,15 @@ export function BookSessionDialog({
 
   const timeSlots = useMemo(() => {
     if (!formData.date) return []
-    return generateTimeSlots(formData.date, selectedTimezone)
-  }, [formData.date, speakerDetails?.availability, selectedTimezone])
+    return generateTimeSlots(formData.date)
+  }, [formData.date, speakerDetails?.availability, selectedTimezone, speakerTimezone])
 
   const scheduleReady = Boolean(formData.date && formData.time)
   const detailsReady = Boolean(formData.title?.trim())
 
   const handleNextStep = () => {
     if (currentStep === 0) {
-      const availabilityError = validateBookingTime(formData.date, formData.time, selectedTimezone)
+      const availabilityError = validateBookingTime(formData.date, formData.time)
       if (availabilityError) {
         setBookingError(availabilityError)
         return
@@ -485,7 +637,7 @@ export function BookSessionDialog({
       return
     }
 
-    const availabilityError = validateBookingTime(formData.date, formData.time, selectedTimezone)
+    const availabilityError = validateBookingTime(formData.date, formData.time)
     if (availabilityError) {
       setBookingError(availabilityError)
       return
@@ -501,14 +653,20 @@ export function BookSessionDialog({
       setIsBooking(true)
       setBookingError("")
 
-      // Convert the selected time from the selected timezone to UTC for the backend
-      const timeInUTC = convertTimeToUTC(formData.time, formData.date, selectedTimezone)
+      // Convert the selected time from selected timezone back to speaker's timezone
+      // The selected time is in the selected timezone, but backend expects it in speaker's timezone
+      const timeInSpeakerTimezone = convertTimeToTimezone(
+        formData.time,
+        formData.date,
+        selectedTimezone,
+        speakerTimezone
+      )
 
       await learnerService.bookSession({
         speakerId,
         title: formData.title,
         date: formData.date,
-        time: timeInUTC,
+        time: timeInSpeakerTimezone,
         topics,
       })
 
@@ -540,7 +698,8 @@ export function BookSessionDialog({
       )
     }
 
-    if (!speakerDetails?.availability || speakerDetails.availability.length === 0) {
+    // Use converted availability for display (shows times in selected timezone)
+    if (!convertedAvailability || convertedAvailability.length === 0) {
       return (
         <p className="text-xs text-muted-foreground">
           {t("speakerProfile.bookSession.notAvailable")}
@@ -549,7 +708,7 @@ export function BookSessionDialog({
     }
 
     return daysOfWeek.map((day) => {
-      const dayAvailability = speakerDetails.availability?.find((avail) => avail.day === day.key)
+      const dayAvailability = convertedAvailability.find((avail) => avail.day === day.key)
       const isAvailable = dayAvailability?.isAvailable || false
       return (
         <div
@@ -624,24 +783,54 @@ export function BookSessionDialog({
               <Label className="text-foreground font-semibold block text-sm mb-2">
                 Timezone
               </Label>
-              <Select value={selectedTimezone} onValueChange={(value) => {
-                setSelectedTimezone(value)
-                setFormData((prev) => ({ ...prev, time: "" })) // Reset time when timezone changes
-                setBookingError("")
-              }}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select timezone" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableTimezones.map((tz) => (
-                    <SelectItem key={tz.value} value={tz.value}>
-                      {tz.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Popover open={timezoneOpen} onOpenChange={setTimezoneOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={timezoneOpen}
+                    className="w-full justify-between"
+                  >
+                    {selectedTimezone
+                      ? availableTimezones.find((tz) => tz.value === selectedTimezone)?.label || formatTimezoneLabel(selectedTimezone)
+                      : "Select timezone..."}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                  <Command>
+                    <CommandInput placeholder="Search timezone..." />
+                    <CommandList>
+                      <CommandEmpty>No timezone found.</CommandEmpty>
+                      <CommandGroup>
+                        {availableTimezones.map((tz) => (
+                          <CommandItem
+                            key={tz.value}
+                            value={tz.value}
+                            onSelect={() => {
+                              setSelectedTimezone(tz.value === selectedTimezone ? selectedTimezone : tz.value)
+                              setFormData((prev) => ({ ...prev, time: "" })) // Reset time when timezone changes
+                              setBookingError("")
+                              setTimezoneOpen(false)
+                            }}
+                          >
+                            <Check
+                              className={`mr-2 h-4 w-4 ${
+                                selectedTimezone === tz.value ? "opacity-100" : "opacity-0"
+                              }`}
+                            />
+                            {tz.label}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               <p className="text-xs text-muted-foreground mt-2">
-                Times are displayed in {availableTimezones.find(tz => tz.value === selectedTimezone)?.label || formatTimezoneLabel(selectedTimezone)}
+                {speakerDetails?.googleCalendar?.timezone && selectedTimezone === speakerDetails.googleCalendar.timezone
+                  ? `Using speaker's timezone: ${speakerTimezoneLabel}`
+                  : `Times are displayed in ${availableTimezones.find(tz => tz.value === selectedTimezone)?.label || formatTimezoneLabel(selectedTimezone)}`}
               </p>
             </div>
             <div className="grid gap-1 lg:grid-cols-[6fr_4fr]">
@@ -800,7 +989,7 @@ export function BookSessionDialog({
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">{t("speakerProfile.bookSession.time")}</span>
-                <span>{formData.time || "—"} ({availableTimezones.find(tz => tz.value === selectedTimezone)?.label || formatTimezoneLabel(selectedTimezone)})</span>
+                <span>{formData.time || "—"} {speakerDetails?.googleCalendar?.timezone && `(${speakerTimezoneLabel})`}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">{t("speakerProfile.bookSession.sessionTitle")}</span>

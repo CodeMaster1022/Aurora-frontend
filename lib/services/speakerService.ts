@@ -241,6 +241,7 @@ class SpeakerService {
     data: {
       connected: boolean;
       expiresAt: string | null;
+      timezone: string | null;
     };
   }> {
     return this.makeRequest<{
@@ -248,6 +249,7 @@ class SpeakerService {
       data: {
         connected: boolean;
         expiresAt: string | null;
+        timezone: string | null;
       };
     }>('/speaker/calendar/status');
   }
