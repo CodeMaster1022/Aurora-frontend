@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Star, Loader2, Gift, Heart } from "lucide-react"
 import { learnerService } from "@/lib/services/learnerService"
+import { DonationAmountDialog } from "@/components/DonationAmountDialog"
 
 interface LearnerRatingModalProps {
   open: boolean
@@ -29,6 +30,7 @@ export function LearnerRatingModal({
   const [error, setError] = useState<string>("")
   const [showThankYou, setShowThankYou] = useState(false)
   const [isCreatingDonation, setIsCreatingDonation] = useState(false)
+  const [donationDialogOpen, setDonationDialogOpen] = useState(false)
 
   const handleSubmit = async () => {
     if (rating === 0) {
@@ -52,13 +54,17 @@ export function LearnerRatingModal({
     }
   }
 
-  const handleDonate = async () => {
+  const handleDonateClick = () => {
+    setDonationDialogOpen(true)
+  }
+
+  const handleDonationConfirm = async (amount: number) => {
     try {
       setIsCreatingDonation(true)
       setError("")
       
-      // Create Stripe checkout session
-      const response = await learnerService.createDonation()
+      // Create Stripe checkout session with selected amount
+      const response = await learnerService.createDonation(amount)
       
       if (response.success && response.data?.url) {
         // Redirect to Stripe checkout
@@ -71,6 +77,7 @@ export function LearnerRatingModal({
           setError((response as any).message || "Failed to create donation checkout")
         }
         setIsCreatingDonation(false)
+        setDonationDialogOpen(false)
       }
     } catch (err: any) {
       console.error("Error creating donation:", err)
@@ -81,6 +88,7 @@ export function LearnerRatingModal({
         setError(err.message || "Failed to create donation")
       }
       setIsCreatingDonation(false)
+      setDonationDialogOpen(false)
     }
   }
 
@@ -103,7 +111,7 @@ export function LearnerRatingModal({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md max-w-[95vw] mx-4">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-center text-white">
+          <DialogTitle className="text-2xl font-bold text-center text-foreground">
             {showThankYou ? "Thank you!" : "Rate Your Session"}
           </DialogTitle>
         </DialogHeader>
@@ -140,7 +148,7 @@ export function LearnerRatingModal({
 
             {/* Comment */}
             <div className="space-y-2">
-              <label htmlFor="comment" className="text-sm font-medium text-white">
+              <label htmlFor="comment" className="text-sm font-medium text-foreground">
                 Share your thoughts (optional)
               </label>
               <Textarea
@@ -150,7 +158,7 @@ export function LearnerRatingModal({
                 placeholder="Write a short review about the session..."
                 rows={4}
                 disabled={isLoading}
-                className="resize-none"
+                className="resize-none text-foreground"
               />
             </div>
 
@@ -190,21 +198,12 @@ export function LearnerRatingModal({
             </div>
 
             <Button
-              onClick={handleDonate}
+              onClick={handleDonateClick}
               disabled={isCreatingDonation}
-              className="w-full cursor-pointer bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white"
+              className="w-full cursor-pointer bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-foreground"
             >
-              {isCreatingDonation ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <Gift className="mr-2 h-4 w-4" />
-                  Donate to help Aurora grow
-                </>
-              )}
+              <Gift className="mr-2 h-4 w-4" />
+              Donate to help Aurora grow
             </Button>
 
             {/* Skip donation button */}
@@ -225,6 +224,13 @@ export function LearnerRatingModal({
           </div>
         )}
       </DialogContent>
+
+      <DonationAmountDialog
+        open={donationDialogOpen}
+        onOpenChange={setDonationDialogOpen}
+        onConfirm={handleDonationConfirm}
+        isLoading={isCreatingDonation}
+      />
     </Dialog>
   )
 }

@@ -691,6 +691,18 @@ export default function SpeakerDashboardPage() {
     setCancelModalOpen(true)
   }
 
+  const handleCompleteSession = async (session: Session) => {
+    try {
+      setError("")
+      await speakerService.completeSession(session._id)
+      // Refresh dashboard data
+      fetchDashboardData()
+    } catch (err: any) {
+      console.error("Error completing session:", err)
+      setError(err.message || t('dashboard.errors.completeFailed'))
+    }
+  }
+
   const handleConfirmCancellation = async () => {
     if (!selectedSessionForCancellation) return
 
@@ -1151,9 +1163,9 @@ export default function SpeakerDashboardPage() {
                               {TIMEZONES.find(tz => tz.value === calendarTimezone)?.label || calendarTimezone}
                             </span>
                           </div>
-                          <p className="mt-1 text-xs text-muted-foreground">
+                          {/* <p className="mt-1 text-xs text-muted-foreground">
                             Sessions are scheduled in your calendar timezone.
-                          </p>
+                          </p> */}
                         </div>
                       )}
                       <Button
@@ -1177,9 +1189,9 @@ export default function SpeakerDashboardPage() {
                     </>
                   ) : (
                     <>
-                      <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-600 dark:text-amber-200">
-                        <p className="font-medium">{t('dashboard.calendar.notConnected')}</p>
-                        <p className="mt-1 text-xs text-amber-600/80 dark:text-amber-200/80">
+                      <div className="rounded-lg border border-amber-500/30 dark:border-amber-500/50 bg-background px-4 py-3 text-sm text-black dark:text-white">
+                        <p className="font-medium text-foreground">{t('dashboard.calendar.notConnected')}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">
                           {t('dashboard.calendar.notConnectedDesc')}
                         </p>
                       </div>
@@ -1325,6 +1337,14 @@ export default function SpeakerDashboardPage() {
                                       {session.status}
                                     </Badge>
                                     <Button
+                                      variant="default"
+                                      size="icon"
+                                      className="h-9 w-9 cursor-pointer"
+                                      onClick={() => handleCompleteSession(session)}
+                                    >
+                                      <CheckCircle2 className="h-4 w-4" />
+                                    </Button>
+                                    <Button
                                       variant="destructive"
                                       size="icon"
                                       className="h-9 w-9 cursor-pointer"
@@ -1421,6 +1441,15 @@ export default function SpeakerDashboardPage() {
                                         Join
                                       </a>
                                     )}
+                                    <Button
+                                      variant="default"
+                                      size="sm"
+                                      className="h-7 cursor-pointer px-2 text-xs sm:h-8 sm:px-3 sm:text-sm"
+                                      onClick={() => handleCompleteSession(session)}
+                                      title="Complete Schedule"
+                                    >
+                                      <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                                    </Button>
                                     <Button
                                       variant="destructive"
                                       size="sm"
@@ -1853,7 +1882,7 @@ export default function SpeakerDashboardPage() {
         <DialogContent className="bg-card border-border text-card-foreground">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-destructive" />
+              <AlertTriangle className="w-5 h-5 text-foreground" />
               {t('dashboard.cancel.title')}
             </DialogTitle>
             <DialogDescription className="text-muted-foreground">

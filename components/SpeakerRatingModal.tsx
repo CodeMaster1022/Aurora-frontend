@@ -99,7 +99,7 @@ export function SpeakerRatingModal({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md max-w-[95vw] mx-4">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-center text-white">
+          <DialogTitle className="text-2xl font-bold text-center text-foreground">
             {showThankYou ? "Thank you!" : "Rate Your Session"}
           </DialogTitle>
         </DialogHeader>
@@ -108,7 +108,7 @@ export function SpeakerRatingModal({
           <div className="space-y-6 py-4">
             {/* Rating */}
             <div className="space-y-3">
-              <p className="text-sm text-white text-center">
+              <p className="text-sm text-foreground text-center">
                 How would you rate your session with <span className="font-semibold">{learnerName}</span>?
               </p>
               <div className="flex justify-center gap-2">
@@ -136,7 +136,7 @@ export function SpeakerRatingModal({
 
             {/* Comment */}
             <div className="space-y-2">
-              <label htmlFor="comment" className="text-sm font-medium text-white">
+              <label htmlFor="comment" className="text-sm font-medium text-foreground">
                 Share your thoughts (optional)
               </label>
               <Textarea
@@ -146,7 +146,7 @@ export function SpeakerRatingModal({
                 placeholder="Write a short review about the session (optional)..."
                 rows={4}
                 disabled={isLoading}
-                className="resize-none"
+                className="resize-none text-foreground"
               />
             </div>
 
@@ -188,7 +188,7 @@ export function SpeakerRatingModal({
             <Button
               onClick={handleReceiveGift}
               disabled={isFetchingSong}
-              className="w-full cursor-pointer bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white"
+              className="w-full cursor-pointer bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-foreground"
             >
               {isFetchingSong ? (
                 <>

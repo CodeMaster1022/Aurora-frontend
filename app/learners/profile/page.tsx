@@ -34,6 +34,7 @@ import { learnerService, Session, Review, LearnerProfile } from "@/lib/services/
 import { useAppDispatch, useAppSelector } from "@/lib/hooks/redux"
 import { getCurrentUser } from "@/lib/store/authSlice"
 import { LearnerRatingModal } from "@/components/LearnerRatingModal"
+import { DonationAmountDialog } from "@/components/DonationAmountDialog"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -86,6 +87,7 @@ export default function LearnerProfilePage() {
   const [isCancelling, setIsCancelling] = useState(false)
 
   const [isCreatingDonation, setIsCreatingDonation] = useState(false)
+  const [donationDialogOpen, setDonationDialogOpen] = useState(false)
   const [isUpcomingSessionsOpen, setIsUpcomingSessionsOpen] = useState(false)
   const [isPastSessionsOpen, setIsPastSessionsOpen] = useState(true)
   const [isReviewsOpen, setIsReviewsOpen] = useState(true)
@@ -151,7 +153,7 @@ export default function LearnerProfilePage() {
           (response.data.reviews || []).map((review) => ({
             ...review,
             sessionDetails:
-              typeof review.session === "object"
+              typeof review.session === "object" && review.session !== null
                 ? {
                     title: (review.session as any).title,
                     date: (review.session as any).date,
@@ -292,18 +294,27 @@ export default function LearnerProfilePage() {
     })
   }
 
-  const handleCreateDonation = async () => {
+  const handleCreateDonation = () => {
+    setDonationDialogOpen(true)
+  }
+
+  const handleDonationConfirm = async (amount: number) => {
     try {
       setIsCreatingDonation(true)
-      const response = await learnerService.createDonation()
+      setError("")
+      const response = await learnerService.createDonation(amount)
       if (response.success && response.data?.url) {
         window.location.href = response.data.url
+      } else {
+        setError((response as any).message || t("learnerProfile.errors.donationFailed"))
+        setIsCreatingDonation(false)
+        setDonationDialogOpen(false)
       }
     } catch (err) {
       console.error("Error creating donation session:", err)
       setError(err instanceof Error ? err.message : t("learnerProfile.errors.donationFailed"))
-    } finally {
       setIsCreatingDonation(false)
+      setDonationDialogOpen(false)
     }
   }
 
@@ -1002,6 +1013,13 @@ export default function LearnerProfilePage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <DonationAmountDialog
+        open={donationDialogOpen}
+        onOpenChange={setDonationDialogOpen}
+        onConfirm={handleDonationConfirm}
+        isLoading={isCreatingDonation}
+      />
     </div>
   )
 }

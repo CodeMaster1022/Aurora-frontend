@@ -316,6 +316,7 @@ export type TranslationKey =
   | 'dashboard.errors.availabilityFailed'
   | 'dashboard.errors.avatarFailed'
   | 'dashboard.errors.cancelFailed'
+  | 'dashboard.errors.completeFailed'
   | 'dashboard.errors.calendarInitFailed'
   | 'dashboard.errors.calendarConnectFailed'
   | 'dashboard.errors.calendarDisconnectFailed'
@@ -935,6 +936,7 @@ export const translations: Record<Language, Translations> = {
     'dashboard.errors.availabilityFailed': 'Failed to save availability',
     'dashboard.errors.avatarFailed': 'Failed to upload avatar',
     'dashboard.errors.cancelFailed': 'Failed to cancel session',
+    'dashboard.errors.completeFailed': 'Failed to complete session',
     'dashboard.errors.calendarInitFailed': 'Failed to initiate Google Calendar connection',
     'dashboard.errors.calendarConnectFailed': 'Failed to connect Google Calendar',
     'dashboard.errors.calendarDisconnectFailed': 'Failed to disconnect Google Calendar',
@@ -1551,6 +1553,7 @@ export const translations: Record<Language, Translations> = {
     'dashboard.errors.availabilityFailed': 'Error al guardar disponibilidad',
     'dashboard.errors.avatarFailed': 'Error al subir avatar',
     'dashboard.errors.cancelFailed': 'Error al cancelar sesión',
+    'dashboard.errors.completeFailed': 'Error al completar sesión',
     'dashboard.errors.calendarInitFailed': 'Error al iniciar conexión con Google Calendar',
     'dashboard.errors.calendarConnectFailed': 'Error al conectar Google Calendar',
     'dashboard.errors.calendarDisconnectFailed': 'Error al desconectar Google Calendar',

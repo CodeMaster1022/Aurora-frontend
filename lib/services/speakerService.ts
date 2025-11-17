@@ -282,6 +282,18 @@ class SpeakerService {
     );
   }
 
+  // Complete a scheduled session
+  async completeSession(
+    sessionId: string
+  ): Promise<{ success: boolean; message: string; data: { session: any } }> {
+    return this.makeRequest<{ success: boolean; message: string; data: { session: any } }>(
+      `/speaker/sessions/${sessionId}/complete`,
+      {
+        method: 'PUT',
+      }
+    );
+  }
+
   // Get available topics (public endpoint)
   async getTopics(): Promise<{ success: boolean; data: { topics: string[] } }> {
     return this.makeRequest<{ success: boolean; data: { topics: string[] } }>(
