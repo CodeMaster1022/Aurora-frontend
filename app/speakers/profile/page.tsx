@@ -128,60 +128,6 @@ export default function SpeakerDashboardPage() {
     }
   }
 
-  // Timezone conversion utilities
-  // Convert time from one timezone to another
-  const convertTimeToTimezone = (time: string, date: string, fromTimezone: string, toTimezone: string): string => {
-    try {
-      const [hours, minutes] = time.split(":").map(Number)
-      const [year, month, day] = date.split("-").map(Number)
-      
-      const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`
-      const noonUTC = new Date(`${dateStr}T12:00:00Z`)
-      
-      const fromTZNoon = new Intl.DateTimeFormat("en-US", {
-        timeZone: fromTimezone,
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      }).formatToParts(noonUTC)
-      
-      const fromTZNoonHour = parseInt(fromTZNoon.find(p => p.type === "hour")?.value || "12")
-      const fromTZNoonMin = parseInt(fromTZNoon.find(p => p.type === "minute")?.value || "0")
-      const fromTZOffsetMinutes = (fromTZNoonHour * 60 + fromTZNoonMin) - (12 * 60)
-      
-      const desiredTotalMinutes = hours * 60 + minutes
-      const utcTotalMinutes = desiredTotalMinutes - fromTZOffsetMinutes
-      
-      let normalizedMinutes = utcTotalMinutes
-      while (normalizedMinutes < 0) normalizedMinutes += 1440
-      while (normalizedMinutes >= 1440) normalizedMinutes -= 1440
-      
-      const utcHours = Math.floor(normalizedMinutes / 60)
-      const utcMins = normalizedMinutes % 60
-      const utcDate = new Date(`${dateStr}T${String(utcHours).padStart(2, "0")}:${String(utcMins).padStart(2, "0")}:00Z`)
-      
-      const toParts = new Intl.DateTimeFormat("en-US", {
-        timeZone: toTimezone,
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      }).formatToParts(utcDate)
-      
-      const toHour = toParts.find(p => p.type === "hour")?.value || "00"
-      const toMinute = toParts.find(p => p.type === "minute")?.value || "00"
-      
-      return `${toHour.padStart(2, "0")}:${toMinute.padStart(2, "0")}`
-    } catch (error) {
-      console.error("Error converting timezone:", error)
-      return time
-    }
-  }
-
-  // Convert time from UTC to display timezone
-  const convertTimeFromUTC = (time: string, date: string, timezone: string): string => {
-    return convertTimeToTimezone(time, date, "UTC", timezone)
-  }
-  
   // Available topic options - loaded from backend
   const [availableTopics, setAvailableTopics] = useState<string[]>([])
 
@@ -294,29 +240,6 @@ export default function SpeakerDashboardPage() {
           setCalendarTimezone(calendarTZ)
           // Always use calendar timezone when calendar is connected
           setTimezone(calendarTZ)
-          
-          // Reload availability to convert times to calendar timezone
-          if (availability.length > 0) {
-            const today = new Date()
-            const nextMonday = new Date(today)
-            nextMonday.setDate(today.getDate() + ((1 + 7 - today.getDay()) % 7))
-            const referenceDate = nextMonday.toISOString().split('T')[0]
-            
-            const convertedAvailability = availability.map(avail => {
-              if (!avail.isAvailable || !avail.startTime || !avail.endTime) {
-                return avail
-              }
-              // Convert from UTC to calendar timezone (availability times are stored in UTC)
-              const startTimeInTZ = convertTimeFromUTC(avail.startTime, referenceDate, calendarTZ)
-              const endTimeInTZ = convertTimeFromUTC(avail.endTime, referenceDate, calendarTZ)
-              return {
-                ...avail,
-                startTime: startTimeInTZ,
-                endTime: endTimeInTZ
-              }
-            })
-            setAvailability(convertedAvailability)
-          }
         }
       }
     } catch (error) {
@@ -464,29 +387,8 @@ export default function SpeakerDashboardPage() {
           console.log('Loaded availability from backend:', profileAvailability)
           const normalizedAvailability = normalizeAvailability(profileAvailability)
           
-          // Convert availability times from UTC to calendar timezone
-          const displayTimezone = calendarTimezone || getUserTimezone()
-          const today = new Date()
-          const nextMonday = new Date(today)
-          nextMonday.setDate(today.getDate() + ((1 + 7 - today.getDay()) % 7))
-          const referenceDate = nextMonday.toISOString().split('T')[0] // YYYY-MM-DD
-          
-          const convertedAvailability = normalizedAvailability.map(avail => {
-            if (!avail.isAvailable || !avail.startTime || !avail.endTime) {
-              return avail
-            }
-            // Convert from UTC to display timezone
-            const startTimeInTZ = convertTimeFromUTC(avail.startTime, referenceDate, displayTimezone)
-            const endTimeInTZ = convertTimeFromUTC(avail.endTime, referenceDate, displayTimezone)
-            return {
-              ...avail,
-              startTime: startTimeInTZ,
-              endTime: endTimeInTZ
-            }
-          })
-          
-          console.log('Normalized and converted availability:', convertedAvailability)
-          setAvailability(convertedAvailability)
+          console.log('Normalized availability:', normalizedAvailability)
+          setAvailability(normalizedAvailability)
         } else {
           // If no profile data, initialize with default availability
           console.log('No profile data, initializing with defaults')
@@ -651,12 +553,15 @@ export default function SpeakerDashboardPage() {
   // Check if the speaker has received a review for this session (from a learner)
   // This checks if any learner has given a review TO the speaker for this session
   const hasReceivedReviews = (sessionId: string) => {
+    console.log("+====================", user?._id)
+    console.log(user)
     if (!user?._id) return false
+    console.log('--------------------------------------------',receivedReviews)
     return receivedReviews.some(review => {
-      // Check if this review is for the given session
       const reviewSessionId = typeof review.session === 'string' 
         ? review.session 
         : (review.session as any)?._id || (review.session as any)?.id
+        console.log(sessionId, "sessionID")
       return reviewSessionId === sessionId || reviewSessionId?.toString() === sessionId?.toString()
     })
   }
@@ -783,10 +688,10 @@ export default function SpeakerDashboardPage() {
       setIsConnectingCalendar(false)
     }
   }
-
-  const receivedReviews = reviews.filter(r => r.type === "received")
-  const givenReviews = reviews.filter(r => r.type === "given")
-
+  console.log(reviews,"********************")
+  const receivedReviews = reviews.filter(r => r.type === "given")
+  const givenReviews = reviews.filter(r => r.type === "received")
+  
   const totalSessions = upcomingSessions.length + pastSessions.length
   const totalCompletedMinutes = pastSessions.reduce((acc, session) => {
     if (session.status !== "completed") {
@@ -1662,11 +1567,11 @@ export default function SpeakerDashboardPage() {
                             </div>
                             <p className="mt-2 text-xs text-foreground sm:mt-3 sm:text-sm">{review.comment}</p>
                             <div className="mt-1.5 flex items-center gap-2 text-[10px] text-muted-foreground sm:mt-2 sm:text-xs">
-                              {typeof review.from === 'object' && (review.from as any).avatar ? (
+                              {typeof review.to === 'object' && (review.to as any).avatar ? (
                                 <div className="relative h-5 w-5 shrink-0 overflow-hidden rounded-full bg-muted sm:h-6 sm:w-6">
                                   <Image
-                                    src={(review.from as any).avatar}
-                                    alt={`${review.from.firstname} ${review.from.lastname}`}
+                                    src={(review.to as any).avatar}
+                                    alt={`${review.to.firstname} ${review.to.lastname}`}
                                     fill
                                     className="object-cover"
                                     sizes="24px"
@@ -1679,9 +1584,9 @@ export default function SpeakerDashboardPage() {
                               )}
                               <span>
                                 {t('dashboard.reviews.received.from')}{" "}
-                                {typeof review.from === 'object'
-                                  ? `${review.from.firstname} ${review.from.lastname}`
-                                  : review.from} • {new Date(review.createdAt).toLocaleDateString()}
+                                {typeof review.to === 'object'
+                                  ? `${review.to.firstname} ${review.to.lastname}`
+                                  : review.to} • {new Date(review.createdAt).toLocaleDateString()}
                               </span>
                             </div>
                           </div>
@@ -1694,7 +1599,7 @@ export default function SpeakerDashboardPage() {
                             <TableRow>
                               <TableHead className="text-xs sm:text-sm">Rating</TableHead>
                               <TableHead className="text-xs sm:text-sm">Comment</TableHead>
-                              <TableHead className="text-xs sm:text-sm">From</TableHead>
+                              <TableHead className="text-xs sm:text-sm">To</TableHead>
                               <TableHead className="text-xs sm:text-sm">Date</TableHead>
                             </TableRow>
                           </TableHeader>
@@ -1718,11 +1623,11 @@ export default function SpeakerDashboardPage() {
                                 </TableCell>
                                 <TableCell className="text-xs sm:text-sm">
                                   <div className="flex items-center gap-2">
-                                    {typeof review.from === 'object' && (review.from as any).avatar ? (
+                                    {typeof review.to === 'object' && (review.to as any).avatar ? (
                                       <div className="relative h-6 w-6 shrink-0 overflow-hidden rounded-full bg-muted sm:h-7 sm:w-7">
                                         <Image
-                                          src={(review.from as any).avatar}
-                                          alt={`${review.from.firstname} ${review.from.lastname}`}
+                                          src={(review.to as any).avatar}
+                                          alt={`${review.to.firstname} ${review.to.lastname}`}
                                           fill
                                           className="object-cover"
                                           sizes="28px"
@@ -1734,9 +1639,9 @@ export default function SpeakerDashboardPage() {
                                       </div>
                                     )}
                                     <span>
-                                      {typeof review.from === 'object'
-                                        ? `${review.from.firstname} ${review.from.lastname}`
-                                        : review.from}
+                                      {typeof review.to === 'object'
+                                        ? `${review.to.firstname} ${review.to.lastname}`
+                                        : review.to}
                                     </span>
                                   </div>
                                 </TableCell>
@@ -1800,9 +1705,9 @@ export default function SpeakerDashboardPage() {
                             <p className="mt-2 text-xs text-foreground sm:mt-3 sm:text-sm">{review.comment}</p>
                             <p className="mt-1.5 text-[10px] text-muted-foreground sm:mt-2 sm:text-xs">
                               {t('dashboard.reviews.given.for')}{" "}
-                              {typeof review.to === 'object'
-                                ? `${review.to.firstname} ${review.to.lastname}`
-                                : review.to} • {new Date(review.createdAt).toLocaleDateString()}
+                              {typeof review.from === 'object'
+                                ? `${review.from.firstname} ${review.from.lastname}`
+                                : review.from} • {new Date(review.createdAt).toLocaleDateString()}
                             </p>
                           </div>
                         ))}
@@ -1814,7 +1719,7 @@ export default function SpeakerDashboardPage() {
                             <TableRow>
                               <TableHead className="text-xs sm:text-sm">Rating</TableHead>
                               <TableHead className="text-xs sm:text-sm">Comment</TableHead>
-                              <TableHead className="text-xs sm:text-sm">To</TableHead>
+                              <TableHead className="text-xs sm:text-sm">From</TableHead>
                               <TableHead className="text-xs sm:text-sm">Date</TableHead>
                             </TableRow>
                           </TableHeader>
@@ -1837,9 +1742,9 @@ export default function SpeakerDashboardPage() {
                                   <p className="line-clamp-2">{review.comment}</p>
                                 </TableCell>
                                 <TableCell className="text-xs sm:text-sm">
-                                  {typeof review.to === 'object'
-                                    ? `${review.to.firstname} ${review.to.lastname}`
-                                    : review.to}
+                                  {typeof review.from === 'object'
+                                    ? `${review.from.firstname} ${review.from.lastname}`
+                                    : review.from}
                                 </TableCell>
                                 <TableCell className="text-xs sm:text-sm">
                                   {new Date(review.createdAt).toLocaleDateString()}

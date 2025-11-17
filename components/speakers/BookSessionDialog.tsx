@@ -228,6 +228,20 @@ export function BookSessionDialog({
   onBooked,
   disableAutoCloseRedirect = false,
 }: BookSessionDialogProps) {
+  // Debug: Log what props BookSessionDialog receives
+  useEffect(() => {
+    console.log("[BookSessionDialog] Received speaker prop:", {
+      _id: speaker?._id,
+      firstname: speaker?.firstname,
+      lastname: speaker?.lastname,
+      googleCalendar: speaker?.googleCalendar,
+      googleCalendarTimezone: speaker?.googleCalendar?.timezone,
+      googleCalendarConnected: speaker?.googleCalendar?.connected,
+      availability: speaker?.availability,
+      availabilityCount: speaker?.availability?.length,
+    })
+  }, [speaker])
+
   const router = useRouter()
   const { t } = useTranslation()
   const { user, isAuthenticated } = useAppSelector((state) => state.auth)
@@ -244,7 +258,13 @@ export function BookSessionDialog({
   const [selectedDate, setSelectedDate] = useState<Date>()
   // Get speaker's calendar timezone as default
   const getDefaultTimezone = (): string => {
-    return speakerDetails?.googleCalendar?.timezone || speaker?.googleCalendar?.timezone || "UTC"
+    const tz = speakerDetails?.googleCalendar?.timezone || speaker?.googleCalendar?.timezone || "UTC"
+    // console.log("[BookSessionDialog] Getting default timezone:", {
+    //   fromSpeakerDetails: speakerDetails?.googleCalendar?.timezone,
+    //   fromSpeakerProp: speaker?.googleCalendar?.timezone,
+    //   final: tz,
+    // })
+    return tz
   }
   
   const [selectedTimezone, setSelectedTimezone] = useState<string>(getDefaultTimezone())
@@ -252,7 +272,13 @@ export function BookSessionDialog({
 
   // Get speaker's calendar timezone (original timezone for availability)
   const speakerTimezone = useMemo(() => {
-    return speakerDetails?.googleCalendar?.timezone || speaker?.googleCalendar?.timezone || "UTC"
+    const tz = speakerDetails?.googleCalendar?.timezone || speaker?.googleCalendar?.timezone || "UTC"
+    console.log("[BookSessionDialog] Speaker timezone calculated:", {
+      fromSpeakerDetails: speakerDetails?.googleCalendar?.timezone,
+      fromSpeakerProp: speaker?.googleCalendar?.timezone,
+      final: tz,
+    })
+    return tz
   }, [speakerDetails?.googleCalendar?.timezone, speaker?.googleCalendar?.timezone])
 
   // Helper function to format date to string (needed before convertedAvailability)
@@ -266,6 +292,7 @@ export function BookSessionDialog({
   // Convert availability times from speaker's timezone to selected timezone for display
   // Keep original availability intact (in speaker's timezone)
   const convertedAvailability = useMemo(() => {
+    console.log(speakerDetails?.availability, selectedTimezone, speakerTimezone, "=========")
     if (!speakerDetails?.availability || selectedTimezone === speakerTimezone) {
       // No conversion needed if timezone matches or no availability
       return speakerDetails?.availability || []
@@ -342,13 +369,36 @@ export function BookSessionDialog({
   }, [speakerDetails?.googleCalendar?.timezone, speaker?.googleCalendar?.timezone])
 
   useEffect(() => {
+    // Debug: Log when speaker prop changes
+    // console.log("[BookSessionDialog] Speaker prop changed, updating speakerDetails:", {
+    //   _id: speaker?._id,
+    //   firstname: speaker?.firstname,
+    //   lastname: speaker?.lastname,
+    //   googleCalendar: speaker?.googleCalendar,
+    //   googleCalendarTimezone: speaker?.googleCalendar?.timezone,
+    //   googleCalendarConnected: speaker?.googleCalendar?.connected,
+    // })
     // Update speaker details when prop changes
     setSpeakerDetails(speaker)
     // Update timezone to speaker's calendar timezone when available
     if (speaker?.googleCalendar?.timezone) {
+      // console.log("[BookSessionDialog] Setting selected timezone from speaker prop:", speaker.googleCalendar.timezone)
       setSelectedTimezone(speaker.googleCalendar.timezone)
     }
   }, [speaker])
+
+  // Debug: Log when speakerDetails state changes
+  // useEffect(() => {
+  //   console.log("[BookSessionDialog] speakerDetails state updated:", {
+  //     _id: speakerDetails?._id,
+  //     firstname: speakerDetails?.firstname,
+  //     lastname: speakerDetails?.lastname,
+  //     googleCalendar: speakerDetails?.googleCalendar,
+  //     googleCalendarTimezone: speakerDetails?.googleCalendar?.timezone,
+  //     googleCalendarConnected: speakerDetails?.googleCalendar?.connected,
+  //     availability: speakerDetails?.availability,
+  //   })
+  // }, [speakerDetails])
 
   const speakerId = speakerDetails?._id ?? speaker?._id
 
@@ -410,9 +460,22 @@ export function BookSessionDialog({
             // Ensure googleCalendar object is preserved (including timezone)
             googleCalendar: response.data.speaker.googleCalendar || speaker?.googleCalendar,
           }
-          console.log("Fetched speaker data:", updatedSpeaker)
-          console.log("Speaker calendar timezone:", updatedSpeaker.googleCalendar?.timezone)
-          console.log("Speaker availability (raw from backend):", updatedSpeaker.availability)
+          // Debug: Log fetched speaker data
+          // console.log("[BookSessionDialog] Fetched speaker data from API:", {
+          //   _id: updatedSpeaker._id,
+          //   firstname: updatedSpeaker.firstname,
+          //   lastname: updatedSpeaker.lastname,
+          //   googleCalendar: updatedSpeaker.googleCalendar,
+          //   googleCalendarFromAPI: response.data.speaker.googleCalendar,
+          //   googleCalendarFromProp: speaker?.googleCalendar,
+          //   googleCalendarTimezone: updatedSpeaker.googleCalendar?.timezone,
+          //   googleCalendarConnected: updatedSpeaker.googleCalendar?.connected,
+          //   availability: updatedSpeaker.availability,
+          //   availabilityCount: updatedSpeaker.availability?.length,
+          // })
+          // console.log("[BookSessionDialog] Speaker calendar timezone:", updatedSpeaker.googleCalendar?.timezone)
+          // console.log("[BookSessionDialog] Speaker availability (raw from backend):", updatedSpeaker.availability)
+          
           setSpeakerDetails(updatedSpeaker)
           
           // Update timezone to speaker's calendar timezone when fetched
@@ -424,7 +487,7 @@ export function BookSessionDialog({
           if (updatedSpeaker.availability && updatedSpeaker.availability.length > 0) {
             updatedSpeaker.availability.forEach((avail: SpeakerAvailability) => {
               if (avail.isAvailable) {
-                console.log(`Availability ${avail.day}: ${avail.startTime} - ${avail.endTime} (should be UTC)`)
+                // console.log(`Availability ${avail.day}: ${avail.startTime} - ${avail.endTime} (should be UTC)`)
               }
             })
           }
@@ -432,11 +495,11 @@ export function BookSessionDialog({
       } catch (error) {
         console.error("Error loading speaker profile:", error)
         if (isMounted) {
-          setBookingError(t("speakerProfile.bookSession.failed"))
+        setBookingError(t("speakerProfile.bookSession.failed"))
         }
       } finally {
         if (isMounted) {
-          setIsLoadingDetails(false)
+        setIsLoadingDetails(false)
         }
       }
     }
@@ -485,6 +548,7 @@ export function BookSessionDialog({
     let startTime: string
     let endTime: string
     
+    // console.log(selectedTimezone, speakerTimezone, "=========")
     if (selectedTimezone === speakerTimezone) {
       // No conversion needed
       startTime = originalDayAvailability.startTime
@@ -545,6 +609,7 @@ export function BookSessionDialog({
     let endTime: string
     
     if (selectedTimezone === speakerTimezone) {
+      // console.log(originalDayAvailability.startTime, originalDayAvailability.endTime, "=========")
       // No conversion needed
       startTime = originalDayAvailability.startTime || "00:00"
       endTime = originalDayAvailability.endTime || "23:59"
@@ -809,8 +874,8 @@ export function BookSessionDialog({
                             value={tz.value}
                             onSelect={() => {
                               setSelectedTimezone(tz.value === selectedTimezone ? selectedTimezone : tz.value)
-                              setFormData((prev) => ({ ...prev, time: "" })) // Reset time when timezone changes
-                              setBookingError("")
+                setFormData((prev) => ({ ...prev, time: "" })) // Reset time when timezone changes
+                setBookingError("")
                               setTimezoneOpen(false)
                             }}
                           >
@@ -819,7 +884,7 @@ export function BookSessionDialog({
                                 selectedTimezone === tz.value ? "opacity-100" : "opacity-0"
                               }`}
                             />
-                            {tz.label}
+                      {tz.label}
                           </CommandItem>
                         ))}
                       </CommandGroup>

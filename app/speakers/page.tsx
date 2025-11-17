@@ -108,7 +108,14 @@ type Speaker = {
   cost?: number
   googleCalendar?: {
     connected?: boolean
+    timezone?: string
   }
+  availability?: Array<{
+    day: string
+    isAvailable: boolean
+    startTime?: string
+    endTime?: string
+  }>
 }
 
 type FilteredSpeaker = Speaker & { id?: string }
@@ -128,6 +135,15 @@ export default function SpeakersPage() {
         setIsLoading(true)
         const response = await learnerService.getSpeakers()
         if (response.success) {
+          console.log("[Speakers Page] Fetched speakers from API:", response.data.speakers)
+          // Debug: Log googleCalendar data for each speaker
+          response.data.speakers.forEach((speaker: Speaker) => {
+            // console.log(`[Speakers Page] Speaker ${speaker.firstname} ${speaker.lastname}:`, {
+            //   _id: speaker._id,
+            //   googleCalendar: speaker.googleCalendar,
+            //   availability: speaker.availability,
+            // })
+          })
           setSpeakers(response.data.speakers)
         } else {
           setSpeakers([])
@@ -217,7 +233,7 @@ export default function SpeakersPage() {
               const key = speaker._id ?? speaker.id ?? `${speaker.firstname}-${speaker.lastname}`
               const rating = speaker.rating ?? 4.9
               const ratingCount = speaker.ratingCount ?? 120
-              const location = (speaker as any)?.location as string | undefined
+              const location = speaker.location
               const fallbackLocation = [speaker.city, speaker.state].filter(Boolean).join(", ")
               const locationLabel = location || fallbackLocation
               return (
@@ -282,12 +298,27 @@ export default function SpeakersPage() {
 
                   <div className="mt-auto flex items-center justify-between gap-4 rounded-xl">
                     <BookSessionDialog
-                      speaker={{
-                        _id: speaker._id,
-                        firstname: speaker.firstname,
-                        lastname: speaker.lastname,
-                        availability: (speaker as any)?.availability,
-                      }}
+                      speaker={(() => {
+                        const speakerProp = {
+                          _id: speaker._id,
+                          firstname: speaker.firstname,
+                          lastname: speaker.lastname,
+                          availability: speaker.availability,
+                          googleCalendar: speaker.googleCalendar,
+                        }
+                        // Debug: Log what's being passed to BookSessionDialog
+                        // console.log(`[Speakers Page] Passing speaker prop to BookSessionDialog for ${speaker.firstname} ${speaker.lastname}:`, {
+                        //   _id: speakerProp._id,
+                        //   firstname: speakerProp.firstname,
+                        //   lastname: speakerProp.lastname,
+                        //   googleCalendar: speakerProp.googleCalendar,
+                        //   googleCalendarTimezone: speakerProp.googleCalendar?.timezone,
+                        //   googleCalendarConnected: speakerProp.googleCalendar?.connected,
+                        //   availability: speakerProp.availability,
+                        //   availabilityCount: speakerProp.availability?.length,
+                        // })
+                        return speakerProp
+                      })()}
                       trigger={
                         speaker.googleCalendar?.connected ? (
                           <Button className="w-full rounded-lg px-5 cursor-pointer bg-[#59248F] text-white">
