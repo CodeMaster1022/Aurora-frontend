@@ -65,6 +65,12 @@ export interface SpeakerRegisterCredentials {
   cost?: number;
   bio?: string;
   avatar?: File;
+  availability?: Array<{
+    day: string;
+    startTime: string;
+    endTime: string;
+    isAvailable: boolean;
+  }>;
   termsAccepted?: boolean;
   privacyAccepted?: boolean;
 }

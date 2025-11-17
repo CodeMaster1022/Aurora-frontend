@@ -5,17 +5,19 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Eye, EyeOff, Loader2, Upload, ArrowLeft } from "lucide-react"
+import { Switch } from "@/components/ui/switch"
+import { Eye, EyeOff, Loader2, Upload, ArrowLeft, Calendar, Clock, CheckCircle2, X } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "@/lib/hooks/redux"
 import { loginUser, setUser } from "@/lib/store/authSlice"
 import { authService } from "@/lib/services/authService"
 import { Header } from "@/components/header"
 import { useTranslation } from "@/lib/hooks/useTranslation"
+import { SpeakerAvailability } from "@/lib/services/speakerService"
 
 const emailRegex = /^[^\s@]+@gmail\.com$/i
 const generalEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-type RegisterStep = 1 | 2
+type RegisterStep = 1 | 2 | 3
 
 export default function SpeakerAuthPage() {
   const router = useRouter()
@@ -40,6 +42,15 @@ export default function SpeakerAuthPage() {
   const [bio, setBio] = useState("")
   const [photo, setPhoto] = useState<File | null>(null)
   const [photoName, setPhotoName] = useState("")
+  const [availability, setAvailability] = useState<SpeakerAvailability[]>(() => {
+    const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+    return daysOfWeek.map(day => ({
+      day,
+      startTime: "09:00",
+      endTime: "17:00",
+      isAvailable: false
+    }))
+  })
   const [registerErrors, setRegisterErrors] = useState({
     fullName: "",
     email: "",
@@ -48,6 +59,7 @@ export default function SpeakerAuthPage() {
     location: "",
     bio: "",
     photo: "",
+    availability: "",
   })
   const [registerError, setRegisterError] = useState("")
 
@@ -121,16 +133,40 @@ export default function SpeakerAuthPage() {
     return Object.values(errors).every((error) => error === "")
   }
 
+  const validateStepThree = () => {
+    const hasAvailableDay = availability.some(day => day.isAvailable)
+    const errors = {
+      availability: hasAvailableDay ? "" : t("auth.speaker.register.step3.availabilityRequired"),
+    }
+    setRegisterErrors((prev) => ({ ...prev, ...errors }))
+    return Object.values(errors).every((error) => error === "")
+  }
+
   const handleNextStep = () => {
-    if (validateStepOne()) {
+    if (registerStep === 1 && validateStepOne()) {
       setRegisterError("")
       setRegisterStep(2)
+    } else if (registerStep === 2 && validateStepTwo()) {
+      setRegisterError("")
+      setRegisterStep(3)
+    }
+  }
+
+  const handleBackStep = () => {
+    if (registerStep === 3) {
+      setRegisterStep(2)
+    } else if (registerStep === 2) {
+      setRegisterStep(1)
     }
   }
 
   const handleRegisterSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
-    if (!validateStepTwo()) return
+    if (registerStep === 3) {
+      if (!validateStepThree()) return
+    } else {
+      if (!validateStepTwo()) return
+    }
 
     setIsSubmitting(true)
     setRegisterError("")
@@ -152,6 +188,7 @@ export default function SpeakerAuthPage() {
         age: ageValue,
         bio: bio || undefined,
         avatar: photo ?? undefined,
+        availability: availability,
         termsAccepted: true,
         privacyAccepted: true,
       })
@@ -167,6 +204,48 @@ export default function SpeakerAuthPage() {
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  const handleAvailabilityToggle = (index: number) => {
+    const updated = [...availability]
+    updated[index] = { ...updated[index], isAvailable: !updated[index].isAvailable }
+    setAvailability(updated)
+    setRegisterErrors((prev) => ({ ...prev, availability: "" }))
+  }
+
+  const handleTimeChange = (index: number, field: "startTime" | "endTime", value: string) => {
+    const updated = [...availability]
+    updated[index] = { ...updated[index], [field]: value }
+    setAvailability(updated)
+  }
+
+  const daysOfWeek = [
+    { key: "monday", translationKey: 'dashboard.availability.days.monday' },
+    { key: "tuesday", translationKey: 'dashboard.availability.days.tuesday' },
+    { key: "wednesday", translationKey: 'dashboard.availability.days.wednesday' },
+    { key: "thursday", translationKey: 'dashboard.availability.days.thursday' },
+    { key: "friday", translationKey: 'dashboard.availability.days.friday' },
+    { key: "saturday", translationKey: 'dashboard.availability.days.saturday' },
+    { key: "sunday", translationKey: 'dashboard.availability.days.sunday' }
+  ]
+
+  const availableDaysCount = availability.filter(day => day.isAvailable).length
+
+  const handleSelectWeekdays = () => {
+    const weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
+    const updated = availability.map(day => 
+      weekdays.includes(day.day) 
+        ? { ...day, isAvailable: true }
+        : day
+    )
+    setAvailability(updated)
+    setRegisterErrors((prev) => ({ ...prev, availability: "" }))
+  }
+
+  const handleClearAll = () => {
+    const updated = availability.map(day => ({ ...day, isAvailable: false }))
+    setAvailability(updated)
+    setRegisterErrors((prev) => ({ ...prev, availability: "" }))
   }
 
   const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -189,7 +268,16 @@ export default function SpeakerAuthPage() {
     setBio("")
     setPhoto(null)
     setPhotoName("")
-    setRegisterErrors({ fullName: "", email: "", password: "", birthDate: "", location: "", bio: "", photo: "" })
+    setAvailability(() => {
+      const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+      return daysOfWeek.map(day => ({
+        day,
+        startTime: "09:00",
+        endTime: "17:00",
+        isAvailable: false
+      }))
+    })
+    setRegisterErrors({ fullName: "", email: "", password: "", birthDate: "", location: "", bio: "", photo: "", availability: "" })
     setRegisterError("")
   }
 
@@ -354,8 +442,8 @@ export default function SpeakerAuthPage() {
                       {t("auth.speaker.register.step1.submit")}
                     </Button>
                   </form>
-                ) : (
-                  <form onSubmit={handleRegisterSubmit} className="space-y-5">
+                ) : registerStep === 2 ? (
+                  <form onSubmit={(event) => { event.preventDefault(); handleNextStep() }} className="space-y-5">
                     <div className="grid gap-5 sm:grid-cols-2">
                       <div className="space-y-2">
                         <label className="block text-sm font-medium text-foreground">{t("auth.speaker.register.step2.birthDateLabel")}</label>
@@ -423,9 +511,141 @@ export default function SpeakerAuthPage() {
                         type="button"
                         variant="outline"
                         className="flex-1 rounded-lg border-border/70 cursor-pointer"
-                        onClick={() => setRegisterStep(1)}
+                        onClick={handleBackStep}
                       >
                         <ArrowLeft className="mr-2 h-4 w-4" /> {t("auth.speaker.register.step2.back")}
+                      </Button>
+                      <Button
+                        type="submit"
+                        className="flex-1 rounded-lg bg-[#59248F] cursor-pointer text-base font-semibold text-white shadow-lg shadow-primary/30 transition hover:from-[#4d20d3] hover:to-[#7638ec]"
+                      >
+                        {t("auth.speaker.register.step1.submit")}
+                      </Button>
+                    </div>
+                  </form>
+                ) : (
+                  <form onSubmit={handleRegisterSubmit} className="space-y-4">
+                    {/* Header Section */}
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-primary" />
+                        <h3 className="text-base font-semibold text-foreground">{t("auth.speaker.register.step3.title")}</h3>
+                      </div>
+                      {/* <p className="text-xs text-muted-foreground">{t("auth.speaker.register.step3.description")}</p> */}
+                    </div>
+
+                    {/* Quick Actions */}
+                    <div className="flex flex-wrap items-center gap-2 pb-2 border-b border-border/50">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleSelectWeekdays}
+                        className="h-7 text-xs cursor-pointer px-2"
+                      >
+                        {t("auth.speaker.register.step3.selectWeekdays")}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleClearAll}
+                        className="h-7 text-xs cursor-pointer px-2"
+                      >
+                        <X className="h-3 w-3 mr-1" />
+                        {t("auth.speaker.register.step3.clearAll")}
+                      </Button>
+                      {availableDaysCount > 0 && (
+                        <div className="ml-auto flex items-center gap-1 text-xs text-primary font-medium">
+                          <CheckCircle2 className="h-3 w-3" />
+                          <span>{availableDaysCount} {t("auth.speaker.register.step3.daysSelected")}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Availability Grid */}
+                    <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
+                      {availability.map((day, index) => {
+                        const dayData = daysOfWeek.find((d) => d.key === day.day)
+                        const dayLabel = dayData ? t(dayData.translationKey as any) : day.day
+                        const isWeekend = day.day === 'saturday' || day.day === 'sunday'
+                        return (
+                          <div
+                            key={day.day}
+                            className={`group relative rounded-lg border transition-all duration-200 px-2.5 py-1 ${
+                              day.isAvailable
+                                ? 'border-primary/50 bg-primary/5 hover:border-primary/70'
+                                : 'border-border/50 bg-muted/30 hover:border-border hover:bg-muted/40'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <span className={`text-xs font-medium ${
+                                  day.isAvailable ? 'text-foreground' : 'text-muted-foreground'
+                                }`}>
+                                  {dayLabel}
+                                </span>
+                                {/* {isWeekend && (
+                                  <span className="text-[9px] px-1 py-0.5 rounded bg-muted text-muted-foreground">
+                                    {t("auth.speaker.register.step3.weekend")}
+                                  </span>
+                                )} */}
+                                {day.isAvailable && (
+                                  <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                                )}
+                              </div>
+                              
+                              {day.isAvailable ? (
+                                <div className="flex items-center gap-2 flex-1 max-w-[280px]">
+                                  <Clock className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                                  <Input
+                                    type="time"
+                                    value={day.startTime || "09:00"}
+                                    onChange={(e) => handleTimeChange(index, "startTime", e.target.value)}
+                                    className="h-8 text-xs flex-1"
+                                  />
+                                  <span className="text-[10px] text-muted-foreground flex-shrink-0">
+                                    {t('dashboard.availability.to')}
+                                  </span>
+                                  <Input
+                                    type="time"
+                                    value={day.endTime || "17:00"}
+                                    onChange={(e) => handleTimeChange(index, "endTime", e.target.value)}
+                                    className="h-8 text-xs flex-1"
+                                  />
+                                </div>
+                              ) : (
+                                <p className="text-[10px] text-muted-foreground italic flex-shrink-0">
+                                  {t("auth.speaker.register.step3.notAvailable")}
+                                </p>
+                              )}
+                              
+                              <Switch
+                                checked={day.isAvailable || false}
+                                onCheckedChange={() => handleAvailabilityToggle(index)}
+                                className="flex-shrink-0"
+                              />
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+
+                    {/* Error Message */}
+                    {registerErrors.availability && (
+                      <div className="rounded-lg border border-red-200 bg-red-50/50 dark:bg-red-950/20 p-2 text-xs text-red-600 dark:text-red-400">
+                        {registerErrors.availability}
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between gap-4 pt-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="flex-1 rounded-lg border-border/70 cursor-pointer"
+                        onClick={handleBackStep}
+                      >
+                        <ArrowLeft className="mr-2 h-4 w-4" /> {t("auth.speaker.register.step3.back")}
                       </Button>
                       <Button
                         type="submit"
@@ -435,10 +655,10 @@ export default function SpeakerAuthPage() {
                         {isLoading ? (
                           <>
                             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                            {t("auth.speaker.register.step2.submitting")}
+                            {t("auth.speaker.register.step3.submitting")}
                           </>
                         ) : (
-                          t("auth.speaker.register.step2.submit")
+                          t("auth.speaker.register.step3.submit")
                         )}
                       </Button>
                     </div>
@@ -452,4 +672,5 @@ export default function SpeakerAuthPage() {
     </div>
   )
 }
+
 

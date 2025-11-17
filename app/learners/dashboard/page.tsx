@@ -60,41 +60,41 @@ export default function LearnerDashboardPage() {
   const [isCancelling, setIsCancelling] = useState(false)
 
   useEffect(() => {
-    console.log('=== Learner Dashboard First Render ===')
-    console.log('User:', user)
-    console.log('isAuthenticated:', isAuthenticated)
-    console.log('authLoading:', authLoading)
+    // console.log('=== Learner Dashboard First Render ===')
+    // console.log('User:', user)
+    // console.log('isAuthenticated:', isAuthenticated)
+    // console.log('authLoading:', authLoading)
     
     // If authenticated but no user data, fetch it
     if (isAuthenticated && !user) {
-      console.log('Fetching current user...')
+      // console.log('Fetching current user...')
       dispatch(getCurrentUser())
     }
   }, [isAuthenticated, user, dispatch, authLoading])
 
   useEffect(() => {
-    console.log('Dashboard fetch effect - user:', !!user, 'isAuthenticated:', isAuthenticated, 'authLoading:', authLoading)
+    // console.log('Dashboard fetch effect - user:', !!user, 'isAuthenticated:', isAuthenticated, 'authLoading:', authLoading)
     
     // Don't do anything while auth is loading
     if (authLoading) {
-      console.log('Auth still loading, waiting...')
+      // console.log('Auth still loading, waiting...')
       return
     }
     
     // If user exists, fetch dashboard data
     if (user) {
-      console.log('User exists, fetching dashboard data...')
+      // console.log('User exists, fetching dashboard data...')
       fetchDashboardData()
     } 
     // If not authenticated at all, show error
     else if (!isAuthenticated) {
-      console.log('Not authenticated, showing error')
+      // console.log('Not authenticated, showing error')
       setIsLoading(false)
       setError(t('learnerDashboard.errors.loginRequired'))
     }
     // If authenticated but no user yet, wait for getCurrentUser to complete
     else if (isAuthenticated && !user) {
-      console.log('Authenticated but no user, waiting for getCurrentUser...')
+      // console.log('Authenticated but no user, waiting for getCurrentUser...')
       // Keep loading state - getCurrentUser will be called by the first useEffect
     }
   }, [user, isAuthenticated, authLoading])

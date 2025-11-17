@@ -29,8 +29,8 @@ class AuthService {
     try {
       const response = await fetch(url, config);
       const data = await response.json();
-      console.log('makeRequest - endpoint:', endpoint);
-      console.log('makeRequest - data:', data);
+      // console.log('makeRequest - endpoint:', endpoint);
+      // console.log('makeRequest - data:', data);
 
       if (!response.ok) {
         console.error('API Error:', data);
@@ -39,7 +39,7 @@ class AuthService {
 
       return data;
     } catch (error) {
-      console.error('Network Error:', error);
+      // console.error('Network Error:', error);
       if (error instanceof Error) {
         throw error;
       }
@@ -57,7 +57,7 @@ class AuthService {
   async register(credentials: RegisterCredentials): Promise<AuthResponse> {
     // Remove confirmPassword before sending to backend
     const { confirmPassword, ...registerData } = credentials;
-    console.log('Sending user registration data:', registerData);
+    // console.log('Sending user registration data:', registerData);
     return this.makeRequest<AuthResponse>('/auth/signup', {
       method: 'POST',
       body: JSON.stringify(registerData),
@@ -66,7 +66,7 @@ class AuthService {
 
   async registerSpeaker(credentials: SpeakerRegisterCredentials): Promise<AuthResponse> {
     // Remove confirmPassword before sending to backend
-    const { confirmPassword, avatar, ...registerData } = credentials;
+    const { confirmPassword, avatar, availability, ...registerData } = credentials;
     
     // If there's an avatar, use FormData
     if (avatar) {
@@ -84,10 +84,15 @@ class AuthService {
         }
       });
       
+      // Add availability if provided
+      if (availability) {
+        formData.append('availability', JSON.stringify(availability));
+      }
+      
       // Add avatar file
       formData.append('avatar', avatar);
       
-      console.log('Sending speaker registration data with avatar:', formData);
+      // console.log('Sending speaker registration data with avatar:', formData);
       
       // For FormData, we need to send without JSON headers
       const url = `${API_BASE_URL}/auth/speaker/signup`;
@@ -117,11 +122,12 @@ class AuthService {
         throw new Error('Network error occurred');
       }
     } else {
-      // No avatar, send as JSON
-      console.log('Sending speaker registration data:', registerData);
+      // No avatar, send as JSON (include availability if provided)
+      const jsonData = availability ? { ...registerData, availability } : registerData;
+      // console.log('Sending speaker registration data:', jsonData);
       return this.makeRequest<AuthResponse>('/auth/speaker/signup', {
         method: 'POST',
-        body: JSON.stringify(registerData),
+        body: JSON.stringify(jsonData),
       });
     }
   }

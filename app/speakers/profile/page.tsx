@@ -195,16 +195,16 @@ export default function SpeakerDashboardPage() {
   }
 
   useEffect(() => {
-    console.log('=== Dashboard First Render ===')
-    console.log('User:', user)
-    console.log('isAuthenticated:', isAuthenticated)
-    console.log('authLoading:', authLoading)
-    console.log('Has user?', !!user)
-    console.log('==========================')
+    // console.log('=== Dashboard First Render ===')
+    // console.log('User:', user)
+    // console.log('isAuthenticated:', isAuthenticated)
+    // console.log('authLoading:', authLoading)
+    // console.log('Has user?', !!user)
+    // console.log('==========================')
     
     // If authenticated but no user data, fetch it
     if (isAuthenticated && !user) {
-      console.log('Authenticated but no user - fetching current user...')
+      // console.log('Authenticated but no user - fetching current user...')
       dispatch(getCurrentUser())
     }
 
@@ -213,7 +213,7 @@ export default function SpeakerDashboardPage() {
     const calendarStatus = params.get('calendar')
     if (calendarStatus === 'connected') {
       // Calendar connected successfully
-      console.log('Calendar connected successfully')
+      // console.log('Calendar connected successfully')
       setError('') // Clear any errors
       // Refresh calendar status
       checkCalendarStatus()
@@ -235,7 +235,7 @@ export default function SpeakerDashboardPage() {
         setCalendarExpiresAt(response.data.expiresAt)
       }
     } catch (error) {
-      console.error('Error checking calendar status:', error)
+      // console.error('Error checking calendar status:', error)
     }
   }
 
@@ -248,7 +248,7 @@ export default function SpeakerDashboardPage() {
           setAvailableTopics(response.data.topics)
         }
       } catch (error) {
-        console.error('Error loading topics:', error)
+        // console.error('Error loading topics:', error)
         // Keep default topics if backend fails
       }
     }
@@ -293,30 +293,30 @@ export default function SpeakerDashboardPage() {
   }, [upcomingSessions, pastSessions, isLoading, user])
 
   useEffect(() => {
-    console.log('Dashboard fetch effect - user:', !!user, 'isAuthenticated:', isAuthenticated, 'authLoading:', authLoading)
+    // console.log('Dashboard fetch effect - user:', !!user, 'isAuthenticated:', isAuthenticated, 'authLoading:', authLoading)
     
     // Don't do anything while auth is loading
     if (authLoading) {
-      console.log('Auth still loading, waiting...')
+      // console.log('Auth still loading, waiting...')
       return
     }
     
     // If user exists, fetch dashboard data
     if (user) {
-      console.log('User exists, fetching dashboard data...')
+      // console.log('User exists, fetching dashboard data...')
       fetchDashboardData()
       // Check calendar connection status
       checkCalendarStatus()
     } 
     // If not authenticated at all, show error
     else if (!isAuthenticated) {
-      console.log('Not authenticated, showing error')
+      // console.log('Not authenticated, showing error')
       setIsLoading(false)
       setError(t('dashboard.errors.loginRequired'))
     }
     // If authenticated but no user yet, wait for getCurrentUser to complete
     else if (isAuthenticated && !user) {
-      console.log('Authenticated but no user, waiting for getCurrentUser...')
+      // console.log('Authenticated but no user, waiting for getCurrentUser...')
       // Keep loading state - getCurrentUser will be called by the first useEffect
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -324,7 +324,7 @@ export default function SpeakerDashboardPage() {
 
   const fetchDashboardData = async () => {
     if (!user) {
-      console.log('No user available, skipping dashboard fetch')
+      // console.log('No user available, skipping dashboard fetch')
       setIsLoading(false)
       return
     }

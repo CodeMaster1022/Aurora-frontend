@@ -157,6 +157,17 @@ export type TranslationKey =
   | 'auth.speaker.register.step2.back'
   | 'auth.speaker.register.step2.submit'
   | 'auth.speaker.register.step2.submitting'
+  | 'auth.speaker.register.step3.title'
+  | 'auth.speaker.register.step3.description'
+  | 'auth.speaker.register.step3.availabilityRequired'
+  | 'auth.speaker.register.step3.back'
+  | 'auth.speaker.register.step3.submit'
+  | 'auth.speaker.register.step3.submitting'
+  | 'auth.speaker.register.step3.selectWeekdays'
+  | 'auth.speaker.register.step3.clearAll'
+  | 'auth.speaker.register.step3.daysSelected'
+  | 'auth.speaker.register.step3.weekend'
+  | 'auth.speaker.register.step3.notAvailable'
   
   // Terms and Conditions Page
   | 'terms.title'
@@ -761,6 +772,17 @@ export const translations: Record<Language, Translations> = {
     'auth.speaker.register.step2.back': 'Back',
     'auth.speaker.register.step2.submit': 'Create Account',
     'auth.speaker.register.step2.submitting': 'Creating account...',
+    'auth.speaker.register.step3.title': 'Availability',
+    'auth.speaker.register.step3.description': 'Select the days and times when you are available for sessions',
+    'auth.speaker.register.step3.availabilityRequired': 'Please select at least one available day',
+    'auth.speaker.register.step3.back': 'Back',
+    'auth.speaker.register.step3.submit': 'Create Account',
+    'auth.speaker.register.step3.submitting': 'Creating account...',
+    'auth.speaker.register.step3.selectWeekdays': 'Select Weekdays',
+    'auth.speaker.register.step3.clearAll': 'Clear All',
+    'auth.speaker.register.step3.daysSelected': 'days selected',
+    'auth.speaker.register.step3.weekend': 'Weekend',
+    'auth.speaker.register.step3.notAvailable': 'Not available',
     
     // Terms and Conditions Page
     'terms.title': 'Terms and Conditions of Use – Aurora',
@@ -1363,6 +1385,17 @@ export const translations: Record<Language, Translations> = {
     'auth.speaker.register.step2.back': 'Atrás',
     'auth.speaker.register.step2.submit': 'Crear Cuenta',
     'auth.speaker.register.step2.submitting': 'Creando cuenta...',
+    'auth.speaker.register.step3.title': 'Disponibilidad',
+    'auth.speaker.register.step3.description': 'Selecciona los días y horarios en los que estás disponible para sesiones',
+    'auth.speaker.register.step3.availabilityRequired': 'Por favor selecciona al menos un día disponible',
+    'auth.speaker.register.step3.back': 'Atrás',
+    'auth.speaker.register.step3.submit': 'Crear Cuenta',
+    'auth.speaker.register.step3.submitting': 'Creando cuenta...',
+    'auth.speaker.register.step3.selectWeekdays': 'Seleccionar Días Laborables',
+    'auth.speaker.register.step3.clearAll': 'Limpiar Todo',
+    'auth.speaker.register.step3.daysSelected': 'días seleccionados',
+    'auth.speaker.register.step3.weekend': 'Fin de Semana',
+    'auth.speaker.register.step3.notAvailable': 'No disponible',
     
     // Terms and Conditions Page
     'terms.title': 'Términos y Condiciones de Uso – Aurora',

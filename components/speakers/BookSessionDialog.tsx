@@ -197,6 +197,25 @@ const getUserTimezone = (): string => {
   }
 }
 
+// Format timezone to a human-readable label
+const formatTimezoneLabel = (tzValue: string): string => {
+  try {
+    // Try to format it using Intl
+    const date = new Date()
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: tzValue,
+      timeZoneName: "short",
+    })
+    const parts = formatter.formatToParts(date)
+    const timeZoneName = parts.find((part) => part.type === "timeZoneName")?.value || ""
+    // Get city name from timezone (e.g., "America/New_York" -> "New York")
+    const cityName = tzValue.split("/").pop()?.replace(/_/g, " ") || tzValue
+    return `${cityName} (${timeZoneName})`
+  } catch {
+    return tzValue
+  }
+}
+
 export function BookSessionDialog({
   speaker,
   trigger,
@@ -218,6 +237,22 @@ export function BookSessionDialog({
   const [currentStep, setCurrentStep] = useState(0)
   const [selectedDate, setSelectedDate] = useState<Date>()
   const [selectedTimezone, setSelectedTimezone] = useState<string>(getUserTimezone())
+
+  // Create a list of timezones that includes the system timezone if not already in the list
+  const availableTimezones = useMemo(() => {
+    const userTimezone = getUserTimezone()
+    const isInList = TIMEZONES.some((tz) => tz.value === userTimezone)
+    
+    if (isInList) {
+      return TIMEZONES
+    }
+    
+    // Add system timezone to the beginning of the list
+    return [
+      { value: userTimezone, label: formatTimezoneLabel(userTimezone) },
+      ...TIMEZONES,
+    ]
+  }, [])
 
   useEffect(() => {
     setSpeakerDetails(speaker)
@@ -598,7 +633,7 @@ export function BookSessionDialog({
                   <SelectValue placeholder="Select timezone" />
                 </SelectTrigger>
                 <SelectContent>
-                  {TIMEZONES.map((tz) => (
+                  {availableTimezones.map((tz) => (
                     <SelectItem key={tz.value} value={tz.value}>
                       {tz.label}
                     </SelectItem>
@@ -606,7 +641,7 @@ export function BookSessionDialog({
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground mt-2">
-                Times are displayed in {TIMEZONES.find(tz => tz.value === selectedTimezone)?.label || selectedTimezone}
+                Times are displayed in {availableTimezones.find(tz => tz.value === selectedTimezone)?.label || formatTimezoneLabel(selectedTimezone)}
               </p>
             </div>
             <div className="grid gap-1 lg:grid-cols-[6fr_4fr]">
@@ -765,7 +800,7 @@ export function BookSessionDialog({
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">{t("speakerProfile.bookSession.time")}</span>
-                <span>{formData.time || "—"} ({TIMEZONES.find(tz => tz.value === selectedTimezone)?.label || selectedTimezone})</span>
+                <span>{formData.time || "—"} ({availableTimezones.find(tz => tz.value === selectedTimezone)?.label || formatTimezoneLabel(selectedTimezone)})</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">{t("speakerProfile.bookSession.sessionTitle")}</span>
