@@ -63,8 +63,8 @@ export function SpeakerRatingModal({
         // Open the YouTube link in a new tab
         const newWindow = window.open(response.data.url, "_blank", "noopener,noreferrer")
         
-        // Check if popup was blocked
-        if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+        // Check if popup was blocked (window.open returns null if blocked)
+        if (!newWindow) {
           setError("Popup blocked. Please allow popups for this site to open the YouTube video.")
           return
         }
