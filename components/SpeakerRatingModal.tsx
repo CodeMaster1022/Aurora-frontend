@@ -14,6 +14,7 @@ interface SpeakerRatingModalProps {
   learnerName: string
   onSuccess?: () => void
   onGiftUrlReceived?: (url: string) => void
+  openInNewTab?: boolean
 }
 
 export function SpeakerRatingModal({
@@ -22,7 +23,8 @@ export function SpeakerRatingModal({
   sessionId,
   learnerName,
   onSuccess,
-  onGiftUrlReceived
+  onGiftUrlReceived,
+  openInNewTab = false
 }: SpeakerRatingModalProps) {
   const [rating, setRating] = useState<number>(0)
   const [hoverRating, setHoverRating] = useState<number>(0)
@@ -71,7 +73,7 @@ export function SpeakerRatingModal({
         }
         resetModal()
         
-        // Use callback if provided, otherwise navigate in same tab
+        // Use callback if provided, otherwise handle navigation based on openInNewTab prop
         if (onGiftUrlReceived) {
           // Small delay to ensure modal closes smoothly before callback
           setTimeout(() => {
@@ -79,11 +81,23 @@ export function SpeakerRatingModal({
             setIsFetchingSong(false)
           }, 100)
         } else {
-          // Navigate to YouTube URL in the same tab using assign (more reliable than href)
           // Small delay to ensure modal closes before navigation
           setTimeout(() => {
-            window.location.assign(url)
-            // Note: setIsFetchingSong won't execute after navigation starts
+            if (openInNewTab) {
+              // Open in new tab
+              const newWindow = window.open(url, '_blank', 'noopener,noreferrer')
+              if (!newWindow) {
+                // Popup blocked - fallback to same tab
+                console.warn('Popup blocked, opening in same tab instead')
+                window.location.assign(url)
+              } else {
+                setIsFetchingSong(false)
+              }
+            } else {
+              // Navigate to YouTube URL in the same tab using assign (more reliable than href)
+              window.location.assign(url)
+              // Note: setIsFetchingSong won't execute after navigation starts
+            }
           }, 100)
         }
       } else {
