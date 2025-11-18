@@ -904,7 +904,7 @@ export default function SpeakerDashboardPage() {
                       Share your city to help learners understand your location.
                     </p> */}
                   </div>
-                  {!isCalendarConnected && (
+                  {/* {!isCalendarConnected && (
                     <div className="rounded-lg border border-border bg-muted/30 p-3 shadow-sm sm:rounded-xl sm:p-4 md:p-5">
                       <Label className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground sm:text-xs">Timezone</Label>
                       <Select value={timezone} onValueChange={setTimezone}>
@@ -923,7 +923,7 @@ export default function SpeakerDashboardPage() {
                         Connect your Google Calendar to automatically use its timezone.
                       </p>
                     </div>
-                  )}
+                  )} */}
                   {isCalendarConnected && calendarTimezone && (
                     <div className="rounded-lg border border-border bg-muted/30 p-3 shadow-sm sm:rounded-xl sm:p-4 md:p-5">
                       <Label className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground sm:text-xs">Timezone</Label>
