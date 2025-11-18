@@ -196,13 +196,7 @@ export default function SpeakerDashboardPage() {
   }
 
   useEffect(() => {
-    // console.log('=== Dashboard First Render ===')
-    // console.log('User:', user)
-    // console.log('isAuthenticated:', isAuthenticated)
-    // console.log('authLoading:', authLoading)
-    // console.log('Has user?', !!user)
-    // console.log('==========================')
-    
+
     // If authenticated but no user data, fetch it
     if (isAuthenticated && !user) {
       // console.log('Authenticated but no user - fetching current user...')
@@ -269,36 +263,6 @@ export default function SpeakerDashboardPage() {
       setAvailability(getDefaultAvailability())
     }
   }, [availability.length, isLoading])
-
-  // Auto-open rating modal for ended sessions that haven't been reviewed
-  useEffect(() => {
-    // Only run if we have sessions and reviews loaded, and not currently loading
-    if (isLoading) return
-    if ((upcomingSessions.length === 0 && pastSessions.length === 0) || !user) return
-    
-    // Don't auto-open if any modal is already open
-    if (ratingModalOpen || cancelModalOpen) return
-    
-    // Check past sessions first (completed sessions)
-    const completedSessions = pastSessions.filter(s => s.status === 'completed')
-    for (const session of completedSessions) {
-      if (!hasReceivedReviews(session._id)) {
-        // Found a completed session that hasn't received any reviews yet - open modal
-        setSelectedSessionForRating(session)
-        setRatingModalOpen(true)
-        return // Only open for one session at a time
-      }
-    }
-    
-    // Also check upcoming sessions that have actually ended but still marked as scheduled
-    const endedSessions = upcomingSessions.filter(s => hasSessionEnded(s) && !hasReceivedReviews(s._id))
-    if (endedSessions.length > 0) {
-      // Found an ended session that hasn't received any reviews yet - open modal
-      setSelectedSessionForRating(endedSessions[0])
-      setRatingModalOpen(true)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [upcomingSessions, pastSessions, isLoading, user])
 
   useEffect(() => {
     // console.log('Dashboard fetch effect - user:', !!user, 'isAuthenticated:', isAuthenticated, 'authLoading:', authLoading)
