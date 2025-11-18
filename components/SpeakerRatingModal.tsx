@@ -192,7 +192,7 @@ export function SpeakerRatingModal({
                   <Gift className="w-12 h-12 text-purple-600" />
                 </div>
               </div>
-              <p className="text-lg text-gray-800">
+              <p className="text-lg text-foreground">
                 Thank you for sharing another story with Aurora.
               </p>
             </div>
