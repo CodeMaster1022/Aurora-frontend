@@ -1497,8 +1497,8 @@ export default function SpeakerDashboardPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="flex items-center gap-1.5 text-sm font-semibold sm:gap-2 sm:text-base md:text-lg">
-                      <Star className="h-4 w-4 sm:h-5 sm:w-5" />
-                      {t('dashboard.reviews.received.title')}
+                    <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5" />
+                    {t('dashboard.reviews.given.title')}
                     </CardTitle>
                     <CardDescription className="text-xs sm:text-sm">
                       {receivedReviews.length} {t('dashboard.reviews.received.count')}
@@ -1634,8 +1634,8 @@ export default function SpeakerDashboardPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="flex items-center gap-1.5 text-sm font-semibold sm:gap-2 sm:text-base md:text-lg">
-                      <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5" />
-                      {t('dashboard.reviews.given.title')}
+                    <Star className="h-4 w-4 sm:h-5 sm:w-5" />
+                    {t('dashboard.reviews.received.title')}
                     </CardTitle>
                     <CardDescription className="text-xs sm:text-sm">
                       {givenReviews.length} {t('dashboard.reviews.given.count')}

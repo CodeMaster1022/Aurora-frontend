@@ -102,6 +102,10 @@ export function SpeakerRatingModal({
 
   const handleClose = () => {
     if (!isLoading && !isFetchingSong) {
+      // If feedback has been submitted (showThankYou is true), update status
+      if (showThankYou && onSuccess) {
+        onSuccess()
+      }
       onOpenChange(false)
       resetModal()
     }
