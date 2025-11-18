@@ -60,14 +60,15 @@ export function SpeakerRatingModal({
       const response = await speakerService.getGiftSong()
       
       if (response.success && response.data?.url) {
-        // Open the YouTube link in a new tab
-        const newWindow = window.open(response.data.url, "_blank", "noopener,noreferrer")
-        
-        // Check if popup was blocked (window.open returns null if blocked)
-        if (!newWindow) {
-          setError("Popup blocked. Please allow popups for this site to open the YouTube video.")
-          return
-        }
+        // Create a temporary anchor element and click it to open in new tab
+        // This approach avoids popup blockers better than window.open after async operations
+        const link = document.createElement('a')
+        link.href = response.data.url
+        link.target = '_blank'
+        link.rel = 'noopener noreferrer'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
         
         // Close modal and call onSuccess callback
         setTimeout(() => {
