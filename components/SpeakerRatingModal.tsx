@@ -78,14 +78,16 @@ export function SpeakerRatingModal({
           }
           // Reset state
           resetModal()
+          // Clear loading state after modal operations complete
+          setIsFetchingSong(false)
         }, 500)
       } else {
         setError("Failed to get YouTube song. Please try again.")
+        setIsFetchingSong(false)
       }
     } catch (err) {
       console.error("Error fetching gift song:", err)
       setError(err instanceof Error ? err.message : "Failed to fetch gift song")
-    } finally {
       setIsFetchingSong(false)
     }
   }

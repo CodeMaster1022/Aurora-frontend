@@ -98,6 +98,9 @@ type Speaker = {
   cost?: number
 }
 
+
+// type add country
+
 type FilteredSpeaker = Speaker & { id?: string }
 
 export default function HomePage() {

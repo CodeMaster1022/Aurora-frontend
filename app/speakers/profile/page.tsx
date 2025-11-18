@@ -601,7 +601,7 @@ export default function SpeakerDashboardPage() {
       setError("")
       await speakerService.completeSession(session._id)
       // Refresh dashboard data
-      fetchDashboardData()
+      await fetchDashboardData()
     } catch (err: any) {
       console.error("Error completing session:", err)
       setError(err.message || t('dashboard.errors.completeFailed'))
@@ -624,7 +624,7 @@ export default function SpeakerDashboardPage() {
       setCancelModalOpen(false)
       setSelectedSessionForCancellation(null)
       setCancellationReason("")
-      fetchDashboardData()
+      await fetchDashboardData()
     } catch (err: any) {
       console.error("Error cancelling session:", err)
       setError(err.message || t('dashboard.errors.cancelFailed'))
