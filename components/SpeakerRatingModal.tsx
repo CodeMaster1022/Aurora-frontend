@@ -13,6 +13,7 @@ interface SpeakerRatingModalProps {
   sessionId: string
   learnerName: string
   onSuccess?: () => void
+  onGiftUrlReceived?: (url: string) => void
 }
 
 export function SpeakerRatingModal({
@@ -20,7 +21,8 @@ export function SpeakerRatingModal({
   onOpenChange,
   sessionId,
   learnerName,
-  onSuccess
+  onSuccess,
+  onGiftUrlReceived
 }: SpeakerRatingModalProps) {
   const [rating, setRating] = useState<number>(0)
   const [hoverRating, setHoverRating] = useState<number>(0)
@@ -29,7 +31,6 @@ export function SpeakerRatingModal({
   const [error, setError] = useState<string>("")
   const [showThankYou, setShowThankYou] = useState(false)
   const [isFetchingSong, setIsFetchingSong] = useState(false)
-  const [giftUrl, setGiftUrl] = useState<string>("")
 
   const handleSubmit = async () => {
     if (rating === 0) {
@@ -58,131 +59,34 @@ export function SpeakerRatingModal({
       setIsFetchingSong(true)
       setError("")
       
-      // Open a new window immediately (within user gesture context) to avoid mobile popup blockers
-      // Use 'about:blank' instead of empty string for better Safari compatibility
-      // We'll redirect it once we have the URL
-      const newWindow = window.open('about:blank', '_blank', 'noopener,noreferrer')
-      
-      if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-        // If popup was blocked, we'll show the URL as a clickable link instead
-        const response = await speakerService.getGiftSong()
-        
-        if (response.success && response.data?.url) {
-          setGiftUrl(response.data.url)
-          setIsFetchingSong(false)
-          
-          // Try one more time with link click as fallback (for desktop Safari)
-          setTimeout(() => {
-            const link = document.createElement('a')
-            link.href = response.data.url
-            link.target = '_blank'
-            link.rel = 'noopener noreferrer'
-            link.style.display = 'none'
-            document.body.appendChild(link)
-            link.click()
-            document.body.removeChild(link)
-          }, 100)
-          
-          return
-        } else {
-          setError("Failed to get YouTube song. Please try again.")
-          setIsFetchingSong(false)
-          return
-        }
-      }
-      
-      // Show loading message in the new window
-      // Use try-catch for Safari compatibility in case document.write is restricted
-      try {
-        newWindow.document.open()
-        newWindow.document.write(`
-          <html>
-            <head>
-              <title>Opening your gift...</title>
-              <style>
-                body {
-                  display: flex;
-                  justify-content: center;
-                  align-items: center;
-                  height: 100vh;
-                  margin: 0;
-                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                  color: white;
-                }
-                .container {
-                  text-align: center;
-                }
-                .spinner {
-                  border: 4px solid rgba(255,255,255,0.3);
-                  border-top: 4px solid white;
-                  border-radius: 50%;
-                  width: 40px;
-                  height: 40px;
-                  animation: spin 1s linear infinite;
-                  margin: 0 auto 20px;
-                }
-                @keyframes spin {
-                  0% { transform: rotate(0deg); }
-                  100% { transform: rotate(360deg); }
-                }
-              </style>
-            </head>
-            <body>
-              <div class="container">
-                <div class="spinner"></div>
-                <p>Opening your gift...</p>
-              </div>
-            </body>
-          </html>
-        `)
-        newWindow.document.close()
-      } catch (docError) {
-        // If document.write fails (some Safari restrictions), just proceed with redirect
-        console.warn('Could not write to new window:', docError)
-      }
-      
       const response = await speakerService.getGiftSong()
       
       if (response.success && response.data?.url) {
-        // Check if window is still open (Safari might close it)
-        if (newWindow && !newWindow.closed) {
-          try {
-            // Use location.replace for better Safari compatibility
-            newWindow.location.replace(response.data.url)
-          } catch (locationError) {
-            // Fallback to href if replace fails
-            try {
-              newWindow.location.href = response.data.url
-            } catch (hrefError) {
-              // If both fail, close window and show clickable link
-              newWindow.close()
-              setGiftUrl(response.data.url)
-              setIsFetchingSong(false)
-              return
-            }
-          }
-          
-          // Close modal and call onSuccess callback
+        const url = response.data.url
+        
+        // Close modal and cleanup first
+        onOpenChange(false)
+        if (onSuccess) {
+          onSuccess()
+        }
+        resetModal()
+        
+        // Use callback if provided, otherwise navigate in same tab
+        if (onGiftUrlReceived) {
+          // Small delay to ensure modal closes smoothly before callback
           setTimeout(() => {
-            onOpenChange(false)
-            if (onSuccess) {
-              onSuccess()
-            }
-            // Reset state
-            resetModal()
-            // Clear loading state after modal operations complete
+            onGiftUrlReceived(url)
             setIsFetchingSong(false)
-          }, 500)
+          }, 100)
         } else {
-          // Window was closed or blocked, show clickable link
-          setGiftUrl(response.data.url)
-          setIsFetchingSong(false)
+          // Navigate to YouTube URL in the same tab using assign (more reliable than href)
+          // Small delay to ensure modal closes before navigation
+          setTimeout(() => {
+            window.location.assign(url)
+            // Note: setIsFetchingSong won't execute after navigation starts
+          }, 100)
         }
       } else {
-        if (newWindow && !newWindow.closed) {
-          newWindow.close()
-        }
         setError("Failed to get YouTube song. Please try again.")
         setIsFetchingSong(false)
       }
@@ -199,7 +103,6 @@ export function SpeakerRatingModal({
     setComment("")
     setError("")
     setShowThankYou(false)
-    setGiftUrl("")
   }
 
   const handleClose = () => {
@@ -309,51 +212,23 @@ export function SpeakerRatingModal({
               </div>
             )}
 
-            {giftUrl ? (
-              <div className="space-y-3">
-                <p className="text-sm text-foreground text-center">
-                  Please tap the link below to open your gift:
-                </p>
-                <a
-                  href={giftUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full"
-                  onClick={() => {
-                    setTimeout(() => {
-                      onOpenChange(false)
-                      if (onSuccess) {
-                        onSuccess()
-                      }
-                      resetModal()
-                    }, 500)
-                  }}
-                >
-                  <Button className="w-full cursor-pointer bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-foreground">
-                    <Gift className="mr-2 h-4 w-4" />
-                    Open Your Gift
-                  </Button>
-                </a>
-              </div>
-            ) : (
-              <Button
-                onClick={handleReceiveGift}
-                disabled={isFetchingSong}
-                className="w-full cursor-pointer bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-foreground"
-              >
-                {isFetchingSong ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Opening...
-                  </>
-                ) : (
-                  <>
-                    <Gift className="mr-2 h-4 w-4" />
-                    Receive your gift
-                  </>
-                )}
-              </Button>
-            )}
+            <Button
+              onClick={handleReceiveGift}
+              disabled={isFetchingSong}
+              className="w-full cursor-pointer bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-foreground"
+            >
+              {isFetchingSong ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Opening...
+                </>
+              ) : (
+                <>
+                  <Gift className="mr-2 h-4 w-4" />
+                  Receive your gift
+                </>
+              )}
+            </Button>
           </div>
         )}
       </DialogContent>
