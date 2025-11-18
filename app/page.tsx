@@ -151,6 +151,8 @@ export default function HomePage() {
               </p>
             </div>
 
+
+
             <>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {featuredSpeakers.map((speaker: FeaturedSpeaker, idx: number) => {
