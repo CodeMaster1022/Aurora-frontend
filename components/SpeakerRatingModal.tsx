@@ -55,12 +55,19 @@ export function SpeakerRatingModal({
   const handleReceiveGift = async () => {
     try {
       setIsFetchingSong(true)
+      setError("")
       
       const response = await speakerService.getGiftSong()
       
-      if (response.success && response.data.url) {
+      if (response.success && response.data?.url) {
         // Open the YouTube link in a new tab
-        window.open(response.data.url, "_blank", "noopener,noreferrer")
+        const newWindow = window.open(response.data.url, "_blank", "noopener,noreferrer")
+        
+        // Check if popup was blocked
+        if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+          setError("Popup blocked. Please allow popups for this site to open the YouTube video.")
+          return
+        }
         
         // Close modal and call onSuccess callback
         setTimeout(() => {
@@ -71,6 +78,8 @@ export function SpeakerRatingModal({
           // Reset state
           resetModal()
         }, 500)
+      } else {
+        setError("Failed to get YouTube song. Please try again.")
       }
     } catch (err) {
       console.error("Error fetching gift song:", err)
@@ -184,6 +193,12 @@ export function SpeakerRatingModal({
                 Thank you for sharing another story with Aurora.
               </p>
             </div>
+
+            {error && (
+              <div className="p-3 rounded-md bg-red-50 border border-red-200">
+                <p className="text-sm text-red-600">{error}</p>
+              </div>
+            )}
 
             <Button
               onClick={handleReceiveGift}

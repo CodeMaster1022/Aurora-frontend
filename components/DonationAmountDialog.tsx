@@ -32,7 +32,7 @@ export function DonationAmountDialog({
   isLoading = false,
   defaultAmount = 500
 }: DonationAmountDialogProps) {
-  const [selectedAmount, setSelectedAmount] = useState<number | null>(defaultAmount)
+  const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
   const [customAmount, setCustomAmount] = useState<string>("")
   const [error, setError] = useState<string>("")
 
@@ -46,6 +46,14 @@ export function DonationAmountDialog({
     setCustomAmount(value)
     setSelectedAmount(null)
     setError("")
+  }
+
+  const handleCustomAmountFocus = () => {
+    // Clear preset selection when user focuses on custom input
+    if (selectedAmount !== null) {
+      setSelectedAmount(null)
+      setCustomAmount("")
+    }
   }
 
   const handleConfirm = () => {
@@ -140,7 +148,8 @@ export function DonationAmountDialog({
                 placeholder="0.00"
                 value={customAmount}
                 onChange={(e) => handleCustomAmountChange(e.target.value)}
-                disabled={isLoading || selectedAmount !== null}
+                onFocus={handleCustomAmountFocus}
+                disabled={isLoading}
                 className="pl-8"
               />
             </div>
