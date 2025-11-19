@@ -368,6 +368,18 @@ export function BookSessionDialog({
     return [...timezonesToAdd, ...TIMEZONES]
   }, [speakerDetails?.googleCalendar?.timezone, speaker?.googleCalendar?.timezone])
 
+  // Get selected timezone label for display
+  const selectedTimezoneLabel = useMemo(() => {
+    if (!selectedTimezone) return "UTC"
+    
+    // Try to find in available timezones list first
+    const standardTZ = availableTimezones.find((tz) => tz.value === selectedTimezone)
+    if (standardTZ) return standardTZ.label
+    
+    // Otherwise format it
+    return formatTimezoneLabel(selectedTimezone)
+  }, [selectedTimezone, availableTimezones])
+
   useEffect(() => {
     // Debug: Log when speaker prop changes
     // console.log("[BookSessionDialog] Speaker prop changed, updating speakerDetails:", {
@@ -1065,7 +1077,7 @@ export function BookSessionDialog({
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">{t("speakerProfile.bookSession.time")}</span>
-                <span>{formData.time || "—"} {speakerDetails?.googleCalendar?.timezone && `(${speakerTimezoneLabel})`}</span>
+                <span>{formData.time || "—"} {selectedTimezone && `(${selectedTimezoneLabel})`}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">{t("speakerProfile.bookSession.sessionTitle")}</span>
