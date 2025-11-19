@@ -119,6 +119,8 @@ export type TranslationKey =
   | 'auth.common.emailPlaceholder'
   | 'auth.common.passwordPlaceholder'
   | 'auth.common.passwordCreatePlaceholder'
+  | 'auth.common.confirmPassword'
+  | 'auth.common.confirmPasswordPlaceholder'
   | 'auth.errors.loginFailed'
   | 'auth.errors.loginUnknown'
   | 'auth.errors.registerFailed'
@@ -126,6 +128,8 @@ export type TranslationKey =
   | 'auth.validation.emailRequired'
   | 'auth.validation.emailInvalid'
   | 'auth.validation.passwordRequired'
+  | 'auth.validation.confirmPasswordRequired'
+  | 'auth.validation.passwordsDoNotMatch'
   | 'auth.validation.gmailRequired'
   | 'auth.validation.birthDateRequired'
   | 'auth.validation.cityRequired'
@@ -779,6 +783,8 @@ export const translations: Record<Language, Translations> = {
     'auth.common.emailPlaceholder': 'Enter your email address',
     'auth.common.passwordPlaceholder': 'Enter your password',
     'auth.common.passwordCreatePlaceholder': 'Create a secure password',
+    'auth.common.confirmPassword': 'Confirm Password',
+    'auth.common.confirmPasswordPlaceholder': 'Confirm your password',
     'auth.errors.loginFailed': 'We could not sign you in',
     'auth.errors.loginUnknown': 'Something went wrong while signing in',
     'auth.errors.registerFailed': 'We could not complete the registration',
@@ -786,6 +792,8 @@ export const translations: Record<Language, Translations> = {
     'auth.validation.emailRequired': 'Email is required',
     'auth.validation.emailInvalid': 'Please enter a valid email address',
     'auth.validation.passwordRequired': 'Password is required',
+    'auth.validation.confirmPasswordRequired': 'Please confirm your password',
+    'auth.validation.passwordsDoNotMatch': 'Passwords do not match',
     'auth.validation.gmailRequired': 'Please use a Gmail account (@gmail.com)',
     'auth.validation.birthDateRequired': 'Birth date is required',
     'auth.validation.cityRequired': 'City is required',
@@ -1433,6 +1441,8 @@ export const translations: Record<Language, Translations> = {
     'auth.common.emailPlaceholder': 'Ingresa tu correo electrónico',
     'auth.common.passwordPlaceholder': 'Ingresa tu contraseña',
     'auth.common.passwordCreatePlaceholder': 'Crea una contraseña segura',
+    'auth.common.confirmPassword': 'Confirmar Contraseña',
+    'auth.common.confirmPasswordPlaceholder': 'Confirma tu contraseña',
     'auth.errors.loginFailed': 'No pudimos iniciar sesión',
     'auth.errors.loginUnknown': 'Ocurrió un problema al iniciar sesión',
     'auth.errors.registerFailed': 'No pudimos completar el registro',
@@ -1440,6 +1450,8 @@ export const translations: Record<Language, Translations> = {
     'auth.validation.emailRequired': 'El correo es obligatorio',
     'auth.validation.emailInvalid': 'Introduce un correo válido',
     'auth.validation.passwordRequired': 'La contraseña es obligatoria',
+    'auth.validation.confirmPasswordRequired': 'Por favor confirma tu contraseña',
+    'auth.validation.passwordsDoNotMatch': 'Las contraseñas no coinciden',
     'auth.validation.gmailRequired': 'Debe ser una cuenta de Gmail (@gmail.com)',
     'auth.validation.birthDateRequired': 'La fecha de nacimiento es obligatoria',
     'auth.validation.cityRequired': 'La ciudad es obligatoria',

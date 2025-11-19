@@ -37,6 +37,7 @@ export default function SpeakerAuthPage() {
   const [fullName, setFullName] = useState("")
   const [registerEmail, setRegisterEmail] = useState("")
   const [registerPassword, setRegisterPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
   const [birthDate, setBirthDate] = useState("")
   const [location, setLocation] = useState("")
   const [bio, setBio] = useState("")
@@ -55,6 +56,7 @@ export default function SpeakerAuthPage() {
     fullName: "",
     email: "",
     password: "",
+    confirmPassword: "",
     birthDate: "",
     location: "",
     bio: "",
@@ -117,6 +119,11 @@ export default function SpeakerAuthPage() {
           : t("auth.validation.gmailRequired")
         : t("auth.validation.emailRequired"),
       password: registerPassword.length >= 8 ? "" : t("auth.signup.validate.passwordMin"),
+      confirmPassword: confirmPassword.trim()
+        ? confirmPassword === registerPassword
+          ? ""
+          : t("auth.validation.passwordsDoNotMatch")
+        : t("auth.validation.confirmPasswordRequired"),
     }
     setRegisterErrors((prev) => ({ ...prev, ...errors }))
     return Object.values(errors).every((error) => error === "")
@@ -181,7 +188,7 @@ export default function SpeakerAuthPage() {
         lastName,
         email: registerEmail,
         password: registerPassword,
-        confirmPassword: registerPassword,
+        confirmPassword: confirmPassword,
         interests: [],
         meetingPreference,
         location: location || undefined,
@@ -263,6 +270,7 @@ export default function SpeakerAuthPage() {
     setFullName("")
     setRegisterEmail("")
     setRegisterPassword("")
+    setConfirmPassword("")
     setBirthDate("")
     setLocation("")
     setBio("")
@@ -277,7 +285,7 @@ export default function SpeakerAuthPage() {
         isAvailable: false
       }))
     })
-    setRegisterErrors({ fullName: "", email: "", password: "", birthDate: "", location: "", bio: "", photo: "", availability: "" })
+    setRegisterErrors({ fullName: "", email: "", password: "", confirmPassword: "", birthDate: "", location: "", bio: "", photo: "", availability: "" })
     setRegisterError("")
   }
 
@@ -430,12 +438,59 @@ export default function SpeakerAuthPage() {
                         type="password"
                         placeholder={t("auth.common.passwordCreatePlaceholder")}
                         value={registerPassword}
-                        onChange={(event) => setRegisterPassword(event.target.value)}
+                        onChange={(event) => {
+                          setRegisterPassword(event.target.value)
+                          // Clear confirm password error if passwords now match
+                          if (confirmPassword && registerErrors.confirmPassword) {
+                            setRegisterErrors((prev) => ({
+                              ...prev,
+                              confirmPassword: event.target.value === confirmPassword
+                                ? ""
+                                : t("auth.validation.passwordsDoNotMatch"),
+                            }))
+                          }
+                        }}
                         className={`h-10 rounded-lg border border-border/70 bg-background text-base ${
                           registerErrors.password ? "border-red-500 focus-visible:border-red-500" : "focus-visible:border-primary"
                         }`}
                       />
                       {registerErrors.password && <p className="text-xs text-red-500">{registerErrors.password}</p>}
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="block text-sm font-medium text-foreground">{t("auth.common.confirmPassword")}</label>
+                      <Input
+                        type="password"
+                        placeholder={t("auth.common.confirmPasswordPlaceholder")}
+                        value={confirmPassword}
+                        onChange={(event) => {
+                          setConfirmPassword(event.target.value)
+                          if (registerErrors.confirmPassword) {
+                            setRegisterErrors((prev) => ({
+                              ...prev,
+                              confirmPassword: event.target.value.trim()
+                                ? event.target.value === registerPassword
+                                  ? ""
+                                  : t("auth.validation.passwordsDoNotMatch")
+                                : t("auth.validation.confirmPasswordRequired"),
+                            }))
+                          }
+                        }}
+                        onBlur={(event) => {
+                          setRegisterErrors((prev) => ({
+                            ...prev,
+                            confirmPassword: event.target.value.trim()
+                              ? event.target.value === registerPassword
+                                ? ""
+                                : t("auth.validation.passwordsDoNotMatch")
+                              : t("auth.validation.confirmPasswordRequired"),
+                          }))
+                        }}
+                        className={`h-10 rounded-lg border border-border/70 bg-background text-base ${
+                          registerErrors.confirmPassword ? "border-red-500 focus-visible:border-red-500" : "focus-visible:border-primary"
+                        }`}
+                      />
+                      {registerErrors.confirmPassword && <p className="text-xs text-red-500">{registerErrors.confirmPassword}</p>}
                     </div>
 
                     <Button type="submit" className="h-10 cursor-pointer w-full rounded-lg bg-[#59248F] text-base font-semibold text-white shadow-lg shadow-primary/30 transition hover:from-[#4d20d3] hover:to-[#7638ec]">
