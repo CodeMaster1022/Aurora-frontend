@@ -216,13 +216,13 @@ export default function AboutPage() {
             }}
           >
             {missionHighlights.map(({ icon: Icon, title, description }) => (
-              <motion.div
-                key={title}
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  visible: { opacity: 1, y: 0 },
-                }}
-              >
+              // <motion.div
+              //   key={title}
+              //   variants={{
+              //     hidden: { opacity: 0, y: 20 },
+              //     visible: { opacity: 1, y: 0 },
+              //   }}
+              // >
                 <div className="h-full border border-border/60 bg-card rounded-2xl shadow-lg transition-colors duration-300 hover:border-[#49BBBD]/40 hover:shadow-xl">
                   <CardContent className="p-4 sm:p-6 space-y-3">
                     {/* <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#49BBBD]/15 text-[#49BBBD] dark:bg-[#49BBBD]/20 dark:text-[#7ae2e4]">
@@ -236,7 +236,7 @@ export default function AboutPage() {
                     </p>
                   </CardContent>
                 </div>
-              </motion.div>
+              // </motion.div>
             ))}
           </motion.div>
         </div>
