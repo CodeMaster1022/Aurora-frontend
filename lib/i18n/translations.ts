@@ -38,6 +38,7 @@ export type TranslationKey =
   | 'home.howItWorks.step2'
   | 'home.howItWorks.step3'
   | 'home.howItWorks.step4'
+  | 'home.howItWorks.step5'
   | 'home.whyDifferent.badge'
   | 'home.whyDifferent.title'
   | 'home.whyDifferent.point1'
@@ -383,6 +384,42 @@ export type TranslationKey =
   | 'dashboard.cancel.keep'
   | 'dashboard.cancel.cancelling'
   | 'dashboard.cancel.confirmButton'
+  | 'dashboard.profile.titleHeader'
+  | 'dashboard.profile.cancel'
+  | 'dashboard.profile.edit'
+  | 'dashboard.profile.topicsInterests'
+  | 'dashboard.profile.selected'
+  | 'dashboard.profile.age'
+  | 'dashboard.profile.agePlaceholder'
+  | 'dashboard.profile.location'
+  | 'dashboard.profile.locationPlaceholder'
+  | 'dashboard.profile.timezone'
+  | 'dashboard.profile.fromCalendar'
+  | 'dashboard.profile.timezoneSynced'
+  | 'dashboard.profile.noInterests'
+  | 'dashboard.profile.locationHint'
+  | 'dashboard.profile.averageRating'
+  | 'dashboard.profile.sessionsHosted'
+  | 'dashboard.profile.hoursFacilitated'
+  | 'dashboard.profile.ageLabel'
+  | 'dashboard.sessions.title'
+  | 'dashboard.sessions.learner'
+  | 'dashboard.sessions.date'
+  | 'dashboard.sessions.time'
+  | 'dashboard.sessions.duration'
+  | 'dashboard.sessions.status'
+  | 'dashboard.sessions.actions'
+  | 'dashboard.sessions.join'
+  | 'dashboard.sessions.joinMeeting'
+  | 'dashboard.sessions.completeSchedule'
+  | 'dashboard.sessions.feedbackGiven'
+  | 'dashboard.reviews.rating'
+  | 'dashboard.reviews.comment'
+  | 'dashboard.reviews.to'
+  | 'dashboard.reviews.from'
+  | 'dashboard.reviews.session'
+  | 'dashboard.reviews.dateTime'
+  | 'dashboard.sessions.speaker'
 
   // Speaker Signup
   | 'speakerSignup.title'
@@ -672,6 +709,7 @@ export const translations: Record<Language, Translations> = {
     'home.howItWorks.step2': 'Select date and time.',
     'home.howItWorks.step3': 'Practice and Connect: Enjoy authentic conversation.',
     'home.howItWorks.step4': 'The speakers have chosen their most favorite topics.',
+    'home.howItWorks.step5': 'Practice for 30 minutes',
     'home.whyDifferent.badge': 'You contribute while learning',
     'home.whyDifferent.title': 'Why Aurora is different',
     'home.whyDifferent.point1': 'You learn with purpose: Your practice helps reduce loneliness in seniors and makes them feel useful.',
@@ -1003,6 +1041,42 @@ export const translations: Record<Language, Translations> = {
     'dashboard.cancel.keep': 'Keep Session',
     'dashboard.cancel.cancelling': 'Cancelling...',
     'dashboard.cancel.confirmButton': 'Cancel Session',
+    'dashboard.profile.titleHeader': 'Speaker Profile',
+    'dashboard.profile.cancel': 'Cancel',
+    'dashboard.profile.edit': 'Edit Profile',
+    'dashboard.profile.topicsInterests': 'Topics & Interests',
+    'dashboard.profile.selected': 'Selected',
+    'dashboard.profile.age': 'Age',
+    'dashboard.profile.agePlaceholder': 'Enter your age',
+    'dashboard.profile.location': 'Location',
+    'dashboard.profile.locationPlaceholder': 'Where are you based?',
+    'dashboard.profile.timezone': 'Timezone',
+    'dashboard.profile.fromCalendar': 'From Calendar',
+    'dashboard.profile.timezoneSynced': 'Your timezone is automatically synced with your Google Calendar.',
+    'dashboard.profile.noInterests': 'No interests added yet.',
+    'dashboard.profile.locationHint': "Let learners know where you're based by adding a location to your profile.",
+    'dashboard.profile.averageRating': 'Average Rating',
+    'dashboard.profile.sessionsHosted': 'Sessions Hosted',
+    'dashboard.profile.hoursFacilitated': 'Hours Facilitated',
+    'dashboard.profile.ageLabel': 'age',
+    'dashboard.sessions.title': 'Title',
+    'dashboard.sessions.learner': 'Learner',
+    'dashboard.sessions.speaker': 'Speaker',
+    'dashboard.sessions.date': 'Date',
+    'dashboard.sessions.time': 'Time',
+    'dashboard.sessions.duration': 'Duration',
+    'dashboard.sessions.status': 'Status',
+    'dashboard.sessions.actions': 'Actions',
+    'dashboard.sessions.join': 'Join',
+    'dashboard.sessions.joinMeeting': 'Join Meeting →',
+    'dashboard.sessions.completeSchedule': 'Complete Schedule',
+    'dashboard.sessions.feedbackGiven': 'Feedback Given',
+    'dashboard.reviews.rating': 'Rating',
+    'dashboard.reviews.comment': 'Comment',
+    'dashboard.reviews.to': 'To',
+    'dashboard.reviews.from': 'From',
+    'dashboard.reviews.session': 'Session',
+    'dashboard.reviews.dateTime': 'Date & Time',
 
     // Speaker Signup
     'speakerSignup.title': 'Aurora',
@@ -1149,7 +1223,7 @@ export const translations: Record<Language, Translations> = {
 
     // About Page
     'about.hero.badge': 'Our Story',
-    'about.hero.title': 'Aurora: Bringing English to Life',
+    'about.hero.title': 'Aurora: Introduce the language into your life',
     'about.hero.subtitle': 'We believe language unlocks opportunity. Aurora connects learners with kind, inspiring speakers for warm, human conversations that build confidence—one meaningful session at a time.',
     'about.story.title': 'The Story of Aurora',
     'about.story.p1': 'If you are new here, my name is Monica Medina and my mission in life is communication—helping people to communicate and helping people to feel happy.I have been teaching English, at multiple levels, including children and adults, since 1988. Besides teaching, I have a special chemistry with elderly people. They are living treasures, as they possess a thorough encyclopedia within, and an exceptional storybook of experiences. I have prepared hundreds of English students to be successful in the language. They have become better people!',
@@ -1158,7 +1232,7 @@ export const translations: Record<Language, Translations> = {
     'about.story.intro.p2': "I've been teaching English at multiple levels, from children to adults, since 1988. Beyond teaching, I have a special bond with elderly people—they are living treasures, with encyclopedic knowledge and extraordinary life stories.",
     'about.story.intro.p3': "I've helped hundreds of English learners succeed—and they've become better people through it.",
     'about.mission.title': 'Our Mission',
-    'about.mission.p1': 'To make English practice accessible, human, and joyful—by matching learners with thoughtful speakers and giving them everything they need to connect, grow, and belong.',
+    'about.mission.p1': 'To make language practice accessible, human, and joyful between learners and thoughtful speakers, giving them everything they need to connect, grow, and belong.',
     'about.mission.point1': 'Warm, one‑to‑one sessions that build confidence',
     'about.mission.point2': 'Diverse speakers with real‑world experience',
     'about.mission.point3': 'Flexible scheduling that fits real life',
@@ -1274,7 +1348,7 @@ export const translations: Record<Language, Translations> = {
     'home.title.line3': 'mucho que contar',
     'home.cta.explore': 'Explora speakers',
     'home.reviews': '( 10k+ Reseñas )',
-    'home.popularSpeakers': 'Popular Speakers',
+    'home.popularSpeakers': 'Oradoras populares',
     'home.popularSpeakersDesc': 'Mejora tu expresión oral conversando con un hablante nativo sénior.',
     'home.filter.all': 'Todos',
     'home.filter.literature': 'Literatura',
@@ -1289,6 +1363,7 @@ export const translations: Record<Language, Translations> = {
     'home.howItWorks.step2': 'Seleccione la fecha y la hora.',
     'home.howItWorks.step3': 'Practica y Conecta: Disfruta de conversación auténtica.',
     'home.howItWorks.step4': 'Las oradoras han elegido sus temas más favoritos.',
+    'home.howItWorks.step5': 'Practica por 30 minutos',
     'home.whyDifferent.badge': 'Contribuyes mientras aprendes',
     'home.whyDifferent.title': 'Por qué Aurora es diferente',
     'home.whyDifferent.point1': 'Aprendes con un propósito: Tu práctica ayuda a reducir la soledad en las personas mayores y les hace sentir útiles.',
@@ -1620,6 +1695,42 @@ export const translations: Record<Language, Translations> = {
     'dashboard.cancel.keep': 'Mantener Sesión',
     'dashboard.cancel.cancelling': 'Cancelando...',
     'dashboard.cancel.confirmButton': 'Cancelar Sesión',
+    'dashboard.profile.titleHeader': 'Perfil de Speaker',
+    'dashboard.profile.cancel': 'Cancelar',
+    'dashboard.profile.edit': 'Editar Perfil',
+    'dashboard.profile.topicsInterests': 'Temas e Intereses',
+    'dashboard.profile.selected': 'Seleccionado',
+    'dashboard.profile.age': 'Edad',
+    'dashboard.profile.agePlaceholder': 'Ingresa tu edad',
+    'dashboard.profile.location': 'Ubicación',
+    'dashboard.profile.locationPlaceholder': '¿Dónde te encuentras?',
+    'dashboard.profile.timezone': 'Zona Horaria',
+    'dashboard.profile.fromCalendar': 'Desde Calendario',
+    'dashboard.profile.timezoneSynced': 'Tu zona horaria se sincroniza automáticamente con tu Google Calendar.',
+    'dashboard.profile.noInterests': 'Aún no se han agregado intereses.',
+    'dashboard.profile.locationHint': 'Déjales saber a los learners dónde te encuentras agregando una ubicación a tu perfil.',
+    'dashboard.profile.averageRating': 'Calificación Promedio',
+    'dashboard.profile.sessionsHosted': 'Sesiones Organizadas',
+    'dashboard.profile.hoursFacilitated': 'Horas Facilitadas',
+    'dashboard.profile.ageLabel': 'años',
+    'dashboard.sessions.title': 'Título',
+    'dashboard.sessions.learner': 'Learner',
+    'dashboard.sessions.speaker': 'Speaker',
+    'dashboard.sessions.date': 'Fecha',
+    'dashboard.sessions.time': 'Hora',
+    'dashboard.sessions.duration': 'Duración',
+    'dashboard.sessions.status': 'Estado',
+    'dashboard.sessions.actions': 'Acciones',
+    'dashboard.sessions.join': 'Unirse',
+    'dashboard.sessions.joinMeeting': 'Unirse a la Reunión →',
+    'dashboard.sessions.completeSchedule': 'Completar Programación',
+    'dashboard.sessions.feedbackGiven': 'Comentario Dado',
+    'dashboard.reviews.rating': 'Calificación',
+    'dashboard.reviews.comment': 'Comentario',
+    'dashboard.reviews.to': 'Para',
+    'dashboard.reviews.from': 'De',
+    'dashboard.reviews.session': 'Sesión',
+    'dashboard.reviews.dateTime': 'Fecha y Hora',
 
     // Speaker Signup
     'speakerSignup.title': 'Aurora',
@@ -1766,7 +1877,7 @@ export const translations: Record<Language, Translations> = {
 
     // About Page
     'about.hero.badge': 'Nuestra Historia',
-    'about.hero.title': 'Aurora: Traer la Inglés a la Vida',
+    'about.hero.title': 'Aurora: Introducir el idioma a tu vida',
     'about.hero.subtitle': 'Creemos que el idioma desbloquea la oportunidad. Aurora conecta a los aprendices con hablantes amables e inspiradores para conversaciones cálidas y humanas que construyen confianza, una sesión significativa a la vez.',
     'about.story.title': 'La Historia de Aurora',
     'about.story.p1': 'Si eres nuevo por aquí, me llamo Mónica Medina y mi misión en la vida es la comunicación: ayudar a las personas a comunicarse y a sentirse felices. Llevo enseñando inglés a distintos niveles, incluyendo niños y adultos, desde 1988. Además de la docencia, tengo una conexión especial con las personas mayores. Son un tesoro viviente, pues poseen una enciclopedia andante y un valioso caudal de experiencias. He preparado a cientos de estudiantes de inglés para que dominen el idioma con éxito. ¡Se han convertido en mejores personas!',
@@ -1775,7 +1886,7 @@ export const translations: Record<Language, Translations> = {
     'about.story.intro.p2': 'He estado enseñando inglés en múltiples niveles, desde niños hasta adultos, desde 1988. Más allá de la enseñanza, tengo un vínculo especial con las personas mayores: son tesoros vivientes, con conocimientos enciclopédicos e historias de vida extraordinarias.',
     'about.story.intro.p3': 'He ayudado a cientos de estudiantes de inglés a tener éxito—y se han convertido en mejores personas a través de ello.',
     'about.mission.title': 'Nuestra Misión',
-    'about.mission.p1': 'Para hacer que la práctica de inglés sea accesible, humana y alegre—al hacer coincidir a los aprendices con hablantes reflexivos y dándoles todo lo que necesitan para conectarse, crecer y pertenecer.',
+    'about.mission.p1': 'Hacer que la practica del idioma sea accesible, humana y alegre entre aprendices y hablantes reflexivos, dandoles todo lo que necesitan para conectarse, crecer y pertenecer.',
     'about.mission.point1': 'Sesiones cálidas de uno a uno que construyen confianza',
     'about.mission.point2': 'Hablantes diversos con experiencia en el mundo real',
     'about.mission.point3': 'Programación flexible que se adapta a la vida real',
@@ -1798,15 +1909,15 @@ export const translations: Record<Language, Translations> = {
     'about.community.card4.subtitle': 'Crecer juntos',
     'about.faq.title': 'Preguntas Frecuentes',
     'about.faq.q1': '¿Cómo funcionan las donaciones?',
-    'about.faq.a1': 'Las donaciones nos ayudan a apoyar sesiones gratuitas o con costo reducido para los aprendices que lo necesitan, y a mantener nuestra plataforma. Puedes agregar una donación en el pago o a través de la configuración de tu cuenta en cualquier momento.',
+    'about.faq.a1': 'Las donaciones nos ayudan a ofrecer sesiones gratuitas o a precio reducido a los estudiantes que las necesitan y a mantener nuestra plataforma. Puedes añadir una donación al finalizar la compra o a través de la configuración de tu cuenta en cualquier momento.',
     'about.faq.q2': '¿Qué nivel de inglés necesito?',
-    'about.faq.a2': 'Cualquier nivel. Desde las primeras palabras hasta casi la fluidez, el interlocutor se adapta a tu nivel y a tus objetivos.',
+    'about.faq.a2': 'Para mantener una conversación, debes hablar el idioma. Poco a poco irás mejorando tu fluidez y tu vocabulario.',
     'about.faq.q3': '¿Cuánto dura una sesión?',
     'about.faq.a3': '30 minutos.',
     'about.faq.q4': '¿Cuál es la política de cancelación?',
     'about.faq.a4': 'Pendiente...',
     'about.faq.q5': '¿Qué necesito para la sesión?',
-    'about.faq.a5': 'Una conexión estable a internet, un dispositivo con micrófono y un espacio tranquilo. Una webcam es recomendada pero opcional.',
+    'about.faq.a5': 'Se necesita una conexión a internet estable, un dispositivo con micrófono y un espacio tranquilo. Se recomienda usar una cámara web, pero es opcional.',
     'about.faq.more': '¿Tienes otra pregunta? Estamos aquí para ti.',
     'about.cta.title': '¿Listo para comenzar tu viaje de idiomas?',
     'about.cta.subtitle': 'Encuentra un speaker que te inspire y reserva tu primera sesión hoy. La confianza está solo a un paso de una conversación.',

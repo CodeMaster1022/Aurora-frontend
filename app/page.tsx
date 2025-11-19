@@ -2,7 +2,7 @@
 
 import { Header } from "@/components/header"
 import { FloatingCards } from "@/components/floating-cards"
-import { Play, ArrowRight, BookOpen, Users, Award, FileText, Calendar, UserCheck, Grid3X3, Square, Eye, CheckCircle, X, Send, Star, Download, Volume2, MessageCircle, CalendarDays, FastForward, Search, Heart, UserPlus, Share2, MapPin } from "lucide-react"
+import { Play, ArrowRight, BookOpen, Users, Award, FileText, Calendar, UserCheck, Grid3X3, Square, Eye, CheckCircle, X, Send, Star, Download, Volume2, MessageCircle, CalendarDays, FastForward, Search, Heart, UserPlus, Share2, MapPin, Clock } from "lucide-react"
 import Image from "next/image"
 import studentImage from "@/public/image/student.png"
 import grandmother1 from "@/public/image/1.jpeg"
@@ -76,7 +76,8 @@ const HOW_IT_WORKS_STEPS = [
   { icon: Search, key: "home.howItWorks.step1" },
   { icon: Calendar, key: "home.howItWorks.step2" },
   { icon: MessageCircle, key: "home.howItWorks.step3" },
-  { icon: Heart, key: "home.howItWorks.step4" },
+  // { icon: Heart, key: "home.howItWorks.step4" },
+  { icon: Clock, key: "home.howItWorks.step5" },
 ] as const
 
 const WHY_DIFFERENT_CARDS = [
@@ -310,11 +311,6 @@ export default function HomePage() {
                         <h3 className="text-lg font-semibold text-foreground">
                           {headline.trim()}
                         </h3>
-                        {description && (
-                          <p className="text-sm leading-6 text-muted-foreground">
-                            {description}
-                          </p>
-                        )}
                       </div>
                     </div>
                   )

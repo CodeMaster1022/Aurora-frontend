@@ -565,12 +565,12 @@ export default function LearnerProfilePage() {
                         <Table>
                           <TableHeader>
                             <TableRow>
-                              <TableHead className="text-xs sm:text-sm">Title</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Speaker</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Date</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Time</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Status</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Actions</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.sessions.title')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.sessions.speaker')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.sessions.date')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.sessions.time')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.sessions.status')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.sessions.actions')}</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -708,12 +708,12 @@ export default function LearnerProfilePage() {
                         <Table>
                           <TableHeader>
                             <TableRow>
-                              <TableHead className="text-xs sm:text-sm">Title</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Speaker</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Date</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Time</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Status</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Actions</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.sessions.title')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.sessions.speaker')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.sessions.date')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.sessions.time')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.sessions.status')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.sessions.actions')}</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -752,7 +752,7 @@ export default function LearnerProfilePage() {
                                     </Button>
                                   ) : (
                                     <Badge variant="outline" className="text-[10px] uppercase sm:text-xs">
-                                      Feedback Given
+                                      {t('dashboard.sessions.feedbackGiven')}
                                     </Badge>
                                   )}
                                 </TableCell>
@@ -826,15 +826,15 @@ export default function LearnerProfilePage() {
                     {/* Desktop View - Table */}
                     <div className="hidden md:block">
                       <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="text-xs sm:text-sm">Rating</TableHead>
-                            <TableHead className="text-xs sm:text-sm">Comment</TableHead>
-                            <TableHead className="text-xs sm:text-sm">To</TableHead>
-                            <TableHead className="text-xs sm:text-sm">Session</TableHead>
-                            <TableHead className="text-xs sm:text-sm">Date & Time</TableHead>
-                          </TableRow>
-                        </TableHeader>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.reviews.rating')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.reviews.comment')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.reviews.to')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.reviews.session')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.reviews.dateTime')}</TableHead>
+                            </TableRow>
+                          </TableHeader>
                         <TableBody>
                           {reviews.map((review) => (
                             <TableRow key={review._id}>
@@ -881,11 +881,11 @@ export default function LearnerProfilePage() {
         </Collapsible>
 
         <Card className="shadow-sm">
-          <CardContent className="flex flex-col gap-3 p-3 sm:gap-3.5 sm:p-4 md:flex-row md:items-center md:justify-between md:gap-4 md:p-6">
-            <div className="space-y-1 sm:space-y-1.5 md:space-y-2">
+          <CardContent className="flex flex-col gap-3 p-3 sm:gap-3.5 sm:p-4 md:flex-row md:items-center md:justify-center md:gap-4 md:p-6">
+            {/* <div className="space-y-1 sm:space-y-1.5 md:space-y-2">
               <h3 className="text-base font-semibold sm:text-lg md:text-xl">{t("learnerProfile.support.title")}</h3>
               <p className="text-xs text-muted-foreground sm:text-sm">{t("learnerProfile.support.description")}</p>
-            </div>
+            </div> */}
             <Button
               size="sm"
               className="inline-flex w-full items-center justify-center gap-1.5 text-xs sm:w-auto sm:text-sm"

@@ -207,7 +207,7 @@ export default function AboutPage() {
             whileInView="visible"
             viewport={{ once: true, amount: 0.3 }}
             variants={{
-              hidden: {},
+              // hidden: {},
               visible: {
                 transition: {
                   staggerChildren: 0.12,
@@ -283,14 +283,6 @@ export default function AboutPage() {
               </AccordionTrigger>
               <AccordionContent className="px-4 md:px-6 text-muted-foreground">
                 {t('about.faq.a3')}
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="cancellations">
-              <AccordionTrigger className="px-4 md:px-6 text-left text-foreground hover:text-[#49BBBD] transition-colors">
-                {t('about.faq.q4')}
-              </AccordionTrigger>
-              <AccordionContent className="px-4 md:px-6 text-muted-foreground">
-                {t('about.faq.a4')}
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="tech">

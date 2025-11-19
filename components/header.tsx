@@ -317,14 +317,14 @@ export function Header() {
                     className="flex items-center justify-between px-4 py-3 text-sm text-foreground transition-colors hover:bg-accent/50"
                     onClick={() => setShowAuthMenu(false)}
                   >
-                    Estudiante
+                    {t("header.loginStudent")}
                   </Link>
                   <Link
                     href="/auth/speaker-auth"
                     className="flex items-center justify-between px-4 py-3 text-sm text-foreground transition-colors hover:bg-accent/50"
                     onClick={() => setShowAuthMenu(false)}
                   >
-                    Speaker / Orador
+                    {t("header.loginSpeaker")}
                   </Link>
                 </div>
               )}

@@ -649,15 +649,26 @@ export function BookSessionDialog({
   }
 
   const unavailableDayMatchers = useMemo<Matcher[]>(() => {
+    const matchers: Matcher[] = []
+    
+    // Disable all dates before today
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    matchers.push({ before: today })
+    
     // Use original availability for day availability check (days don't change with timezone)
-    if (!speakerDetails?.availability) return []
-    const unavailableDays = speakerDetails.availability
-      .filter((avail) => !avail.isAvailable)
-      .map((avail) => dayNameToIndex[avail.day])
-      .filter((value) => typeof value === "number")
+    if (speakerDetails?.availability) {
+      const unavailableDays = speakerDetails.availability
+        .filter((avail) => !avail.isAvailable)
+        .map((avail) => dayNameToIndex[avail.day])
+        .filter((value) => typeof value === "number")
 
-    if (unavailableDays.length === 0) return []
-    return [{ dayOfWeek: unavailableDays }]
+      if (unavailableDays.length > 0) {
+        matchers.push({ dayOfWeek: unavailableDays })
+      }
+    }
+    
+    return matchers
   }, [speakerDetails?.availability])
 
   const timeSlots = useMemo(() => {

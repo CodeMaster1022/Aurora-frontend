@@ -78,7 +78,6 @@ export default function SpeakerDashboardPage() {
     age: string
     cost: string
     location: string
-    timezone: string
     interests: string[]
     avatar: string | null
   } | null>(null)
@@ -389,8 +388,6 @@ export default function SpeakerDashboardPage() {
           age: age ? Number(age) : undefined,
           cost: cost ? Number(cost) : undefined,
           location: location ? location.trim() : "",
-          // Only save timezone if calendar is not connected, otherwise use calendar timezone
-          timezone: isCalendarConnected && calendarTimezone ? calendarTimezone : (timezone || getUserTimezone()),
           availability 
         })
       await speakerService.updateAvailability(availability)
@@ -410,8 +407,6 @@ export default function SpeakerDashboardPage() {
       age,
       cost,
       location,
-      // Only save timezone if calendar is not connected, otherwise it's managed by calendar
-      timezone: isCalendarConnected && calendarTimezone ? calendarTimezone : timezone,
       interests: [...interests],
       avatar: avatarPreview
     }
@@ -425,7 +420,6 @@ export default function SpeakerDashboardPage() {
       setAge(snapshot.age)
       setCost(snapshot.cost)
       setLocation(snapshot.location)
-      setTimezone(snapshot.timezone)
       setInterests(snapshot.interests)
       setAvatarPreview(snapshot.avatar)
     }
@@ -673,21 +667,21 @@ export default function SpeakerDashboardPage() {
 
   const profileHighlights = [
     {
-      label: "Average Rating",
+      label: t('dashboard.profile.averageRating'),
       value: formattedAverageRating,
       helper: `${receivedReviews.length || 0} review${receivedReviews.length === 1 ? "" : "s"}`,
       icon: Star
     },
     {
-      label: "Sessions Hosted",
+      label: t('dashboard.profile.sessionsHosted'),
       value: `${totalSessions}`,
       helper: upcomingSessions.length
         ? `${upcomingSessions.length} upcoming`
-        : "No upcoming sessions",
+        : t('dashboard.sessions.upcoming.none'),
       icon: Calendar
     },
     {
-      label: "Hours Facilitated",
+      label: t('dashboard.profile.hoursFacilitated'),
       value: formattedHoursPracticed,
       helper: "",
       icon: Clock
@@ -709,7 +703,7 @@ export default function SpeakerDashboardPage() {
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-3 pb-8 pt-4 sm:gap-6 sm:px-4 sm:pb-12 sm:pt-6 lg:gap-8 lg:px-8 lg:pb-16 lg:pt-8">
         <header className="flex flex-col gap-1 sm:gap-2">
-          <h1 className="text-xl font-semibold sm:text-2xl md:text-3xl lg:text-4xl">Speaker Profile</h1>
+          <h1 className="text-xl font-semibold sm:text-2xl md:text-3xl lg:text-4xl">{t('dashboard.profile.titleHeader')}</h1>
           <p className="text-xs text-muted-foreground sm:text-sm">{t('dashboard.subtitle')}</p>
         </header>
 
@@ -769,7 +763,7 @@ export default function SpeakerDashboardPage() {
                     )}
                     {age && (
                       <div className="rounded-lg border border-border bg-primary/10 p-0.5 text-center shadow-sm sm:rounded-xl sm:p-1">
-                        <p className="text-foreground text-[10px] font-semibold sm:text-xs">{age} age</p>
+                        <p className="text-foreground text-[10px] font-semibold sm:text-xs">{age} {t('dashboard.profile.ageLabel')}</p>
                       </div>
                     )}
                   </div>
@@ -784,7 +778,7 @@ export default function SpeakerDashboardPage() {
                       onClick={handleCancelEditProfile}
                       disabled={isUploading}
                     >
-                      Cancel
+                      {t('dashboard.profile.cancel')}
                     </Button>
                     <Button
                       className="cursor-pointer"
@@ -807,7 +801,7 @@ export default function SpeakerDashboardPage() {
                 ) : (
                   <Button variant="outline" className="cursor-pointer" onClick={handleStartEditProfile}>
                     <Edit className="mr-2 h-4 w-4" />
-                    Edit Profile
+                    {t('dashboard.profile.edit')}
                   </Button>
                 )}
               </div>
@@ -848,7 +842,7 @@ export default function SpeakerDashboardPage() {
                   </div>
                   <div className="rounded-lg border border-border bg-muted/30 p-3 shadow-sm sm:rounded-xl sm:p-4 md:p-5">
                     <Label className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground sm:text-xs">
-                      Topics & Interests
+                      {t('dashboard.profile.topicsInterests')}
                     </Label>
                     <div className="mt-2 flex flex-wrap gap-1.5 sm:mt-3 sm:gap-2">
                       {availableTopics.map((topic) => {
@@ -871,20 +865,20 @@ export default function SpeakerDashboardPage() {
                         )
                       })}
                     </div>
-                    <p className="mt-3 text-xs text-muted-foreground">Selected {interests.length}/4</p>
+                    <p className="mt-3 text-xs text-muted-foreground">{t('dashboard.profile.selected')} {interests.length}/4</p>
                   </div>
                 </div>
 
                 <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-3">
                   <div className="rounded-lg border border-border bg-muted/30 p-3 shadow-sm sm:rounded-xl sm:p-4 md:p-5">
-                    <Label className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground sm:text-xs">Age</Label>
+                    <Label className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground sm:text-xs">{t('dashboard.profile.age')}</Label>
                     <Input
                       type="number"
                       value={age}
                       onChange={(e) => setAge(e.target.value)}
                       min={18}
                       max={120}
-                      placeholder="Enter your age"
+                      placeholder={t('dashboard.profile.agePlaceholder')}
                       className="mt-3"
                     />
                     {/* <p className="mt-2 text-xs text-muted-foreground">
@@ -892,12 +886,12 @@ export default function SpeakerDashboardPage() {
                     </p> */}
                   </div>
                   <div className="rounded-lg border border-border bg-muted/30 p-3 shadow-sm sm:rounded-xl sm:p-4 md:p-5">
-                    <Label className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground sm:text-xs">Location</Label>
+                    <Label className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground sm:text-xs">{t('dashboard.profile.location')}</Label>
                     <Input
                       type="text"
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
-                      placeholder="Where are you based?"
+                      placeholder={t('dashboard.profile.locationPlaceholder')}
                       className="mt-3 text-foreground"
                     />
                     {/* <p className="mt-2 text-xs text-muted-foreground">
@@ -926,17 +920,17 @@ export default function SpeakerDashboardPage() {
                   )} */}
                   {isCalendarConnected && calendarTimezone && (
                     <div className="rounded-lg border border-border bg-muted/30 p-3 shadow-sm sm:rounded-xl sm:p-4 md:p-5">
-                      <Label className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground sm:text-xs">Timezone</Label>
+                      <Label className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground sm:text-xs">{t('dashboard.profile.timezone')}</Label>
                       <div className="mt-3 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2">
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-medium text-foreground">
                             {TIMEZONES.find(tz => tz.value === calendarTimezone)?.label || calendarTimezone}
                           </span>
-                          <span className="text-xs text-emerald-600 dark:text-emerald-400">From Calendar</span>
+                          <span className="text-xs text-emerald-600 dark:text-emerald-400">{t('dashboard.profile.fromCalendar')}</span>
                         </div>
                       </div>
                       <p className="mt-2 text-xs text-muted-foreground">
-                        Your timezone is automatically synced with your Google Calendar.
+                        {t('dashboard.profile.timezoneSynced')}
                       </p>
                     </div>
                   )}
@@ -955,7 +949,7 @@ export default function SpeakerDashboardPage() {
                 <div className="space-y-4">
                   <div className="rounded-xl border border-border bg-muted/30 p-2 sm:p-5 shadow-sm">
                     <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Topics & Interests
+                      {t('dashboard.profile.topicsInterests')}
                     </Label>
                     {interests.length > 0 ? (
                       <div className="mt-2 flex flex-wrap gap-1">
@@ -969,20 +963,20 @@ export default function SpeakerDashboardPage() {
                         ))}
                       </div>
                     ) : (
-                      <p className="mt-3 text-sm text-muted-foreground">No interests added yet.</p>
+                      <p className="mt-3 text-sm text-muted-foreground">{t('dashboard.profile.noInterests')}</p>
                     )}
                   </div>
                 </div>
                 {location ? (
                     <div className="rounded-xl border border-border bg-muted/30 p-2 sm:p-5 shadow-sm">
                       <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                        Location
+                        {t('dashboard.profile.location')}
                       </Label>
                       <p className="mt-3 text-sm font-medium text-foreground p-1 rounded-lg">{location}</p>
                     </div>
                   ) : (
                     <div className="rounded-xl border border-dashed border-border/70 bg-muted/10 p-5 text-sm text-muted-foreground">
-                      Let learners know where you’re based by adding a location to your profile.
+                      {t('dashboard.profile.locationHint')}
                     </div>
                   )}
               </div>
@@ -1027,7 +1021,7 @@ export default function SpeakerDashboardPage() {
                       {calendarTimezone && (
                         <div className="rounded-lg border border-border bg-muted/30 px-3 py-2">
                           <div className="flex items-center justify-between">
-                            <span className="text-xs font-medium text-muted-foreground">Timezone</span>
+                            <span className="text-xs font-medium text-muted-foreground">{t('dashboard.profile.timezone')}</span>
                             <span className="text-sm font-semibold text-foreground">
                               {TIMEZONES.find(tz => tz.value === calendarTimezone)?.label || calendarTimezone}
                             </span>
@@ -1249,7 +1243,7 @@ export default function SpeakerDashboardPage() {
                                     rel="noopener noreferrer"
                                     className="text-sm font-medium text-primary hover:underline"
                                   >
-                                    Join Meeting →
+                                    {t('dashboard.sessions.joinMeeting')}
                                   </a>
                                 )}
                                 <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground sm:gap-3 sm:text-sm">
@@ -1272,13 +1266,13 @@ export default function SpeakerDashboardPage() {
                         <Table>
                           <TableHeader>
                             <TableRow>
-                              <TableHead className="text-xs sm:text-sm">Title</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Learner</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Date</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Time</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Duration</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Status</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Actions</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.sessions.title')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.sessions.learner')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.sessions.date')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.sessions.time')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.sessions.duration')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.sessions.status')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.sessions.actions')}</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -1307,7 +1301,7 @@ export default function SpeakerDashboardPage() {
                                         rel="noopener noreferrer"
                                         className="text-xs font-medium text-primary hover:underline sm:text-sm"
                                       >
-                                        Join
+                                        {t('dashboard.sessions.join')}
                                       </a>
                                     )}
                                     <Button
@@ -1315,7 +1309,7 @@ export default function SpeakerDashboardPage() {
                                       size="sm"
                                       className="h-7 cursor-pointer px-2 text-xs sm:h-8 sm:px-3 sm:text-sm"
                                       onClick={() => handleCompleteSession(session)}
-                                      title="Complete Schedule"
+                                      title={t('dashboard.sessions.completeSchedule')}
                                     >
                                       <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
                                     </Button>
@@ -1430,12 +1424,12 @@ export default function SpeakerDashboardPage() {
                         <Table>
                           <TableHeader>
                             <TableRow>
-                              <TableHead className="text-xs sm:text-sm">Title</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Learner</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Date</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Time</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Status</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Actions</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.sessions.title')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.sessions.learner')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.sessions.date')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.sessions.time')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.sessions.status')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.sessions.actions')}</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -1469,7 +1463,7 @@ export default function SpeakerDashboardPage() {
                                     </Button>
                                   ) : (
                                     <Badge variant="outline" className="text-[10px] uppercase sm:text-xs">
-                                      Feedback Given
+                                      {t('dashboard.sessions.feedbackGiven')}
                                     </Badge>
                                   )}
                                 </TableCell>
@@ -1561,10 +1555,10 @@ export default function SpeakerDashboardPage() {
                         <Table>
                           <TableHeader>
                             <TableRow>
-                              <TableHead className="text-xs sm:text-sm">Rating</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Comment</TableHead>
-                              <TableHead className="text-xs sm:text-sm">To</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Date</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.reviews.rating')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.reviews.comment')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.reviews.to')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.sessions.date')}</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -1681,10 +1675,10 @@ export default function SpeakerDashboardPage() {
                         <Table>
                           <TableHeader>
                             <TableRow>
-                              <TableHead className="text-xs sm:text-sm">Rating</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Comment</TableHead>
-                              <TableHead className="text-xs sm:text-sm">From</TableHead>
-                              <TableHead className="text-xs sm:text-sm">Date</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.reviews.rating')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.reviews.comment')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.reviews.from')}</TableHead>
+                              <TableHead className="text-xs sm:text-sm">{t('dashboard.sessions.date')}</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
