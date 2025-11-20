@@ -1240,7 +1240,7 @@ export const translations: Record<Language, Translations> = {
     'about.story.intro.p2': "I've been teaching English at multiple levels, from children to adults, since 1988. Beyond teaching, I have a special bond with elderly people—they are living treasures, with encyclopedic knowledge and extraordinary life stories.",
     'about.story.intro.p3': "I've helped hundreds of English learners succeed—and they've become better people through it.",
     'about.mission.title': 'Our Mission',
-    'about.mission.p1': 'Make language practice accessible, human, and joyful among learners and thoughtful speakers, giving them everything they need to connect, grow, and belong.++',
+    'about.mission.p1': 'Make language practice accessible, human, and joyful among learners and thoughtful speakers, giving them everything they need to connect, grow, and belong.',
     'about.mission.point1': 'Warm, one‑to‑one sessions that build confidence',
     'about.mission.point2': 'Diverse speakers with real‑world experience',
     'about.mission.point3': 'Flexible scheduling that fits real life',
